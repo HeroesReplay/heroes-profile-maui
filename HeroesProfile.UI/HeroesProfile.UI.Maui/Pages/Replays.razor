@@ -1,0 +1,63 @@
+﻿@page "/replays"
+@page "/"
+
+@using MediatR
+@using HeroesProfile.Core.CQRS
+@using HeroesProfile.Core.CQRS.Queries
+@inject IMediator mediator;
+
+<h1>Replays</h1>
+
+<p>This page shows the scanned replays and their status.</p>
+
+@if (response == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>File</th>
+                <th>Created</th>
+                <th>Fingerprint</th>
+                <th>Result</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var replay in response.Replays)
+            {
+                <tr>
+                    <td>@System.IO.Path.GetFileName(replay.Path)</td>
+                    <td>@replay.Created</td>
+                    <td>@replay.Fingerprint</td>
+                    <td>@replay.ParseResult</td>
+                    <td>@replay.ProcessStatus</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private GetReplays.Response response;
+
+    protected override async Task OnInitializedAsync()
+    {
+        RefreshReplaysAsync();
+        await base.OnInitializedAsync();
+    }
+
+    // Update UI every 5 seconds
+    async void RefreshReplaysAsync()
+    {
+        while (true)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(5));
+            response = await mediator.Send(new GetReplays.Query(new List<GetReplays.Filter>()));
+            StateHasChanged();
+        }
+    }
+}
