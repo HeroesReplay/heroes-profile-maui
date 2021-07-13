@@ -1,24 +1,29 @@
 ﻿using System.Collections.Generic;
+
 using Heroes.ReplayParser;
 
 namespace HeroesProfile.Core.Models
 {
     public class Session
     {
-        public SessionState State { get; init; }
+        public SessionState State { get; set; }
 
-        public Replay BattleLobby { get; init; }
-        public Replay StormSave { get; init; }
-        public Replay StormReplay { get; init; }
+        // This is the ID returned from Heroes Profile for a twitch extension session
+        public string ReplayId { get; set; }
 
-        public int TrackerEventIndex { get; init; }
-        public bool UpdatedTalents { get; init; }
-        public bool UpdatedMode { get; init; }
+        public Replay BattleLobby { get; set; }
+        public Replay StormSave { get; set; }
+        public Replay StormReplay { get; set; }
 
-        public List<string> PlayerFoundTalents { get; init; }
+        public int TrackerEventIndex { get; set; }
+        public bool TalentsUpdated { get; set; }
+        public bool GameModeUpdated { get; set; }
 
-        public string? TwitchExtensionId { get; init; }
-        public string? TwitchPredictionId { get; init; }
-        public string? TwitchPredictionWinningOutcomeId { get; init; }
+        public List<string> PlayerFoundTalents { get; set; }
+
+        public string? TwitchExtensionId { get; set; }
+        public string? TwitchPredictionId { get; set; }
+        public string? TwitchPredictionWinningOutcomeId { get; set; }
+        public string? TwitchPredictionOtherOutcomeId { get; set; }
     }
 }

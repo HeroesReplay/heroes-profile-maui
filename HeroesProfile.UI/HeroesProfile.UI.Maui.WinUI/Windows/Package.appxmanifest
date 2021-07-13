@@ -12,8 +12,8 @@
     Version="1.0.0.0" />
 
   <Properties>
-    <DisplayName>MauiApp1</DisplayName>
-    <PublisherDisplayName>Microsoft</PublisherDisplayName>
+    <DisplayName>Heroes Profile</DisplayName>
+    <PublisherDisplayName>Skill Tree Development, LLC</PublisherDisplayName>
     <Logo>Assets\appiconStoreLogo.png</Logo>
   </Properties>
 
@@ -31,7 +31,7 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="MauiApp1"
+        DisplayName="Heroes Profile"
         Description="MauiApp1"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\appiconMediumTile.png"
@@ -40,7 +40,7 @@
           Wide310x150Logo="Assets\appiconWideTile.png"
           Square71x71Logo="Assets\appiconSmallTile.png"
           Square310x310Logo="Assets\appiconLargeTile.png"
-          ShortName="MauiApp1">
+          ShortName="Heroes Replay">
           <uap:ShowNameOnTiles>
             <uap:ShowOn Tile="square150x150Logo"/>
             <uap:ShowOn Tile="wide310x150Logo"/>

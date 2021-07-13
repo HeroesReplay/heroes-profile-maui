@@ -1,5 +1,11 @@
-﻿using Microsoft.Maui;
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Maui;
 using Microsoft.UI.Xaml;
+using HeroesProfile.Core.BackgroundServices;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -11,7 +17,9 @@ namespace HeroesProfile.UI.Maui.WinUI
     /// </summary>
     public partial class App : MiddleApp
     {
-        // private readonly CancellationTokenSource Source = new CancellationTokenSource();
+        private readonly CancellationTokenSource source = new();
+
+        private Task[] backgroundTasks;
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -20,33 +28,37 @@ namespace HeroesProfile.UI.Maui.WinUI
         public App()
         {
             this.InitializeComponent();
-            // this.UnhandledException += App_UnhandledException;
+            this.UnhandledException += App_UnhandledException;
         }
 
-        //private void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        //{
-        //    this.Services.GetRequiredService<ILogger<App>>().LogError(e.Exception, "Unhandled exception");
-        //}
+        private void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            this.Services.GetRequiredService<ILogger<App>>().LogError(e.Exception, "Unhandled exception");
+        }
 
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
             base.OnLaunched(args);
             Microsoft.Maui.Essentials.Platform.OnLaunched(args);
-            // this.MainWindow.Closed += MainWindowOnClosed;
+            this.MainWindow.Closed += MainWindowOnClosed;
+
+            backgroundTasks = new Task[]
+            {
+                Task.Factory.StartNew(() => this.Services.GetRequiredService<FileWatcherService>().StartAsync(source.Token)),
+                Task.Factory.StartNew(() => this.Services.GetRequiredService<ReplayProcessingService>().StartAsync(source.Token))
+            };
         }
 
-        //protected override void OnWindowCreated(WindowCreatedEventArgs args)
-        //{
-        //    base.OnWindowCreated(args);
+        protected override void OnWindowCreated(WindowCreatedEventArgs args)
+        {
+            base.OnWindowCreated(args);
+        }
 
-        //    //Task.Factory.StartNew(() => this.Services.GetRequiredService<StartupScanner>().StartAsync(Source.Token));
-        //    //Task.Factory.StartNew(() => this.Services.GetRequiredService<GameFileWatcher>().StartAsync(Source.Token));
-        //}
-
-        //private void MainWindowOnClosed(object sender, WindowEventArgs args)
-        //{
-        //    Source.Cancel();
-        //}
+        private void MainWindowOnClosed(object sender, WindowEventArgs args)
+        {
+            source.Cancel();
+            Task.WaitAll(backgroundTasks);
+        }
     }
 
     public class MiddleApp : MauiWinUIApplication<Startup>

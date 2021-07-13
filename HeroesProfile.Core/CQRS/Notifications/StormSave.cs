@@ -1,0 +1,39 @@
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+using HeroesProfile.Core.CQRS.Commands;
+using HeroesProfile.Core.Models;
+using HeroesProfile.Core.Repositories;
+
+using MediatR;
+
+namespace HeroesProfile.Core.CQRS.Notifications
+{
+    public static class StormSave
+    {
+        public record Created(ReplayParseData Data) : INotification;
+
+        public class Handler : INotificationHandler<Created>
+        {
+            private readonly IMediator mediator;
+            private readonly UserSettingsRepository userSettingsRepository;
+
+            public Handler(IMediator mediator, UserSettingsRepository userSettingsRepository)
+            {
+                this.mediator = mediator;
+                this.userSettingsRepository = userSettingsRepository;
+            }
+
+            public async Task Handle(Created notification, CancellationToken cancellationToken)
+            {
+                var settings = await this.userSettingsRepository.LoadAsync(cancellationToken);
+
+                if (settings.EnableTwitchExtension)
+                {
+                    await mediator.Send(new UpdateTalentsSession.Command(notification.Data.Replay, notification.Data.ParseType), cancellationToken);
+                }
+
+            }
+        }
+    }
+}
