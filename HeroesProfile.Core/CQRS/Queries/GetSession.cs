@@ -1,7 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
+
 using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Queries
@@ -23,7 +25,7 @@ namespace HeroesProfile.Core.CQRS.Queries
 
             public Task<Response> Handle(Query request, CancellationToken cancellationToken)
             {
-                return Task.FromResult(new Response(sessionManager.GetSession()));
+                return Task.FromResult(new Response(sessionManager.Session));
             }
         }
     }

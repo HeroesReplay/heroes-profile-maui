@@ -16,26 +16,26 @@ namespace HeroesProfile.Core.CQRS.Notifications
         public class Handler : INotificationHandler<Created>
         {
             private readonly IMediator mediator;
-            private readonly UserSettingsRepository settingsRepository;
+            private readonly UserSettingsRepository userSettingsRepository;
 
-            public Handler(IMediator mediator, UserSettingsRepository settingsRepository)
+            public Handler(IMediator mediator, UserSettingsRepository userSettingsRepository)
             {
                 this.mediator = mediator;
-                this.settingsRepository = settingsRepository;
+                this.userSettingsRepository = userSettingsRepository;
             }
 
             public async Task Handle(Created notification, CancellationToken cancellationToken)
             {
-                var settings = await settingsRepository.LoadAsync(cancellationToken);
+                var settings = await userSettingsRepository.LoadAsync(cancellationToken);
 
                 if (settings.EnableTwitchExtension)
                 {
-                    await mediator.Send(new CreateTalentsSession.Command(notification.Data.Replay), cancellationToken);
+                    await mediator.Send(new CreateTalents.Command(), cancellationToken);
                 }
 
                 if (settings.EnablePredictions)
                 {
-                    await mediator.Send(new CreateTwitchPrediction.Command(), cancellationToken);
+                    await mediator.Send(new CreatePrediction.Command(), cancellationToken);
                 }
 
                 if (settings.EnablePreMatch)

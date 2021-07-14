@@ -10,52 +10,72 @@ using HeroesProfile.Core.JsonConverters;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Parsers;
 using HeroesProfile.Core.Repositories;
+using HeroesProfile.Core.Watchers;
+
 using MediatR;
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using TwitchLib.Api;
-using TwitchLib.Api.Core;
-using TwitchLib.Api.Core.HttpCallHandlers;
 using TwitchLib.Api.Interfaces;
 
 namespace HeroesProfile.Core
 {
     public static class Extensions
     {
-        public static IServiceCollection AddCore(this IServiceCollection services, bool hostedServices = true)
+        public static IServiceCollection AddCore(this IServiceCollection services, IHostEnvironment environment)
         {
-            Settings settings = new Settings();
-            UserSettings userSettings = new UserSettings();
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .AddJsonFile($"appsettings.{environment.EnvironmentName}.json")
+                .Build();
 
-            Directory.CreateDirectory(settings.GameTempDirectory);
-            Directory.CreateDirectory(settings.GameDocumentsDirectory);
-            Directory.CreateDirectory(settings.StoredReplaysDirectory);
+            AppSettings appSettings = configuration.GetSection("AppSettings").Get<AppSettings>();
 
-            if (settings.Debug)
-            {
-                // Clean out all previously processed and stored replays.
-                // This will start a full scan / import
-                File.WriteAllText(Path.Combine(settings.StoredReplaysDirectory, "replays.json"), "[]");
-            }
-
-
+            Directory.CreateDirectory(appSettings.GameTempDirectory);
+            Directory.CreateDirectory(appSettings.GameDocumentsDirectory);
+            Directory.CreateDirectory(appSettings.SimulationTargetDirectory);
+            Directory.CreateDirectory(appSettings.SimulationSourceDirectory);
+            Directory.CreateDirectory(appSettings.ApplicationDataDirectory);
+            Directory.CreateDirectory(appSettings.ApplicationSessionDirectory);
+            
+            /*
+            * Logging and defaultSettings
+            */
             services
-                .AddSingleton(settings)
-                .AddSingleton(userSettings)
-                .AddSingleton(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>))
+                .AddSingleton(configuration)
+                .AddSingleton(configuration.GetSection("AppSettings").Get<AppSettings>())
+                .AddSingleton(configuration.GetSection("UserSettings").Get<UserSettings>())
                 .AddLogging(builder =>
                 {
-                    if (settings.Debug)
+                    if (appSettings.Debug)
                         builder.AddDebug();
                 });
 
-            services
-                .AddSingleton(new FileSystemWatcher(settings.GameDocumentsDirectory, "*.StormSave") { EnableRaisingEvents = true, IncludeSubdirectories = true })
-                .AddSingleton(new FileSystemWatcher(settings.GameDocumentsDirectory, "*.StormReplay") { EnableRaisingEvents = true, IncludeSubdirectories = true })
-                .AddSingleton(new FileSystemWatcher(settings.GameTempDirectory, "*.battlelobby") { EnableRaisingEvents = true, IncludeSubdirectories = true });
 
+            /*
+             * Allows us to log each command or query that has executed
+             */
+            services
+                .AddSingleton(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+
+            /*
+             * Watch for .battlelobby, .StormSave and .StormReplay files
+             * Watch for files that are copied into the Heroes Profile Session Data folder (copied game files)
+             */
+            services
+                .AddSingleton<AbstractGameFileSystemWatcher, BattleLobbySystemWatcher>()
+                .AddSingleton<AbstractGameFileSystemWatcher, StormSaveSystemWatcher>()
+                .AddSingleton<AbstractGameFileSystemWatcher, StormReplaySystemWatcher>()
+                .AddSingleton<SessionFileSystemWatcher>();
+
+            /*
+             * Reading and Writing to JSON files or the single tracked Session
+             */
             services
                 .AddSingleton<SessionRepository>()
                 .AddSingleton<ReplaysRepository>()
@@ -66,32 +86,42 @@ namespace HeroesProfile.Core
                 .AddSingleton<JsonConverter, ReplayToReadableStringConverter>()
                 .AddSingleton<JsonConverter, FileInfoToFullPathConverter>();
 
+            /*
+             * Parsers that parse each type of supported game file the application watches
+             */
             services
                 .AddSingleton<AggregateReplayParser>()
                 .AddSingleton<IReplayParser, StormReplayParser>()
                 .AddSingleton<IReplayParser, BattleLobbyParser>()
                 .AddSingleton<IReplayParser, StormSaveParser>();
 
+            /*
+             * Upload client is used for Uploading Replays to Heroes Profile /Upload endpoint.
+             * Talents client is used for the Heroes Profile Twitch Extension using /twitch/extension endpoint.
+             */
             services
                 .AddSingleton<IUploadClient, UploadClient>()
                 .AddSingleton<TalentsClient, TalentsClient>()
                 .AddSingleton<ITwitchAPI, TwitchAPI>(provider => new TwitchAPI(provider.GetRequiredService<ILoggerFactory>(), rateLimiter: null, settings: null));
 
 
-            if (settings.EnableFakeHttp)
+            if (appSettings.EnableFakeHttp)
             {
+                /*
+                 * This allows us to fake HTTP responses for Upload Client & Talents for an easier experience in testing and development.
+                 */
                 services.AddTransient<FakeHeroesProfileDelegatingHandler>();
 
                 services
                     .AddHttpClient<TalentsClient>()
-                    .ConfigureHttpClient(client => client.BaseAddress = settings.HeroesProfileApiUri)
+                    .ConfigureHttpClient(client => client.BaseAddress = appSettings.HeroesProfileApiUri)
                     .AddHttpMessageHandler(provider => provider.GetRequiredService<FakeHeroesProfileDelegatingHandler>())
                     .SetHandlerLifetime(TimeSpan.FromMinutes(5))
                     .AddPolicyHandler(PollyPolicies.GetHeroesProfileRetryPolicy());
 
                 services
                     .AddHttpClient<IUploadClient, UploadClient>()
-                    .ConfigureHttpClient(client => client.BaseAddress = settings.HeroesProfileApiUri)
+                    .ConfigureHttpClient(client => client.BaseAddress = appSettings.HeroesProfileApiUri)
                     .AddHttpMessageHandler(provider => provider.GetRequiredService<FakeHeroesProfileDelegatingHandler>())
                     .SetHandlerLifetime(TimeSpan.FromMinutes(5))
                     .AddPolicyHandler(PollyPolicies.GetHeroesProfileRetryPolicy());
@@ -100,31 +130,41 @@ namespace HeroesProfile.Core
             {
                 services
                     .AddHttpClient<TalentsClient>()
-                    .ConfigureHttpClient(client => client.BaseAddress = settings.HeroesProfileApiUri)
+                    .ConfigureHttpClient(client => client.BaseAddress = appSettings.HeroesProfileApiUri)
                     .SetHandlerLifetime(TimeSpan.FromMinutes(5))
                     .AddPolicyHandler(PollyPolicies.GetHeroesProfileRetryPolicy());
 
                 services
                     .AddHttpClient<IUploadClient, UploadClient>()
-                    .ConfigureHttpClient(client => client.BaseAddress = settings.HeroesProfileApiUri)
+                    .ConfigureHttpClient(client => client.BaseAddress = appSettings.HeroesProfileApiUri)
                     .SetHandlerLifetime(TimeSpan.FromMinutes(5))
                     .AddPolicyHandler(PollyPolicies.GetHeroesProfileRetryPolicy());
             }
 
-
-            if (hostedServices)
+            /*
+             * Hosted services only works with the Hosting Extensions from .NET
+             * Maui does not use the same Hosting service and so we much register them differently depending on how we execute background services.
+             * If this is for Maui, we must hook into Application startup and run the services.
+             * If this is for Console, .AddHostedService will handle starting the services for us.
+             */
+            if (environment.ApplicationName.Equals("HeroesProfile.Console"))
             {
                 services
-                .AddHostedService<FileWatcherService>()
-                .AddHostedService<ReplayProcessingService>();
+                    .AddHostedService<GameSimulator>()
+                    .AddHostedService<FileWatchers>()
+                    .AddHostedService<ReplayProcessor>();
             }
             else
             {
                 services
-                .AddSingleton<FileWatcherService>()
-                .AddSingleton<ReplayProcessingService>();
+                    .AddSingleton<GameSimulator>()
+                    .AddSingleton<FileWatchers>()
+                    .AddSingleton<ReplayProcessor>();
             }
 
+            /*
+             * Registers all the handlers and behavours.
+             */
             services.AddMediatR((mediatorService) => mediatorService.AsSingleton(), typeof(Extensions).Assembly);
 
             return services;

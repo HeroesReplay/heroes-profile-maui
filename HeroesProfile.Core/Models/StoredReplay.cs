@@ -31,7 +31,7 @@ namespace HeroesProfile.Core.Models
             if (obj.GetType() != GetType()) return false;
             return Equals((StoredReplay)obj);
         }
-
+        
         public override int GetHashCode() => HashCode.Combine(Path, Created);
     }
 }

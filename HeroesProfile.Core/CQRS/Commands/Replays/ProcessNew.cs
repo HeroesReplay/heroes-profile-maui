@@ -12,7 +12,7 @@ using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Commands
 {
-    public static class ProcessAndSaveNewReplays
+    public static class ProcessNew
     {
         public record Item(StoredReplay StoredReplay, ReplayParseData ParseData);
 
@@ -22,13 +22,13 @@ namespace HeroesProfile.Core.CQRS.Commands
 
         public class Handler : IRequestHandler<Command, Response>
         {
-            private readonly Settings settings;
+            private readonly AppSettings appSettings;
             private readonly ReplaysRepository repository;
             private readonly IMediator mediator;
 
-            public Handler(Settings settings, ReplaysRepository repository, IMediator mediator)
+            public Handler(AppSettings appSettings, ReplaysRepository repository, IMediator mediator)
             {
-                this.settings = settings;
+                this.appSettings = appSettings;
                 this.repository = repository;
                 this.mediator = mediator;
             }
@@ -58,7 +58,7 @@ namespace HeroesProfile.Core.CQRS.Commands
 
             private IEnumerable<FileInfo> GetAllReplays()
             {
-                return new DirectoryInfo(settings.GameDocumentsDirectory).EnumerateFiles("*.StormReplay", SearchOption.AllDirectories);
+                return new DirectoryInfo(appSettings.GameDocumentsDirectory).EnumerateFiles("*.StormReplay", SearchOption.AllDirectories);
             }
 
             private async Task<IEnumerable<FileInfo>> GetNewReplaysAsync(CancellationToken token)

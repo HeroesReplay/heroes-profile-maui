@@ -2,6 +2,9 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Hosting;
 using HeroesProfile.Core;
+using HeroesProfile.Core.CQRS.Commands;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HeroesProfile.Console
 {
@@ -11,6 +14,10 @@ namespace HeroesProfile.Console
         {
             using (var host = CreateHostBuilder(args).Build())
             {
+                IMediator mediator = host.Services.GetRequiredService<IMediator>();
+
+                await mediator.Send(new InitializeApp.Command());
+
                 await host.RunAsync();
             }
         }
@@ -20,10 +27,14 @@ namespace HeroesProfile.Console
             return Host
                 .CreateDefaultBuilder(args)
                 .ConfigureHostOptions(hostOptions => hostOptions.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.StopHost)
+                .ConfigureHostConfiguration((builder) =>
+                {
+
+                })
                 .UseConsoleLifetime(x => x.SuppressStatusMessages = false)
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.AddCore(hostedServices: true);
+                    services.AddCore(hostContext.HostingEnvironment);
                 });
         }
     }

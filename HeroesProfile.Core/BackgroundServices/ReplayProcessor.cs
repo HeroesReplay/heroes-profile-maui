@@ -2,24 +2,29 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+
 using HeroesProfile.Core.CQRS.Commands;
 using HeroesProfile.Core.CQRS.Queries;
 using HeroesProfile.Core.Models;
+
 using MediatR;
+
 using Microsoft.Extensions.Hosting;
 
 namespace HeroesProfile.Core.BackgroundServices
 {
-    public class ReplayProcessingService : BackgroundService
+
+
+    public class ReplayProcessor : BackgroundService
     {
         private readonly IMediator mediator;
-        private readonly Settings settings;
+        private readonly AppSettings appSettings;
         private bool started;
 
-        public ReplayProcessingService(IMediator mediator, Settings settings)
+        public ReplayProcessor(IMediator mediator, AppSettings appSettings)
         {
             this.mediator = mediator;
-            this.settings = settings;
+            this.appSettings = appSettings;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -27,11 +32,13 @@ namespace HeroesProfile.Core.BackgroundServices
             if (started) return;
             started = true;
 
+            if (!appSettings.EnableReplayProcessing) return;
+
             TimeSpan TimeBetweenScans = TimeSpan.FromMinutes(10);
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                await mediator.Send(new ProcessAndSaveNewReplays.Command(), stoppingToken);
+                await mediator.Send(new ProcessNew.Command(), stoppingToken);
 
                 List<GetReplays.Filter> filters = new()
                 {

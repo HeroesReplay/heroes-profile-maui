@@ -5,7 +5,9 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+
 using MediatR;
+
 using Microsoft.Extensions.Logging;
 
 namespace HeroesProfile.Core.CQRS.Behaviours
@@ -33,7 +35,7 @@ namespace HeroesProfile.Core.CQRS.Behaviours
         public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
             var stopwatch = Stopwatch.StartNew();
-            var requestName = request.GetType().Name;
+            var requestName = request.GetType().DeclaringType?.Name ?? request.GetType().Name;
             var requestGuid = Guid.NewGuid().ToString();
 
             var requestNameWithGuid = $"{requestName} [{requestGuid}]";
@@ -53,6 +55,15 @@ namespace HeroesProfile.Core.CQRS.Behaviours
                 }
 
                 response = await next();
+
+                try
+                {
+                    logger.LogInformation($"[PROPS] [RESP] {requestNameWithGuid} {JsonSerializer.Serialize(response, options)}");
+                }
+                catch (NotSupportedException e)
+                {
+                    logger.LogInformation($"[Serialization ERROR] {requestNameWithGuid} Could not serialize the response.");
+                }
             }
             finally
             {

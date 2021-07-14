@@ -22,12 +22,12 @@ namespace HeroesProfile.Core.Clients
 
     public class UploadClient : IUploadClient
     {
-        private readonly Settings settings;
+        private readonly AppSettings appSettings;
         private readonly HttpClient httpClient;
 
-        public UploadClient(Settings settings, HttpClient httpClient)
+        public UploadClient(AppSettings appSettings, HttpClient httpClient)
         {
-            this.settings = settings;
+            this.appSettings = appSettings;
             this.httpClient = httpClient;
         }
 

@@ -1,0 +1,60 @@
+﻿using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using HeroesProfile.Core.Models;
+using HeroesProfile.Core.Repositories;
+using MediatR;
+using Polly;
+
+namespace HeroesProfile.Core.CQRS.Commands
+{
+    public static class CopyToSessionAndRefresh
+    {
+        public record Command(string FileToCopy) : IRequest<Response>;
+
+        public record Response(bool Success);
+
+        public class Handler : IRequestHandler<Command, Response>
+        {
+            private readonly AppSettings appSettings;
+            private readonly SessionRepository sessionRepository;
+
+            public Handler(AppSettings appSettings, SessionRepository sessionRepository)
+            {
+                this.appSettings = appSettings;
+                this.sessionRepository = sessionRepository;
+            }
+
+            public async Task<Response> Handle(Command command, CancellationToken cancellationToken)
+            {
+                var context = new Context();
+                context.Add("Command", command);
+
+                PolicyResult result = await Policy
+                    .Handle<IOException>()
+                    .WaitAndRetryAsync(5, (attempt) => TimeSpan.FromSeconds(1))
+                    .ExecuteAndCaptureAsync((context, token) => UpdateSessionFileAsync((Command)context["Command"], token), context, cancellationToken);
+
+                return new Response(result.Outcome == OutcomeType.Successful);
+            }
+
+            private async Task UpdateSessionFileAsync(Command command, CancellationToken cancellationToken)
+            {
+                string extension = Path.GetExtension(command.FileToCopy).TrimStart('.');
+                string fullName = Path.Combine(appSettings.ApplicationSessionDirectory, $"session.{extension}");
+                
+                if (File.Exists(fullName))
+                {
+                    File.Delete(fullName);
+                }
+                else
+                {
+                    File.Copy(command.FileToCopy, fullName, overwrite: true);
+                }
+
+                await sessionRepository.RefreshAsync(fullName, cancellationToken);
+            }
+        }
+    }
+}

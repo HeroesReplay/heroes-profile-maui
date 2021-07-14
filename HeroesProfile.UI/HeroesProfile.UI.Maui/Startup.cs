@@ -30,17 +30,8 @@ namespace HeroesProfile.UI.Maui
                     //        MauiWinUIApplication.Current.MainWindow.SetIcon("Platforms/Windows/trayicon.ico");
                     //    }));
 #endif
-
                 })
-                //.ConfigureAppConfiguration((context, builder) =>
-                //{
-
-                //})
-                //.ConfigureHostConfiguration((configurationBuilder) =>
-                //{
-
-                //})
-                .ConfigureServices(services =>
+                .ConfigureServices((appBuilder, services) =>
                 {
                     services.AddBlazorWebView();
 #if WINDOWS
@@ -51,7 +42,7 @@ namespace HeroesProfile.UI.Maui
                     //services.AddSingleton<INotificationService, MacCatalyst.NotificationService>();
 #endif
 
-                    services.AddCore(hostedServices: false);
+                    services.AddCore(appBuilder.HostingEnvironment);
                 });
         }
     }

@@ -1,97 +1,95 @@
 ﻿using System;
-
-using Heroes.ReplayParser;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 using HeroesProfile.Core.Models;
+using HeroesProfile.Core.Parsers;
 
 namespace HeroesProfile.Core.Repositories
 {
     public class SessionRepository
     {
-        private Session Session { get; set; }
+        private readonly AppSettings appSettings;
+        private readonly AggregateReplayParser replayParser;
+        private readonly ReaderWriterLockSlim readerWriterLockSlim = new(LockRecursionPolicy.NoRecursion);
 
-        private static readonly object SyncLock = new();
+        private Session session;
 
-        public Session GetSession() => Session;
-
-        public Session Set(Session session)
+        public Session Session
         {
-            lock (SyncLock)
+            get
             {
-                Session = session;
-            }
-
-            return Session;
-        }
-
-        public Session SetBattleLobby(string replayId, Replay replay)
-        {
-            lock (SyncLock)
-            {
-                Session = new Session()
+                try
                 {
-                    ReplayId = replayId,
-                    BattleLobby = replay,
-                    PlayerFoundTalents = new(),
-                    StormReplay = null,
-                    StormSave = null,
-                    TrackerEventIndex = 0,
-                    TwitchExtensionId = null,
-                    TwitchPredictionId = null,
-                    TwitchPredictionWinningOutcomeId = null,
-                    State = SessionState.BattleLobby,
-                    GameModeUpdated = false,
-                    TalentsUpdated = false
-                };
-
-                return Session;
+                    readerWriterLockSlim.EnterReadLock();
+                    return session;
+                }
+                finally
+                {
+                    readerWriterLockSlim.ExitReadLock();
+                }
+            }
+            set
+            {
+                try
+                {
+                    readerWriterLockSlim.EnterWriteLock();
+                    session = value;
+                }
+                finally
+                {
+                    readerWriterLockSlim.ExitWriteLock();
+                }
             }
         }
 
-        public Session SetStormSave(Replay replay)
+        public SessionRepository(AppSettings appSettings, AggregateReplayParser replayParser)
         {
-            lock (SyncLock)
-            {
-                Session = new Session()
-                {
-                    ReplayId = Session.ReplayId,
-                    BattleLobby = Session.BattleLobby,
-                    PlayerFoundTalents = Session.PlayerFoundTalents,
-                    StormReplay = Session.StormReplay,
-                    StormSave = replay,
-                    TrackerEventIndex = Session.TrackerEventIndex,
-                    TwitchExtensionId = Session.TwitchExtensionId,
-                    TwitchPredictionId = Session.TwitchPredictionId,
-                    TwitchPredictionWinningOutcomeId = Session.TwitchPredictionWinningOutcomeId,
-                    State = SessionState.StormSave,
-                    GameModeUpdated = false,
-                    TalentsUpdated = false
-                };
+            this.appSettings = appSettings;
+            this.replayParser = replayParser;
+            this.session = new Session();
+        }
 
-                return Session;
+        public void Clear()
+        {
+            try
+            {
+                Session = new Session();
+
+                foreach (var file in new DirectoryInfo(appSettings.ApplicationSessionDirectory).EnumerateFiles("*.*", SearchOption.AllDirectories))
+                {
+                    file.Delete();
+                }
+            }
+            catch (Exception)
+            {
+
             }
         }
 
-        public Session SetStormReplay(Replay replay)
+        public async Task RefreshAsync(string sessionFile, CancellationToken cancellationToken)
         {
-            lock (SyncLock)
-            {
-                Session = new Session()
-                {
-                    BattleLobby = Session.BattleLobby,
-                    PlayerFoundTalents = Session.PlayerFoundTalents,
-                    StormReplay = replay,
-                    StormSave = Session.StormSave,
-                    TrackerEventIndex = Session.TrackerEventIndex,
-                    TwitchExtensionId = Session.TwitchExtensionId,
-                    TwitchPredictionId = Session.TwitchPredictionId,
-                    TwitchPredictionWinningOutcomeId = Session.TwitchPredictionWinningOutcomeId,
-                    State = SessionState.StormReplay,
-                    GameModeUpdated = false,
-                    TalentsUpdated = false
-                };
+            ReplayParseData parseData = await replayParser.ParseAsync(new FileInfo(sessionFile), cancellationToken);
 
-                return Session;
+            switch (parseData.ParseType)
+            {
+                case ParseType.BattleLobby:
+                    {
+                        Session.Files.BattleLobby = parseData.Replay;
+                        break;
+                    }
+                case ParseType.StormReplay:
+                    {
+                        Session.Files.StormReplay = parseData.Replay;
+                        break;
+                    }
+                case ParseType.StormSave:
+                    {
+                        Session.Files.StormSave = parseData.Replay;
+                        break;
+                    }
             }
         }
     }

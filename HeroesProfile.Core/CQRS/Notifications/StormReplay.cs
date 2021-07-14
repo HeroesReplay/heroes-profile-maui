@@ -1,7 +1,9 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using HeroesProfile.Core.CQRS.Commands;
+using HeroesProfile.Core.CQRS.Queries;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
 
@@ -30,12 +32,12 @@ namespace HeroesProfile.Core.CQRS.Notifications
 
                 if (settings.EnableTwitchExtension)
                 {
-                    await mediator.Send(new UpdateTalentsSession.Command(notification.ParseResult.Replay, notification.ParseResult.ParseType), cancellationToken);
+                    await mediator.Send(new UpdateTalents.Command(notification.ParseResult.Replay, notification.ParseResult.ParseType), cancellationToken);
                 }
 
                 if (settings.EnablePredictions)
                 {
-                    await mediator.Send(new CloseTwitchPrediction.Command(), cancellationToken);
+                    await mediator.Send(new ClosePrediction.Command(), cancellationToken);
                 }
 
                 if (settings.EnablePostMatch)

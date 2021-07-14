@@ -3,6 +3,14 @@ using Heroes.ReplayParser;
 
 namespace HeroesProfile.Core.Models
 {
+    public enum SessionState
+    {
+        None,
+        BattleLobby,
+        StormSave,
+        StormReplay
+    }
+
     [Flags]
     public enum ParseResult
     {
@@ -17,5 +25,36 @@ namespace HeroesProfile.Core.Models
         UnexpectedResult = DataParser.ReplayParseResult.UnexpectedResult,
         Success = DataParser.ReplayParseResult.Success,
         CustomGame
+    }
+
+    public enum ParseType
+    {
+        All,
+        BattleLobby,
+        StormSave,
+        StormReplay
+    }
+
+    public enum ProcessStatus
+    {
+        Pending,
+        Success,
+        Duplicate,
+        Error,
+        NotSupported
+    }
+
+    public enum UploadStatus
+    {
+        None,
+        Success,
+        InProgress,
+        UploadError,
+        Duplicate,
+        AiDetected,
+        CustomGame,
+        PtrRegion,
+        Incomplete,
+        TooOld,
     }
 }

@@ -1,22 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-
 using Heroes.ReplayParser;
-
 using HeroesProfile.Core.Clients;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
-
 using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Commands
 {
-    public static class UpdateTalentsSession
+    public static class UpdateTalents
     {
         public record Command(Replay Replay, ParseType ParseType) : IRequest<Response>;
 
-        public record Response(Session Session);
+        public record Response(Models.Session Session);
 
         public class Handler : IRequestHandler<Command, Response>
         {
@@ -37,7 +34,7 @@ namespace HeroesProfile.Core.CQRS.Commands
 
             public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
             {
-                UserSettings userSettings = await userSettingsRepository.LoadAsync(cancellationToken);
+                Models.UserSettings userSettings = await userSettingsRepository.LoadAsync(cancellationToken);
                 Dictionary<string, string> identity = userSettings.TalentsIdentity;
 
                 if (request.ParseType == ParseType.BattleLobby)
@@ -46,30 +43,28 @@ namespace HeroesProfile.Core.CQRS.Commands
                 }
                 else if (request.ParseType == ParseType.StormReplay)
                 {
-                    sessionRepository.SetStormReplay(request.Replay);
                     await SaveMissingTalents(identity, cancellationToken);
                 }
                 else if (request.ParseType == ParseType.StormSave)
                 {
-                    sessionRepository.SetStormSave(request.Replay);
-                    await UpdateSession(identity, sessionRepository.GetSession(), cancellationToken);
+                    await UpdateSession(identity, sessionRepository.Session, cancellationToken);
                 }
 
-                return new Response(sessionRepository.GetSession());
+                return new Response(sessionRepository.Session);
             }
 
             private async Task SaveMissingTalents(Dictionary<string, string> identity, CancellationToken cancellationToken)
             {
-                await client.SaveMissingTalents(identity, sessionRepository.GetSession(), cancellationToken);
+                await client.SaveMissingTalents(identity, sessionRepository.Session, cancellationToken);
             }
 
-            private async Task UpdateSession(Dictionary<string, string> identity, Session session, CancellationToken cancellationToken)
+            private async Task UpdateSession(Dictionary<string, string> identity, Models.Session session, CancellationToken cancellationToken)
             {
-                if (session.StormSave == null || session.BattleLobby == null)
+                if (session.Files.StormSave == null || session.Files.BattleLobby == null)
                 {
                     return;
                 }
-
+                
                 // Can this not be processed once? IsBattleLobbyToStormSaveSynced = false/true
                 for (int stormPlayIndex = 0; stormPlayIndex < session.StormSave.Players.Length; stormPlayIndex++)
                 {
@@ -85,7 +80,7 @@ namespace HeroesProfile.Core.CQRS.Commands
 
                 if (session.StormSave.TrackerEvents != null)
                 {
-                    for (int i = session.TrackerEventIndex; i < session.StormSave.TrackerEvents.Count; i++)
+                    for (int i = session.Extension.TrackerEventIndex; i < session.StormSave.TrackerEvents.Count; i++)
                     {
                         var trackerEvent = session.StormSave.TrackerEvents[i];
                         string eventName = trackerEvent.Data.dictionary[0].blobText;
@@ -102,38 +97,38 @@ namespace HeroesProfile.Core.CQRS.Commands
                                 TimeSpanSelected = trackerEvent.TimeSpan
                             };
 
-                            if (!session.GameModeUpdated)
+                            if (!session.Extension.GameModeUpdated)
                             {
                                 await client.UpdateReplayData(identity, session, cancellationToken);
                                 await client.UpdatePlayerData(identity, session, cancellationToken);
-                                session.GameModeUpdated = true;
+                                session.Extension.GameModeUpdated = true;
                             }
 
                             var playerTalent = $"{player.Name}:{talent.TalentName}";
 
-                            if (!session.PlayerFoundTalents.Contains(playerTalent))
+                            if (!session.Extension.PlayerFoundTalents.Contains(playerTalent))
                             {
-                                session.PlayerFoundTalents.Add(playerTalent);
+                                session.Extension.PlayerFoundTalents.Add(playerTalent);
                                 await client.SaveTalentData(identity, session, player, talent, cancellationToken);
-                                session.TalentsUpdated = true;
+                                session.Extension.TalentsUpdated = true;
                             }
 
-                            session.TrackerEventIndex = i;
+                            session.Extension.TrackerEventIndex = i;
                         }
                     }
 
-                    if (session.TalentsUpdated)
+                    if (session.Extension.TalentsUpdated)
                     {
                         await client.NotifyTwitchTalentChange(identity, cancellationToken);
-                        session.TalentsUpdated = false;
+                        session.Extension.TalentsUpdated = false;
                     }
                 }
 
-                if (!session.GameModeUpdated)
+                if (!session.Extension.GameModeUpdated)
                 {
                     await client.UpdateReplayData(identity, session, cancellationToken);
                     await client.UpdatePlayerData(identity, session, cancellationToken);
-                    session.GameModeUpdated = true;
+                    session.Extension.GameModeUpdated = true;
                 }
             }
         }

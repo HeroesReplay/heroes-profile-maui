@@ -31,13 +31,19 @@
     </ItemGroup>
 
     <ItemGroup>
+
         <PackageReference Include="MediatR" Version="9.0.0" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+
         <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="6.0.100-preview.5.794" />
+
         <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0-preview.5.*" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0-preview.5.21301.5" />
+
         <PackageReference Include="Microsoft.Maui" Version="6.0.100-preview.5.794" />
+
         <ProjectReference Include="..\..\HeroesProfile.Core\HeroesProfile.Core.csproj" />
+
     </ItemGroup>
 
     <ItemGroup>

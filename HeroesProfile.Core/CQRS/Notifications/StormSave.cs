@@ -1,7 +1,9 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using HeroesProfile.Core.CQRS.Commands;
+using HeroesProfile.Core.CQRS.Queries;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
 
@@ -30,9 +32,13 @@ namespace HeroesProfile.Core.CQRS.Notifications
 
                 if (settings.EnableTwitchExtension)
                 {
-                    await mediator.Send(new UpdateTalentsSession.Command(notification.Data.Replay, notification.Data.ParseType), cancellationToken);
-                }
+                    var response = await mediator.Send(new GetSession.Query(), cancellationToken);
 
+                    if (response.Session.BattleLobby == null)
+                        throw new Exception("Really, why is BattleLobby null before this point?");
+
+                    await mediator.Send(new UpdateTalents.Command(notification.Data.Replay, notification.Data.ParseType), cancellationToken);
+                }
             }
         }
     }

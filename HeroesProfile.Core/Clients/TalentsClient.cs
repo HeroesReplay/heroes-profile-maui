@@ -13,7 +13,7 @@ namespace HeroesProfile.Core.Clients
 {
     public class TalentsClient
     {
-        private readonly Settings settings;
+        private readonly AppSettings appSettings;
         private readonly HttpClient httpClient;
 
         public static readonly Uri SaveReplayUri = new("twitch/extension/save/replay", UriKind.Relative);
@@ -23,9 +23,9 @@ namespace HeroesProfile.Core.Clients
         public static readonly Uri SaveTalentsUri = new("twitch/extension/save/talent", UriKind.Relative);
         public static readonly Uri NotifyUri = new("twitch/extension/notify/uploader", UriKind.Relative);
 
-        public TalentsClient(Settings settings, HttpClient httpClient)
+        public TalentsClient(AppSettings appSettings, HttpClient httpClient)
         {
-            this.settings = settings;
+            this.appSettings = appSettings;
             this.httpClient = httpClient;
         }
 
@@ -56,7 +56,7 @@ namespace HeroesProfile.Core.Clients
         {
             Dictionary<string, string> values = new(identity)
             {
-                { "replayID", session.ReplayId },
+                { "replayID", session.Extension.SessionId },
                 { "game_type", $"{session.StormSave.GameMode}" },
                 { "game_map", session.StormSave.Map },
                 { "game_version", session.StormSave.ReplayVersion },
@@ -78,7 +78,7 @@ namespace HeroesProfile.Core.Clients
         {
             var values = new Dictionary<string, string>(identity)
             {
-                { "replayID", session.ReplayId },
+                { "replayID", session.Extension.SessionId },
                 { "blizz_id", player.BattleNetId.ToString() },
                 { "battletag", player.Name + "#" + player.BattleTag },
                 { "region", player.BattleNetRegionId.ToString() },
@@ -106,7 +106,7 @@ namespace HeroesProfile.Core.Clients
             {
                 var values = new Dictionary<string, string>(identity)
                 {
-                    { "replayID", session.ReplayId },
+                    { "replayID", session.Extension.SessionId },
                     { "battletag", player.Name + "#" +  player.BattleTag },
                     { "team", player.Team.ToString() },
                 };
@@ -132,7 +132,7 @@ namespace HeroesProfile.Core.Clients
             {
                 var values = new Dictionary<string, string>(identity)
                 {
-                    { "replayID", session.ReplayId },
+                    { "replayID", session.Extension.SessionId },
                     { "blizz_id", player.BattleNetId.ToString() },
                     { "battletag", player.Name + "#" + player.BattleTag},
                     { "hero", player.Character },
@@ -171,7 +171,7 @@ namespace HeroesProfile.Core.Clients
 
         public async Task SaveMissingTalents(Dictionary<string, string> identity, Session session, CancellationToken cancellationToken)
         {
-            if (!string.IsNullOrWhiteSpace(session.ReplayId))
+            if (!string.IsNullOrWhiteSpace(session.Extension.SessionId))
             {
                 Replay replay = session.StormReplay;
 
@@ -185,7 +185,7 @@ namespace HeroesProfile.Core.Clients
                             {
                                 var playerTalent = $"{player.Name}:{talent.TalentName}";
 
-                                if (!session.PlayerFoundTalents.Contains(playerTalent))
+                                if (!session.Extension.PlayerFoundTalents.Contains(playerTalent))
                                 {
                                     await SaveTalentData(identity, session, player, talent, cancellationToken);
                                     await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);

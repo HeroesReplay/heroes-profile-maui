@@ -2,24 +2,28 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 
 using HeroesProfile.Core.Models;
 
+using Polly;
+
 namespace HeroesProfile.Core.Repositories
 {
     public class ReplaysRepository
     {
-        private readonly string replays = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Heroes Profile", "replays.json");
+        private readonly AppSettings appSettings;
 
-        private readonly JsonSerializerOptions writeOptions = new()
+        private readonly JsonSerializerOptions? writeOptions = new()
         {
             WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: true) }
         };
 
         private readonly JsonSerializerOptions readOptions = new()
@@ -30,7 +34,17 @@ namespace HeroesProfile.Core.Repositories
             Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: true) }
         };
 
+        public ReplaysRepository(AppSettings appSettings)
+        {
+            this.appSettings = appSettings;
+        }
+
         private readonly SemaphoreSlim semaphore = new(1, 1);
+
+        public async Task ClearAsync(CancellationToken token)
+        {
+            await File.WriteAllTextAsync(appSettings.StoredReplaysPath, "[]", token);
+        }
 
         public async Task<StoredReplay> FindAsync(string path, CancellationToken token)
         {
@@ -73,12 +87,23 @@ namespace HeroesProfile.Core.Repositories
         {
             await semaphore.WaitAsync(token);
 
-            await using (FileStream stream = new FileInfo(this.replays).Create())
+            try
             {
-                await JsonSerializer.SerializeAsync(stream, replays, writeOptions, token);
+                await Policy
+                    .Handle<IOException>()
+                    .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(1))
+                    .ExecuteAsync(async (cancellationToken) =>
+                    {
+                        using (Stream stream = File.OpenWrite(appSettings.StoredReplaysPath))
+                        {
+                            await JsonSerializer.SerializeAsync<IEnumerable<StoredReplay>>(stream, replays, writeOptions, cancellationToken);
+                        }
+                    }, token);
             }
-
-            semaphore.Release();
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
         public async Task<List<StoredReplay>> LoadAsync(CancellationToken token)
@@ -87,20 +112,19 @@ namespace HeroesProfile.Core.Repositories
 
             try
             {
-                await using (FileStream stream = File.OpenRead(replays))
-                {
-                    return await JsonSerializer.DeserializeAsync<List<StoredReplay>>(stream, readOptions, token);
-                }
-            }
-            catch (DirectoryNotFoundException ex)
-            {
-                return new List<StoredReplay>();
-            }
-            catch (FileNotFoundException ex)
-            {
-                return new List<StoredReplay>();
-            }
+                var result = await Policy
+                    .Handle<Exception>()
+                    .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(1))
+                    .ExecuteAsync(async (t) =>
+                    {
+                        using (Stream stream = File.OpenRead(appSettings.StoredReplaysPath))
+                        {
+                            return await JsonSerializer.DeserializeAsync<List<StoredReplay>>(stream, readOptions, t);
+                        }
+                    }, token);
 
+                return result;
+            }
             finally
             {
                 semaphore.Release();

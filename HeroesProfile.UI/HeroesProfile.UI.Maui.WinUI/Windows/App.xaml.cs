@@ -44,8 +44,8 @@ namespace HeroesProfile.UI.Maui.WinUI
 
             backgroundTasks = new Task[]
             {
-                Task.Factory.StartNew(() => this.Services.GetRequiredService<FileWatcherService>().StartAsync(source.Token)),
-                Task.Factory.StartNew(() => this.Services.GetRequiredService<ReplayProcessingService>().StartAsync(source.Token))
+                Task.Factory.StartNew(() => this.Services.GetRequiredService<FileWatchers>().StartAsync(source.Token)),
+                Task.Factory.StartNew(() => this.Services.GetRequiredService<ReplayProcessor>().StartAsync(source.Token))
             };
         }
 

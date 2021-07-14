@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
 using MediatR;
-
 
 namespace HeroesProfile.Core.CQRS.Commands
 {
@@ -17,7 +16,7 @@ namespace HeroesProfile.Core.CQRS.Commands
 
         public class Handler : IRequestHandler<Command, Response>
         {
-            private ReplaysRepository replaysRepository;
+            private readonly ReplaysRepository replaysRepository;
 
             public Handler(ReplaysRepository replaysRepository)
             {
