@@ -27,6 +27,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <None Include="..\HeroesProfile.UI.Maui\*.json" Link="%(RecursiveDir)%(Filename)%(Extension)" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="MediatR" Version="9.0.0" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="6.0.100-preview.5.794" />
