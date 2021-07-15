@@ -1,10 +1,11 @@
-﻿//using Foundation;
-//using Microsoft.Maui;
+﻿using Foundation;
 
-//namespace HeroesProfile.UI.Maui.MacCatalyst
-//{
-//    [Register("AppDelegate")]
-//    public class AppDelegate : MauiUIApplicationDelegate<Startup>
-//    {
-//    }
-//}
+using Microsoft.Maui;
+
+namespace HeroesProfile.UI.Maui.MacCatalyst
+{
+    [Register("AppDelegate")]
+    public class AppDelegate : MauiUIApplicationDelegate<Startup>
+    {
+    }
+}

@@ -39,11 +39,13 @@ namespace HeroesProfile.Core.Repositories
             this.appSettings = appSettings;
         }
 
-        private readonly SemaphoreSlim semaphore = new(1, 1);
+        private static readonly ReaderWriterLock readerWriterLock = new ReaderWriterLock();
 
         public async Task ClearAsync(CancellationToken token)
         {
+            readerWriterLock.AcquireWriterLock(1000);
             await File.WriteAllTextAsync(appSettings.StoredReplaysPath, "[]", token);
+            readerWriterLock.ReleaseLock();
         }
 
         public async Task<StoredReplay> FindAsync(string path, CancellationToken token)
@@ -56,10 +58,8 @@ namespace HeroesProfile.Core.Repositories
         public async Task InsertAsync(StoredReplay replay, CancellationToken token)
         {
             List<StoredReplay> store = await LoadAsync(token);
-
             await SaveCollectionAsync(store.Prepend(replay).Distinct(), token);
         }
-
 
         public async Task<IEnumerable<StoredReplay>> UpdateAsync(IEnumerable<StoredReplay> replays, CancellationToken token)
         {
@@ -85,49 +85,31 @@ namespace HeroesProfile.Core.Repositories
 
         private async Task SaveCollectionAsync(IEnumerable<StoredReplay> replays, CancellationToken token)
         {
-            await semaphore.WaitAsync(token);
+            readerWriterLock.AcquireWriterLock(1000);
 
             try
             {
-                await Policy
-                    .Handle<IOException>()
-                    .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(1))
-                    .ExecuteAsync(async (cancellationToken) =>
-                    {
-                        using (Stream stream = File.OpenWrite(appSettings.StoredReplaysPath))
-                        {
-                            await JsonSerializer.SerializeAsync(stream, replays, writeOptions, cancellationToken);
-                        }
-                    }, token);
+                var json = JsonSerializer.Serialize(replays, writeOptions);
+                await File.WriteAllTextAsync(appSettings.StoredReplaysPath, json, token);
             }
             finally
             {
-                semaphore.Release();
+                readerWriterLock.ReleaseLock();
             }
         }
 
         public async Task<List<StoredReplay>> LoadAsync(CancellationToken token)
         {
-            await semaphore.WaitAsync(token);
+            readerWriterLock.AcquireReaderLock(1000);
 
             try
             {
-                var result = await Policy
-                    .Handle<Exception>()
-                    .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(1))
-                    .ExecuteAsync(async (t) =>
-                    {
-                        using (Stream stream = File.OpenRead(appSettings.StoredReplaysPath))
-                        {
-                            return await JsonSerializer.DeserializeAsync<List<StoredReplay>>(stream, readOptions, t);
-                        }
-                    }, token);
-
-                return result;
+                string? json = await File.ReadAllTextAsync(appSettings.StoredReplaysPath, token);
+                return JsonSerializer.Deserialize<List<StoredReplay>>(json, readOptions) ?? new List<StoredReplay>();
             }
             finally
             {
-                semaphore.Release();
+                readerWriterLock.ReleaseLock();
             }
         }
     }

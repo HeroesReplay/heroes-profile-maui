@@ -8,23 +8,14 @@
         <RootNamespace>HeroesProfile.UI.Maui</RootNamespace>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <UseMaui>true</UseMaui>
-
-
-        <!--- Enable Single Project for WinUI -->
         <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
         <WindowsPackageType>MSIX</WindowsPackageType>
     </PropertyGroup>
 
     <ItemGroup>
         <MauiImage Include="..\HeroesProfile.UI.Maui\Resources\appicon.svg" Link="Resources\appicon.svg" ForegroundFile="..\HeroesProfile.UI.Maui\Resources\appiconfg.svg" IsAppIcon="true" Color="#512BD4" />
-
-        <!-- Splash Screen -->
         <MauiSplashScreen Include="..\HeroesProfile.UI.Maui\Resources\appiconfg.svg" Link="Resources\appiconfg.svg" Color="#512BD4" />
-
-        <!-- Images -->
         <MauiImage Include="..\HeroesProfile.UI.Maui\Resources\Images\*" Link="Resources\Images\%(Filename)%(Extension)" />
-
-        <!-- Custom Fonts -->
         <MauiFont Include="..\HeroesProfile.UI.Maui\Resources\Fonts\*" Link="Resources\Fonts\%(Filename)%(Extension)" />
     </ItemGroup>
 
@@ -36,37 +27,45 @@
         <RazorComponent Include="..\HeroesProfile.UI.Maui\**\*.razor" Exclude="..\HeroesProfile.UI.Maui\bin\**;..\HeroesProfile.UI.Maui\obj\**" Link="%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
-
     <ItemGroup>
         <None Include="..\HeroesProfile.UI.Maui\*.json" Link="%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
 
     <ItemGroup>
-      <None Remove="..\HeroesProfile.UI.Maui\appsettings.Development.json" />
-      <None Remove="..\HeroesProfile.UI.Maui\appsettings.json" />
-      <None Remove="..\HeroesProfile.UI.Maui\hostsettings.json" />
+        <Content Include="..\HeroesProfile.UI.Maui\appsettings.Development.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="..\HeroesProfile.UI.Maui\appsettings.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Include="..\HeroesProfile.UI.Maui\hostsettings.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\..\HeroesProfile.Core\HeroesProfile.Core.csproj" />
+    </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\HeroesProfile.UI.Maui\appsettings.Development.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\HeroesProfile.UI.Maui\appsettings.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\HeroesProfile.UI.Maui\hostsettings.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
+        <PackageReference Include="Blazorise" Version="0.9.3.10" />
+        <PackageReference Include="Blazorise.Animate" Version="0.9.3.10" />
+        <PackageReference Include="Blazorise.Bootstrap" Version="0.9.3.10" />
+        <PackageReference Include="Blazorise.Components" Version="0.9.3.10" />
+        <PackageReference Include="Blazorise.DataGrid" Version="0.9.3.10" />
+        <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.3.10" />
+        <PackageReference Include="Blazorise.Sidebar" Version="0.9.3.10" />
+        <PackageReference Include="Blazorise.Snackbar" Version="0.9.3.10" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="MediatR" Version="9.0.0" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
-        <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0-preview.6.21355.2" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0-preview.6.21352.12" />
-        <ProjectReference Include="..\..\HeroesProfile.Core\HeroesProfile.Core.csproj" />
+        
+        <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0-preview.6.*" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0-preview.6.*" />
+        <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0-preview.6.*" />
     </ItemGroup>
 
     <ItemGroup>
@@ -74,9 +73,6 @@
         <PackageReference Include="Microsoft.ProjectReunion.Foundation" Version="0.8.1" />
         <PackageReference Include="Microsoft.ProjectReunion.WinUI" Version="0.8.1" />
         <PackageReference Include="Microsoft.ProjectReunion.InteractiveExperiences" Version="0.8.1" NoWarn="NU1701" />
-
-        <!--<FrameworkReference Update="Microsoft.Windows.SDK.NET.Ref" RuntimeFrameworkVersion="10.0.19041.16" />
-        <FrameworkReference Update="Microsoft.Windows.SDK.NET.Ref" TargetingPackVersion="10.0.19041.16" />-->
     </ItemGroup>
 
 </Project>

@@ -1,4 +1,8 @@
 ﻿
+using Blazorise;
+using Blazorise.Bootstrap;
+using Blazorise.Icons.FontAwesome;
+
 using HeroesProfile.Core;
 
 using Microsoft.AspNetCore.Components.WebView.Maui;
@@ -39,6 +43,14 @@ namespace HeroesProfile.UI.Maui
                 .ConfigureServices((appBuilder, services) =>
                 {
                     services.AddBlazorWebView();
+
+                    services
+                        .AddBlazorise(options =>
+                        {
+                            options.ChangeTextOnKeyPress = true; // optional
+                        })
+                        .AddBootstrapProviders()
+                        .AddFontAwesomeIcons();
 #if WINDOWS
                     //services.AddSingleton<ITrayService, WinUI.TrayService>();
                     //services.AddSingleton<INotificationService, WinUI.NotificationService>();

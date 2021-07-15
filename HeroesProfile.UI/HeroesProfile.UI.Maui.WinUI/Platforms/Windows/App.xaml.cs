@@ -3,6 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using HeroesProfile.Core.BackgroundServices;
+using HeroesProfile.Core.CQRS.Commands;
+
+using MediatR;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Maui;
@@ -37,6 +40,9 @@ namespace HeroesProfile.UI.Maui.WinUI
             Microsoft.Maui.Essentials.Platform.OnLaunched(args);
 
             ReplayProcessor processor = (ReplayProcessor)Services.GetService(typeof(ReplayProcessor));
+
+            IMediator mediator = (IMediator)Services.GetService(typeof(IMediator));
+            mediator.Send(new InitializeApp.Command(), source.Token);
 
             Task task = processor.StartAsync(source.Token);
 

@@ -1,11 +1,90 @@
 ﻿@page "/settings"
+@using HeroesProfile.Core.CQRS.Queries
+@using HeroesProfile.Core.Models
+@using MediatR
 
 <h1>Settings</h1>
 
-<button class="btn btn-primary">Save</button>
+@if (userSettings == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <Form>
+
+        <Field>
+            <FieldLabel>Twitch Broadcaster Id</FieldLabel>
+            <TextEdit Placeholder="" Text=@userSettings.BroadcasterId />
+        </Field>
+
+        <Field>
+            <FieldLabel>Heroes Profile Email</FieldLabel>
+            <TextEdit Placeholder="Enter email" Text=@userSettings.HeroesProfileApiEmail />
+        </Field>
+
+        <Field>
+            <FieldLabel>Heroes Profile User Id</FieldLabel>
+            <TextEdit Placeholder="Enter user id" Text=@userSettings.HeroesProfileUserId />
+        </Field>
+
+        <Field>
+            <FieldLabel>Heroes Profile API Key</FieldLabel>
+            <TextEdit Placeholder="Enter api key" Text=@userSettings.HeroesProfileTwitchKey />
+        </Field>
+
+        <Field>
+            <FieldLabel>Enable/Disable Pre Match</FieldLabel>
+            <Check Checked=@userSettings.EnablePreMatch />
+        </Field>
+
+        <Field>
+            <FieldLabel>Enable/Disable Post Match</FieldLabel>
+            <Check Checked=@userSettings.EnablePostMatch />
+        </Field>
+
+        <Field>
+            <FieldLabel>Enable/Disable Auto Predictions</FieldLabel>
+            <Check Checked=@userSettings.EnablePredictions />
+        </Field>
+
+        <Field>
+            <FieldLabel>Twitch ClientId </FieldLabel>
+            <TextEdit Text=@userSettings.TwitchClientId />
+        </Field>
+
+        <Field>
+            <FieldLabel>Twitch Access Token </FieldLabel>
+            <TextEdit Text=@userSettings.TwitchAccessToken />
+        </Field>
+
+
+         <Button Color="Color.Primary" Type="ButtonType.Submit" PreventDefaultOnSubmit="true">Save Changes</Button>
+
+    </Form>
+
+}
+
+
+
 
 @code {
 
+    private UserSettings userSettings;
 
+    [Inject]
+    private IMediator Mediator { get; set; }
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        GetUserSettings.Response response = await Mediator.Send(new GetUserSettings.Query());
+
+        userSettings = response.UserSettings;
+
+        this.StateHasChanged();
+
+        await base.OnInitializedAsync();
+    }
 
 }

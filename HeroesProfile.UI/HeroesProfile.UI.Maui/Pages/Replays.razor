@@ -4,60 +4,51 @@
 @using MediatR
 @using HeroesProfile.Core.CQRS
 @using HeroesProfile.Core.CQRS.Queries
+@using HeroesProfile.Core.Models
+
+@*
+    This shows using @inject method.
+    You can also define a getter/setter property on the component and use the C# [Inject] Attribute
+*@
+
 @inject IMediator mediator;
 
-<h1>Replays 2</h1>
+<h1>Replays</h1>
 
-<p>This page shows scanned replays and their status.</p>
+<Alert Color=Color.Info @bind-Visible="@visible">
+    <AlertDescription>This view shows scanned replays and their status.</AlertDescription>
+    <CloseButton />
+</Alert>
 
 @if (response == null)
 {
-    <p><em>Loading...</em></p>
+   <PageProgress Visible=true  />
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>File</th>
-                <th>Created</th>
-                <th>Fingerprint</th>
-                <th>Result</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var replay in response.Replays)
-            {
-                <tr>
-                    <td>@System.IO.Path.GetFileName(replay.Path)</td>
-                    <td>@replay.Created</td>
-                    <td>@replay.Fingerprint</td>
-                    <td>@replay.ParseResult</td>
-                    <td>@replay.ProcessStatus</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <DataGrid TItem=StoredReplay Data=@response.Replays Filterable=true ShowPager=true PageSize=10 Editable=false FilterMethod=DataGridFilterMethod.StartsWith @bind-SelectedRow=@selected>
+        <DataGridCommandColumn TItem="StoredReplay" />
+        <DataGridColumn TItem="StoredReplay" Field="@nameof(StoredReplay.Path)" Caption="Path" Sortable="true" />
+        <DataGridColumn TItem="StoredReplay" Field="@nameof(StoredReplay.Created)" Caption="Date created" Editable="false" />
+        <DataGridColumn TItem="StoredReplay" Field="@nameof(StoredReplay.Fingerprint)" Caption="Fingerprint" Editable="false" />
+        <DataGridColumn TItem="StoredReplay" Field="@nameof(StoredReplay.ParseResult)" Caption="Parse Result" Editable="false" />
+        <DataGridColumn TItem="StoredReplay" Field="@nameof(StoredReplay.UploadStatus)" Caption="Upload Status" Editable="false" />
+        <DataGridColumn TItem="StoredReplay" Field="@nameof(StoredReplay.ProcessStatus)" Caption="Process Status" Editable="false" />
+    </DataGrid>
 }
 
 @code {
+
     private GetReplays.Response response;
+
+    private StoredReplay selected;
+
+    bool visible = true;
 
     protected override async Task OnInitializedAsync()
     {
-        RefreshReplaysAsync();
-        await base.OnInitializedAsync();
+        response = await mediator.Send(new GetReplays.Query(new List<GetReplays.Filter>()));
+        StateHasChanged();
     }
 
-    // Update UI every 5 seconds
-    async void RefreshReplaysAsync()
-    {
-        while (true)
-        {
-            await Task.Delay(TimeSpan.FromSeconds(5));
-            response = await mediator.Send(new GetReplays.Query(new List<GetReplays.Filter>()));
-            StateHasChanged();
-        }
-    }
 }

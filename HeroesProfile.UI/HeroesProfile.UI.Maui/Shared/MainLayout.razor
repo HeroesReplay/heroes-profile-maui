@@ -1,15 +1,233 @@
-﻿@inherits LayoutComponentBase
+﻿@layout RootLayout
+@inherits LayoutComponentBase
+@using System.Globalization
+@using Blazorise.Localization
+<Layout Sider="true">
+    <LayoutSider>
+        <LayoutSiderContent>
+            <Bar Breakpoint="Breakpoint.Desktop" NavigationBreakpoint="Breakpoint.Tablet" ThemeContrast="ThemeContrast.Dark"
+                 Mode="BarMode.VerticalInline" CollapseMode="BarCollapseMode.Small">
+                <BarToggler />
+                <BarBrand>
+                    <Image src="https://www.heroesprofile.com/includes/images/logo/heroesprofilelogo.png" />
+                </BarBrand>
+                <BarMenu>
+                    <BarStart>
+                         <BarItem>
+                            <BarLink To="/replays">Replays</BarLink>
+                         </BarItem>
+                         <BarItem>
+                            <BarLink To="/session">Session</BarLink>
+                         </BarItem>
+                          <BarItem>
+                            <BarLink To="/settings">Settings</BarLink>
+                         </BarItem>
+                    </BarStart>
+                    <BarEnd>
+                        <BarItem>
+                            <BarDropdown>
+                                <BarDropdownToggle>
+                                    <BarIcon IconName="IconName.Smartphone" />
+                                    Apps
+                                </BarDropdownToggle>
+                                <BarDropdownMenu>
+                                    <BarDropdownItem To="apps/todo">
+                                        Todo
+                                    </BarDropdownItem>
+                                </BarDropdownMenu>
+                            </BarDropdown>
+                        </BarItem>
+                    </BarEnd>
+                </BarMenu>
+            </Bar>
+        </LayoutSiderContent>
+    </LayoutSider>
+    <Layout>
+        <LayoutHeader Fixed="true">
+            <Bar @bind-Visible="@topbarVisible" Breakpoint="Breakpoint.Desktop" Background="Background.Primary" ThemeContrast="ThemeContrast.Light">
+                <BarBrand>
+                    <BarItem>
+                        <BarLink To="">
+                            <BarIcon IconName="IconName.Dashboard" />
+                             Heroes Profile Desktop
+                        </BarLink>
+                    </BarItem>
+                </BarBrand>
+                <BarToggler />
+                <BarMenu>
+                    <BarStart>
+                        <BarItem>
+                            <BarLink To="/replays">Replays</BarLink>
+                        </BarItem>
+                        <BarItem>
+                            <BarLink To="/">Documentation</BarLink>
+                        </BarItem>
+                        <BarItem>
+                            <BarDropdown>
+                                <BarDropdownToggle>More</BarDropdownToggle>
+                                <BarDropdownMenu>
+                                    <BarDropdownItem To="https://blazorise.com/docs/quick-start/">
+                                        Quick-Start Guide
+                                    </BarDropdownItem>
+                                    <BarDropdownItem To="https://blazorise.com/docs/usage/">
+                                        Usage
+                                    </BarDropdownItem>
+                                </BarDropdownMenu>
+                            </BarDropdown>
+                        </BarItem>
+                    </BarStart>
+                    <BarEnd>
+                        <BarItem>
+                            <BarDropdown>
+                                <BarDropdownToggle><Icon Name="IconName.Language" /></BarDropdownToggle>
+                                <BarDropdownMenu RightAligned="true">
+                                    @foreach (var cultureInfo in LocalizationService.AvailableCultures)
+                                    {
+                                        <BarDropdownItem @key="@cultureInfo.Name" Clicked="@(()=>SelectCulture(cultureInfo.Name))">
+                                            @if (cultureInfo.IsNeutralCulture)
+                                            {
+                                                @cultureInfo.EnglishName
+                                                ;
+                                            }
+                                            else
+                                            {
+                                                @cultureInfo.Parent.EnglishName
+                                                ;
+                                            }
+                                        </BarDropdownItem>
+                                    }
+                                </BarDropdownMenu>
+                            </BarDropdown>
+                        </BarItem>
+                        <BarItem>
+                            <BarDropdown>
+                                <BarDropdownToggle><Icon Name="IconName.Tint" /> Theme</BarDropdownToggle>
+                                <BarDropdownMenu Style="padding: 15px; min-width:550px;" RightAligned="true">
+                                    <Row>
+                                        <Column Margin="Margin.Is2.FromBottom">
+                                            <Field>
+                                                <Switch TValue="bool" Checked="@(Theme?.Enabled == true)" CheckedChanged="@OnThemeEnabledChanged">Theme enabled</Switch>
+                                            </Field>
+                                        </Column>
+                                    </Row>
+                                    <Row>
+                                        <Column Margin="Margin.Is2.FromBottom">
+                                            <Field>
+                                                <Check TValue="bool" Checked="@(Theme?.IsGradient == true)" CheckedChanged="@OnGradientChanged">Gradient colors</Check>
+                                            </Field>
+                                            <Field>
+                                                <Check TValue="bool" Checked="@(Theme?.IsRounded == true)" CheckedChanged="@OnRoundedChanged">Rounded elements</Check>
+                                            </Field>
+                                        </Column>
+                                    </Row>
+                                    <Row>
+                                        <Column>
+                                            <Container Fluid="true">
+                                                <ThemeColorSelector Value="@(Theme?.ColorOptions?.Primary)" ValueChanged="@OnThemeColorChanged"></ThemeColorSelector>
+                                            </Container>
+                                        </Column>
+                                    </Row>
+                                </BarDropdownMenu>
+                            </BarDropdown>
+                        </BarItem>
+                        <BarItem>
+                            <BarLink To="https://github.com/stsrki/blazorise">GitHub</BarLink>
+                        </BarItem>
+                    </BarEnd>
+                </BarMenu>
+            </Bar>
+        </LayoutHeader>
+        <LayoutContent Padding="Padding.Is4.OnX">
+            @Body
+        </LayoutContent>
+    </Layout>
+</Layout>
 
-<div class="sidebar">
-    <NavMenu />
-</div>
+@code {
 
-<div class="main">
-    <div class="top-row px-4">
-        <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-    </div>
+    [Inject] protected ITextLocalizerService LocalizationService { get; set; }
 
-    <div class="content px-4">
-        @Body
-    </div>
-</div>
+    protected override async Task OnInitializedAsync()
+    {
+        await SelectCulture("en-US");
+
+        await base.OnInitializedAsync();
+    }
+
+    Task SelectCulture(string name)
+    {
+        LocalizationService.ChangeLanguage(name);
+
+        return Task.CompletedTask;
+    }
+
+    void OnThemeEnabledChanged(bool value)
+    {
+        if (Theme == null)
+            return;
+
+        Theme.Enabled = value;
+
+        Theme.ThemeHasChanged();
+    }
+
+    void OnGradientChanged(bool value)
+    {
+        if (Theme == null)
+            return;
+
+        Theme.IsGradient = value;
+
+        //if ( Theme.GradientOptions == null )
+        //    Theme.GradientOptions = new GradientOptions();
+
+        //Theme.GradientOptions.BlendPercentage = 80;
+
+        Theme.ThemeHasChanged();
+    }
+
+    void OnRoundedChanged(bool value)
+    {
+        if (Theme == null)
+            return;
+
+        Theme.IsRounded = value;
+
+        Theme.ThemeHasChanged();
+    }
+
+    void OnThemeColorChanged(string value)
+    {
+        if (Theme == null)
+            return;
+
+        if (Theme.ColorOptions == null)
+            Theme.ColorOptions = new ThemeColorOptions();
+
+        if (Theme.BackgroundOptions == null)
+            Theme.BackgroundOptions = new ThemeBackgroundOptions();
+
+        if (Theme.TextColorOptions == null)
+            Theme.TextColorOptions = new ThemeTextColorOptions();
+
+        Theme.ColorOptions.Primary = value;
+        Theme.BackgroundOptions.Primary = value;
+        Theme.TextColorOptions.Primary = value;
+
+        if (Theme.InputOptions == null)
+            Theme.InputOptions = new ThemeInputOptions();
+
+        //Theme.InputOptions.Color = value;
+        Theme.InputOptions.CheckColor = value;
+        Theme.InputOptions.SliderColor = value;
+
+        Theme.ThemeHasChanged();
+    }
+
+    private bool topbarVisible = false;
+    private bool uiElementsVisible = true;
+
+    [CascadingParameter] protected Theme Theme { get; set; }
+
+    RenderFragment customIcon = @<img src='/brand-logo.png' style='width:32px; height: 32px' />;
+}
