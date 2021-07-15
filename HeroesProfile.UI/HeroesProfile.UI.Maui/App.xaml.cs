@@ -1,21 +1,28 @@
 ﻿using Microsoft.Maui;
+using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.PlatformConfiguration.WindowsSpecific;
-
-using Application = Microsoft.Maui.Controls.Application;
 
 namespace HeroesProfile.UI.Maui
 {
-    public partial class App : Application
+    public partial class App : Microsoft.Maui.Controls.Application
     {
         public App()
         {
             InitializeComponent();
         }
 
-        protected override IWindow CreateWindow(IActivationState activationState)
+        protected override Window CreateWindow(IActivationState activationState)
         {
-            this.On<Microsoft.Maui.Controls.PlatformConfiguration.Windows>().SetImageDirectory("Assets");
-            return new Microsoft.Maui.Controls.Window(new MainPage());
+            Microsoft.Maui.Controls.Compatibility.Forms.Init(activationState);
+            On<Microsoft.Maui.Controls.PlatformConfiguration.Windows>().SetImageDirectory("Assets");
+            return new Window(new MainPage());
         }
+
+        protected override void OnStart()
+        {
+            base.OnStart();
+        }
+
+
     }
 }

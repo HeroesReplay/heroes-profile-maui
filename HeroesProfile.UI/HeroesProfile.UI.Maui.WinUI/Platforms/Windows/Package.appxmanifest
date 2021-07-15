@@ -32,7 +32,7 @@
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
         DisplayName="Heroes Profile"
-        Description="MauiApp1"
+        Description="Heroes Profile"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\appiconMediumTile.png"
         Square44x44Logo="Assets\appiconLogo.png">

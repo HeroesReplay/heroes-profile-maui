@@ -12,7 +12,7 @@ namespace HeroesProfile.Core.Repositories
     {
         private readonly AppSettings appSettings;
         private readonly UserSettings defaultSettings;
-        
+
         private readonly SemaphoreSlim semaphore = new(1, 1);
 
         public UserSettingsRepository(AppSettings appSettings, UserSettings defaultSettings)
@@ -22,7 +22,7 @@ namespace HeroesProfile.Core.Repositories
         }
 
         public async Task InitilizeAsync(CancellationToken token)
-        { 
+        {
             await using (var writer = File.OpenWrite(appSettings.UserSettingsPath))
             {
                 await JsonSerializer.SerializeAsync(writer, defaultSettings, new JsonSerializerOptions() { WriteIndented = true }, token);

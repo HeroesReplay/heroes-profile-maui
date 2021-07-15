@@ -25,7 +25,7 @@ namespace HeroesProfile.Core.CQRS.Commands
 
             public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
             {
-                sessionRepository.Clear();
+                await sessionRepository.ClearAsync(cancellationToken);
 
                 return new Response();
             }

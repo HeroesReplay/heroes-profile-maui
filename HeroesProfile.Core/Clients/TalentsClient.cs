@@ -54,23 +54,30 @@ namespace HeroesProfile.Core.Clients
 
         public async Task UpdateReplayData(Dictionary<string, string> identity, Session session, CancellationToken cancellationToken)
         {
-            Dictionary<string, string> values = new(identity)
+            if (session.StormSave != null && session.Extension.SessionId != null)
             {
-                { "replayID", session.Extension.SessionId },
-                { "game_type", $"{session.StormSave.GameMode}" },
-                { "game_map", session.StormSave.Map },
-                { "game_version", session.StormSave.ReplayVersion },
-                { "region", $"{session.StormSave.Players[0].BattleNetRegionId}" },
-            };
-
-            using (var content = new FormUrlEncodedContent(values))
-            {
-                HttpResponseMessage response = await httpClient.PostAsync(UpdateReplayDataUri, content, cancellationToken);
-
-                if (!response.IsSuccessStatusCode)
+                Dictionary<string, string> values = new(identity)
                 {
-                    // Log error
+                    { "replayID", session.Extension.SessionId },
+                    { "game_type", $"{session.StormSave.GameMode}" },
+                    { "game_map", session.StormSave.Map },
+                    { "game_version", session.StormSave.ReplayVersion },
+                    { "region", $"{session.StormSave.Players[0].BattleNetRegionId}" },
+                };
+
+                using (var content = new FormUrlEncodedContent(values))
+                {
+                    HttpResponseMessage response = await httpClient.PostAsync(UpdateReplayDataUri, content, cancellationToken);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        // Log error
+                    }
                 }
+            }
+            else
+            {
+                // Could not update
             }
         }
 

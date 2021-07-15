@@ -96,7 +96,7 @@ namespace HeroesProfile.Core.Repositories
                     {
                         using (Stream stream = File.OpenWrite(appSettings.StoredReplaysPath))
                         {
-                            await JsonSerializer.SerializeAsync<IEnumerable<StoredReplay>>(stream, replays, writeOptions, cancellationToken);
+                            await JsonSerializer.SerializeAsync(stream, replays, writeOptions, cancellationToken);
                         }
                     }, token);
             }

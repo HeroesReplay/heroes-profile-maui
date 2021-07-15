@@ -69,7 +69,7 @@ namespace HeroesProfile.Core.Parsers
                     };
                 }
 
-                string replayParseResult = Enum.GetName(typeof(DataParser.ReplayParseResult), status);
+                string? replayParseResult = Enum.GetName(typeof(DataParser.ReplayParseResult), status);
 
                 if (!string.IsNullOrWhiteSpace(replayParseResult))
                 {
@@ -98,7 +98,7 @@ namespace HeroesProfile.Core.Parsers
                     };
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return new ReplayParseData()
                 {

@@ -1,0 +1,50 @@
+﻿
+using System.Threading;
+using System.Threading.Tasks;
+
+using HeroesProfile.Core.BackgroundServices;
+
+using Microsoft.Extensions.Hosting;
+using Microsoft.Maui;
+using Microsoft.UI.Xaml;
+
+// To learn more about WinUI, the WinUI project structure,
+// and more about our project templates, see: http://aka.ms/winui-project-info.
+
+namespace HeroesProfile.UI.Maui.WinUI
+{
+    /// <summary>
+    /// Provides application-specific behavior to supplement the default Application class.
+    /// </summary>
+    public partial class App : MauiWinUIApplication
+    {
+        private CancellationTokenSource source = new CancellationTokenSource();
+
+        /// <summary>
+        /// Initializes the singleton application object.  This is the first line of authored code
+        /// executed, and as such is the logical equivalent of main() or WinMain().
+        /// </summary>
+        public App()
+        {
+            this.InitializeComponent();
+        }
+
+        protected override IStartup OnCreateStartup() => new Startup();
+
+        protected override void OnLaunched(LaunchActivatedEventArgs args)
+        {
+            base.OnLaunched(args);
+            Microsoft.Maui.Essentials.Platform.OnLaunched(args);
+
+            ReplayProcessor processor = (ReplayProcessor)Services.GetService(typeof(ReplayProcessor));
+
+            Task task = processor.StartAsync(source.Token);
+
+            MainWindow.Closed += (sender, e) =>
+            {
+                source.Cancel();
+                Task.WaitAll(task);
+            };
+        }
+    }
+}

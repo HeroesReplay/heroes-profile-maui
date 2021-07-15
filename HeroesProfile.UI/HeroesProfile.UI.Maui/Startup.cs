@@ -22,6 +22,11 @@ namespace HeroesProfile.UI.Maui
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 })
+                .EnableHotReload()
+                .ConfigureHostConfiguration(configBuilder =>
+                {
+
+                })
                 .ConfigureLifecycleEvents((context, lifecycleBuilder) =>
                 {
 #if WINDOWS
@@ -42,7 +47,7 @@ namespace HeroesProfile.UI.Maui
                     //services.AddSingleton<INotificationService, MacCatalyst.NotificationService>();
 #endif
 
-                    services.AddCore(appBuilder.HostingEnvironment);
+                    services.AddCore(new HostEnvironment());
                 });
         }
     }

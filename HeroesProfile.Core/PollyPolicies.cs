@@ -2,6 +2,8 @@
 using System.Net;
 using System.Net.Http;
 
+using Microsoft.Extensions.Logging;
+
 using Polly;
 using Polly.Extensions.Http;
 
@@ -14,23 +16,28 @@ namespace HeroesProfile.Core
     {
         private const string RetryAfterKey = "retry-after";
 
-        public static IAsyncPolicy<HttpResponseMessage> GetHeroesProfileRetryPolicy()
+        public static IAsyncPolicy<HttpResponseMessage> GetHeroesProfileRetryPolicy<T>(ILogger<T> logger)
         {
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .OrResult(responseMessage => responseMessage.StatusCode != HttpStatusCode.OK)
-                .WaitAndRetryAsync(retryCount: 10, GetSleepDuration, OnRetry);
+                .WaitAndRetryAsync(
+                    retryCount: 10,
+                    sleepDurationProvider: (int retryAttempt, Context context) => GetSleepDuration(retryAttempt, context, logger),
+                    onRetry: (DelegateResult<HttpResponseMessage> dr, TimeSpan ts, int retryAttempt, Context ctx) => OnRetry(dr, ts, retryAttempt, ctx, logger));
         }
 
-        private static void OnRetry(DelegateResult<HttpResponseMessage> dr, TimeSpan timeSpan, int retryAttempt, Context context)
+        private static void OnRetry<T>(DelegateResult<HttpResponseMessage> dr, TimeSpan timeSpan, int retryAttempt, Context context, ILogger<T> logger)
         {
             if (dr?.Result?.Headers?.RetryAfter != null && dr.Result.Headers.RetryAfter.Delta != null)
             {
+                logger.LogInformation($"Setting RetryAfter: {dr.Result.Headers.RetryAfter.Delta.Value}");
+
                 context[RetryAfterKey] = dr.Result.Headers.RetryAfter.Delta.Value;
             }
         }
 
-        private static TimeSpan GetSleepDuration(int retryAttempt, Context context)
+        private static TimeSpan GetSleepDuration<T>(int retryAttempt, Context context, ILogger<T> logger)
         {
             if (context.ContainsKey(RetryAfterKey))
             {

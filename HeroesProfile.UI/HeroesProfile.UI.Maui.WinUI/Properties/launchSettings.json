@@ -1,7 +1,10 @@
 {
   "profiles": {
-    "HeroesProfile.WinUI": {
-      "commandName": "AppContainer"
+    "WinUI": {
+        "commandName": "MsixPackage",
+        "environmentVariables": {
+            "DOTNET_ENVIRONMENT": "Development"
+        }
     }
   }
 }

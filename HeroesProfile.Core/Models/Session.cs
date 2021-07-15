@@ -10,21 +10,9 @@ namespace HeroesProfile.Core.Models
         {
             get
             {
-                if (Files != null && Files.StormReplay != null)
-                {
-                    return SessionState.StormReplay;
-                }
-
-                if (Files != null && Files.StormReplay == null && Files.StormSave != null)
-                {
-                    return SessionState.StormSave;
-                }
-
-                if (Files != null && Files.BattleLobby != null)
-                {
-                    return SessionState.BattleLobby;
-                }
-
+                if (StormReplay != null) return SessionState.StormReplay;
+                if (StormSave != null) return SessionState.StormSave;
+                if (BattleLobby != null) return SessionState.BattleLobby;
                 return SessionState.None;
             }
         }
@@ -35,11 +23,11 @@ namespace HeroesProfile.Core.Models
 
         public TwitchExtensionData Extension { get; set; } = new();
 
-        public Replay BattleLobby => Files?.BattleLobby;
+        public Replay? BattleLobby => Files?.BattleLobby;
 
-        public Replay StormSave => Files?.StormSave;
+        public Replay? StormSave => Files?.StormSave;
 
-        public Replay StormReplay => Files?.StormReplay;
+        public Replay? StormReplay => Files?.StormReplay;
 
         public Session()
         {
@@ -51,9 +39,9 @@ namespace HeroesProfile.Core.Models
 
     public class SessionFiles
     {
-        public Replay BattleLobby { get; set; }
-        public Replay StormSave { get; set; }
-        public Replay StormReplay { get; set; }
+        public Replay? BattleLobby { get; set; }
+        public Replay? StormSave { get; set; }
+        public Replay? StormReplay { get; set; }
 
         public SessionFiles()
         {
@@ -63,19 +51,19 @@ namespace HeroesProfile.Core.Models
 
     public class TwitchPredictionData
     {
-        public string PredictionId { get; set; }
-        public string WinningOutcomeId { get; set; }
-        public string OtherOutcomeId { get; set; }
+        public string? PredictionId { get; set; }
+        public string? WinningOutcomeId { get; set; }
+        public string? OtherOutcomeId { get; set; }
 
         public TwitchPredictionData()
         {
-            
+
         }
     }
 
     public class TwitchExtensionData
     {
-        public string SessionId { get; set; }
+        public string? SessionId { get; set; }
         public int TrackerEventIndex { get; set; }
         public bool TalentsUpdated { get; set; }
         public bool GameModeUpdated { get; set; }

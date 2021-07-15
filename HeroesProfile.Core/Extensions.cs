@@ -29,9 +29,9 @@ namespace HeroesProfile.Core
         public static IServiceCollection AddCore(this IServiceCollection services, IHostEnvironment environment)
         {
             var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{environment.EnvironmentName}.json")
+                .SetBasePath(environment.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: false)
+                .AddJsonFile($"appsettings.{environment.EnvironmentName}.json", optional: false)
                 .Build();
 
             AppSettings appSettings = configuration.GetSection("AppSettings").Get<AppSettings>();
@@ -42,7 +42,7 @@ namespace HeroesProfile.Core
             Directory.CreateDirectory(appSettings.SimulationSourceDirectory);
             Directory.CreateDirectory(appSettings.ApplicationDataDirectory);
             Directory.CreateDirectory(appSettings.ApplicationSessionDirectory);
-            
+
             /*
             * Logging and defaultSettings
             */
@@ -55,7 +55,6 @@ namespace HeroesProfile.Core
                     if (appSettings.Debug)
                         builder.AddDebug();
                 });
-
 
             /*
              * Allows us to log each command or query that has executed
@@ -104,41 +103,28 @@ namespace HeroesProfile.Core
                 .AddSingleton<TalentsClient, TalentsClient>()
                 .AddSingleton<ITwitchAPI, TwitchAPI>(provider => new TwitchAPI(provider.GetRequiredService<ILoggerFactory>(), rateLimiter: null, settings: null));
 
+            services.AddSingleton(typeof(ITwitchWrapper), appSettings.EnableFakeTwitch ? typeof(FakeTwitchWrapperClient) : typeof(TwitchWrapperClient));
 
+            var talentsClientBuilder = services
+                    .AddHttpClient<TalentsClient>()
+                    .ConfigureHttpClient(client => client.BaseAddress = appSettings.HeroesProfileApiUri)
+                    .AddPolicyHandler((provider, ctx) => PollyPolicies.GetHeroesProfileRetryPolicy(provider.GetRequiredService<ILogger<TalentsClient>>()))
+                    .SetHandlerLifetime(TimeSpan.FromMinutes(5));
+
+            var uploadClientBuilder = services
+                .AddHttpClient<IUploadClient, UploadClient>()
+                .ConfigureHttpClient(client => client.BaseAddress = appSettings.HeroesProfileApiUri)
+                .SetHandlerLifetime(TimeSpan.FromMinutes(5))
+                .AddPolicyHandler((provider, ctx) => PollyPolicies.GetHeroesProfileRetryPolicy(provider.GetRequiredService<ILogger<UploadClient>>()));
+
+            /*
+             * This allows us to fake HTTP responses for HttpClients, for an easier experience in testing and development without needing the real service.
+             */
             if (appSettings.EnableFakeHttp)
             {
-                /*
-                 * This allows us to fake HTTP responses for Upload Client & Talents for an easier experience in testing and development.
-                 */
                 services.AddTransient<FakeHeroesProfileDelegatingHandler>();
-
-                services
-                    .AddHttpClient<TalentsClient>()
-                    .ConfigureHttpClient(client => client.BaseAddress = appSettings.HeroesProfileApiUri)
-                    .AddHttpMessageHandler(provider => provider.GetRequiredService<FakeHeroesProfileDelegatingHandler>())
-                    .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-                    .AddPolicyHandler(PollyPolicies.GetHeroesProfileRetryPolicy());
-
-                services
-                    .AddHttpClient<IUploadClient, UploadClient>()
-                    .ConfigureHttpClient(client => client.BaseAddress = appSettings.HeroesProfileApiUri)
-                    .AddHttpMessageHandler(provider => provider.GetRequiredService<FakeHeroesProfileDelegatingHandler>())
-                    .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-                    .AddPolicyHandler(PollyPolicies.GetHeroesProfileRetryPolicy());
-            }
-            else
-            {
-                services
-                    .AddHttpClient<TalentsClient>()
-                    .ConfigureHttpClient(client => client.BaseAddress = appSettings.HeroesProfileApiUri)
-                    .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-                    .AddPolicyHandler(PollyPolicies.GetHeroesProfileRetryPolicy());
-
-                services
-                    .AddHttpClient<IUploadClient, UploadClient>()
-                    .ConfigureHttpClient(client => client.BaseAddress = appSettings.HeroesProfileApiUri)
-                    .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-                    .AddPolicyHandler(PollyPolicies.GetHeroesProfileRetryPolicy());
+                talentsClientBuilder.ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<FakeHeroesProfileDelegatingHandler>());
+                uploadClientBuilder.ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<FakeHeroesProfileDelegatingHandler>());
             }
 
             /*

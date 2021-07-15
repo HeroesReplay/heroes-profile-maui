@@ -5,10 +5,19 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+
 using HeroesProfile.Core.Models;
+using HeroesProfile.Core.Repositories;
+
+using TwitchLib.Api.Core.Enums;
+using TwitchLib.Api.Helix.Models.Predictions;
+using TwitchLib.Api.Helix.Models.Predictions.CreatePrediction;
+using TwitchLib.Api.Helix.Models.Predictions.EndPrediction;
+using TwitchLib.Api.Interfaces;
 
 namespace HeroesProfile.Core.Clients
 {
+
     public interface IUploadClient
     {
         Task<List<string>> CheckDuplicatesAsync(List<string> Fingerprints, CancellationToken cancellationToken);

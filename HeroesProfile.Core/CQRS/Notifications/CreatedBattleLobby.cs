@@ -9,11 +9,11 @@ using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Notifications
 {
-    public static class BattleLobby
+    public static class CreatedBattleLobby
     {
-        public record Created(ReplayParseData Data) : INotification;
+        public record Notification(ReplayParseData Data) : INotification;
 
-        public class Handler : INotificationHandler<Created>
+        public class Handler : INotificationHandler<Notification>
         {
             private readonly IMediator mediator;
             private readonly UserSettingsRepository userSettingsRepository;
@@ -24,7 +24,7 @@ namespace HeroesProfile.Core.CQRS.Notifications
                 this.userSettingsRepository = userSettingsRepository;
             }
 
-            public async Task Handle(Created notification, CancellationToken cancellationToken)
+            public async Task Handle(Notification notification, CancellationToken cancellationToken)
             {
                 var settings = await userSettingsRepository.LoadAsync(cancellationToken);
 

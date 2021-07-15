@@ -30,7 +30,7 @@ namespace HeroesProfile.Core.CQRS.Notifications
             {
                 UserSettings settings = await userSettingsRepository.LoadAsync(cancellationToken);
 
-                if (settings.EnableTwitchExtension)
+                if (settings.EnableTwitchExtension && notification.ParseResult.ParseResult == ParseResult.Success)
                 {
                     await mediator.Send(new UpdateTalents.Command(notification.ParseResult.Replay, notification.ParseResult.ParseType), cancellationToken);
                 }

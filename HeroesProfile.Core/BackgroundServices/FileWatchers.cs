@@ -61,7 +61,7 @@ namespace HeroesProfile.Core.BackgroundServices
                     {
                         if (response.Data.ParseType == ParseType.BattleLobby)
                         {
-                            await mediator.Publish(new BattleLobby.Created(response.Data), stoppingToken);
+                            await mediator.Publish(new CreatedBattleLobby.Notification(response.Data), stoppingToken);
                         }
                         else if (response.Data.ParseType == ParseType.StormSave)
                         {

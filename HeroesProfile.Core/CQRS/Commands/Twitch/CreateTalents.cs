@@ -1,8 +1,10 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+
 using HeroesProfile.Core.Clients;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
+
 using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Commands
@@ -29,7 +31,7 @@ namespace HeroesProfile.Core.CQRS.Commands
             public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
             {
                 UserSettings userSettings = await userSettingsRepository.LoadAsync(cancellationToken);
-                
+
                 sessionRepository.Session.Extension.SessionId = await talentsClient.CreateSession(userSettings.TalentsIdentity, cancellationToken);
 
                 await talentsClient.SavePlayerData(userSettings.TalentsIdentity, sessionRepository.Session, cancellationToken);

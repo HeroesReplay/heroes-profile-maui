@@ -13,7 +13,7 @@ namespace HeroesProfile.Core.CQRS.Commands
     {
         public record Command(Replay Replay, ParseType ParseType) : IRequest<Response>;
 
-        public record Response(Models.Session Session);
+        public record Response(Session Session);
 
         public class Handler : IRequestHandler<Command, Response>
         {
@@ -21,10 +21,6 @@ namespace HeroesProfile.Core.CQRS.Commands
             private readonly TalentsClient client;
             private readonly UserSettingsRepository userSettingsRepository;
 
-            public Handler(SessionRepository sessionRepository)
-            {
-                this.sessionRepository = sessionRepository;
-            }
             public Handler(SessionRepository sessionRepository, TalentsClient client, UserSettingsRepository userSettingsRepository)
             {
                 this.sessionRepository = sessionRepository;
@@ -34,7 +30,7 @@ namespace HeroesProfile.Core.CQRS.Commands
 
             public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
             {
-                Models.UserSettings userSettings = await userSettingsRepository.LoadAsync(cancellationToken);
+                UserSettings userSettings = await userSettingsRepository.LoadAsync(cancellationToken);
                 Dictionary<string, string> identity = userSettings.TalentsIdentity;
 
                 if (request.ParseType == ParseType.BattleLobby)
@@ -58,13 +54,13 @@ namespace HeroesProfile.Core.CQRS.Commands
                 await client.SaveMissingTalents(identity, sessionRepository.Session, cancellationToken);
             }
 
-            private async Task UpdateSession(Dictionary<string, string> identity, Models.Session session, CancellationToken cancellationToken)
+            private async Task UpdateSession(Dictionary<string, string> identity, Session session, CancellationToken cancellationToken)
             {
-                if (session.Files.StormSave == null || session.Files.BattleLobby == null)
+                if (session.StormSave == null || session.Files.BattleLobby == null || session.BattleLobby == null)
                 {
                     return;
                 }
-                
+
                 // Can this not be processed once? IsBattleLobbyToStormSaveSynced = false/true
                 for (int stormPlayIndex = 0; stormPlayIndex < session.StormSave.Players.Length; stormPlayIndex++)
                 {

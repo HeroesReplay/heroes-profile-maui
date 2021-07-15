@@ -14,21 +14,21 @@ namespace HeroesProfile.Core.Models
         public bool EnablePreMatch { get; set; }
         public bool EnablePredictions { get; set; }
         public bool EnableTwitchExtension { get; set; }
-        public string HeroesProfileTwitchKey { get; set; }
-        public string HeroesProfileApiEmail { get; set; }
-        public string BroadcasterId { get; set; }
-        public string HeroesProfileUserId { get; set; }
-        public string TwitchAccessToken { get; set; }
-        public string TwitchClientId { get; set; }
+        public string? HeroesProfileTwitchKey { get; set; }
+        public string? HeroesProfileApiEmail { get; set; }
+        public string? BroadcasterId { get; set; }
+        public string? HeroesProfileUserId { get; set; }
+        public string? TwitchAccessToken { get; set; }
+        public string? TwitchClientId { get; set; }
         public List<string> BattleTags { get; set; }
 
         [JsonIgnore]
         public Dictionary<string, string> TalentsIdentity => new()
         {
-            { "hp_twitch_key", HeroesProfileTwitchKey },
-            { "email", HeroesProfileApiEmail },
-            { "twitch_nickname", BroadcasterId },
-            { "user_id", HeroesProfileUserId },
+            { "hp_twitch_key", HeroesProfileTwitchKey ?? "UNSET" },
+            { "email", HeroesProfileApiEmail ?? "UNSET" },
+            { "twitch_nickname", BroadcasterId ?? "UNSET" },
+            { "user_id", HeroesProfileUserId ?? "UNSET" },
         };
 
         public UserSettings()
@@ -39,12 +39,13 @@ namespace HeroesProfile.Core.Models
 
     /*
      * Change the settings in appsettings.Development.json or appsettings.Production.json
+     * These settings should be constants for the given environment.
      */
     public class AppSettings
     {
         public bool Debug { get; set; }
-        public Uri HeroesProfileUri { get; set; }
-        public Uri HeroesProfileApiUri { get; set; }
+        public Uri? HeroesProfileUri { get; set; }
+        public Uri? HeroesProfileApiUri { get; set; }
         public string GameTempDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Temp", "Heroes of the Storm");
         public string GameDocumentsDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Heroes of the Storm");
         public string SimulationTargetDirectory => Path.Combine(GameDocumentsDirectory, "Simulation");
@@ -58,7 +59,7 @@ namespace HeroesProfile.Core.Models
         public bool EnableRecord { get; set; }
         public bool EnableReplayProcessing { get; set; }
         public bool EnableFileSimulator { get; set; }
-        public bool EnableFakePrediction { get; set; }
+        public bool EnableFakeTwitch { get; set; }
         public bool EnableFakeHttp { get; set; }
         public bool ClearStoredReplaysOnStart { get; set; }
     }

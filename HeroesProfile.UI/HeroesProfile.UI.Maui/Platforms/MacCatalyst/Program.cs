@@ -1,6 +1,6 @@
-﻿using UIKit;
+﻿// using UIKit;
 
-namespace MauiApp1
+namespace HeroesProfile.UI.Maui.MacCatalyst
 {
     public class Program
     {
@@ -9,7 +9,7 @@ namespace MauiApp1
         {
             // if you want to use a different Application Delegate class from "AppDelegate"
             // you can specify it here.
-            UIApplication.Main(args, null, "AppDelegate");
+            // UIApplication.Main(args, null, "AppDelegate");
         }
     }
 }

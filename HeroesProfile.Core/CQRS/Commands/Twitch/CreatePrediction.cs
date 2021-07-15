@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+
+using HeroesProfile.Core.Clients;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
 using MediatR;
@@ -20,14 +22,14 @@ namespace HeroesProfile.Core.CQRS.Commands
 
         public class Handler : IRequestHandler<Command, Response>
         {
-            private readonly ITwitchAPI twitchApi;
+            private readonly ITwitchWrapper twitchWrapper;
             private readonly AppSettings appSettings;
             private readonly SessionRepository sessionRepository;
             private readonly UserSettingsRepository settingsRepository;
 
-            public Handler(ITwitchAPI twitchApi, AppSettings appSettings, SessionRepository sessionRepository, UserSettingsRepository settingsRepository)
+            public Handler(ITwitchWrapper twitchWrapper, AppSettings appSettings, SessionRepository sessionRepository, UserSettingsRepository settingsRepository)
             {
-                this.twitchApi = twitchApi;
+                this.twitchWrapper = twitchWrapper;
                 this.appSettings = appSettings;
                 this.sessionRepository = sessionRepository;
                 this.settingsRepository = settingsRepository;
@@ -35,44 +37,33 @@ namespace HeroesProfile.Core.CQRS.Commands
 
             public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
             {
-                Models.UserSettings userSettings = await settingsRepository.LoadAsync(cancellationToken);
+                UserSettings userSettings = await settingsRepository.LoadAsync(cancellationToken);
 
-                Models.Session session = sessionRepository.Session;
+                Session session = sessionRepository.Session;
 
-                if (appSettings.EnableFakePrediction)
+                if (!string.IsNullOrWhiteSpace(session.Prediction?.PredictionId))
                 {
-                    session.Prediction.PredictionId = Guid.NewGuid().ToString();
-                    session.Prediction.WinningOutcomeId = Guid.NewGuid().ToString();
-                    session.Prediction.OtherOutcomeId = Guid.NewGuid().ToString();
-                }
-                else
-                {
-                    if (!string.IsNullOrWhiteSpace(session.Prediction?.PredictionId))
-                    {
-                        EndPredictionResponse endPredictionResponse = await twitchApi.Helix.Predictions.EndPrediction(userSettings.BroadcasterId, session.Prediction.PredictionId, PredictionStatusEnum.CANCELED);
-                    }
-
-                    CreatePredictionRequest createPredictionRequest = new()
-                    {
-                        BroadcasterId = userSettings.BroadcasterId,
-                        PredictionWindowSeconds = appSettings.PredictionWindowSeconds,
-                        Title = "Heroes Profile Auto Predictions",
-                        Outcomes = new TwitchLib.Api.Helix.Models.Predictions.CreatePrediction.Outcome[] { new() { Title = "Win" }, new() { Title = "Loss" } }
-                    };
-
-                    CreatePredictionResponse createPredictionResponse = await twitchApi.Helix.Predictions.CreatePrediction(createPredictionRequest, userSettings.TwitchAccessToken);
-
-                    if (createPredictionResponse.Data != null && createPredictionResponse.Data.Length == 1)
-                    {
-                        session.Prediction.PredictionId = createPredictionResponse.Data[0].Id;
-                        session.Prediction.WinningOutcomeId = createPredictionResponse.Data[0].WinningOutcomeId;
-                        session.Prediction.OtherOutcomeId = createPredictionResponse.Data[1].Outcomes[1].Id;
-                    }
-
-                    return new Response(createPredictionResponse.Data);
+                    EndPredictionResponse endPredictionResponse = await twitchWrapper.EndPrediction(userSettings.BroadcasterId, session.Prediction.PredictionId, PredictionStatusEnum.CANCELED);
                 }
 
-                return new Response(Array.Empty<Prediction>());
+                CreatePredictionRequest createPredictionRequest = new()
+                {
+                    BroadcasterId = userSettings.BroadcasterId,
+                    PredictionWindowSeconds = appSettings.PredictionWindowSeconds,
+                    Title = "Heroes Profile Auto Predictions",
+                    Outcomes = new TwitchLib.Api.Helix.Models.Predictions.CreatePrediction.Outcome[] { new() { Title = "Win" }, new() { Title = "Loss" } }
+                };
+
+                CreatePredictionResponse createPredictionResponse = await twitchWrapper.CreatePrediction(createPredictionRequest, userSettings.TwitchAccessToken);
+
+                if (createPredictionResponse.Data != null && createPredictionResponse.Data.Length == 1)
+                {
+                    session.Prediction.PredictionId = createPredictionResponse.Data[0].Id;
+                    session.Prediction.WinningOutcomeId = createPredictionResponse.Data[0].WinningOutcomeId;
+                    session.Prediction.OtherOutcomeId = createPredictionResponse.Data[1].Outcomes[1].Id;
+                }
+
+                return new Response(createPredictionResponse.Data);
             }
         }
     }

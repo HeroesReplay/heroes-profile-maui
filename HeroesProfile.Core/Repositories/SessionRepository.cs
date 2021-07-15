@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Parsers;
 
+using Polly;
+
 namespace HeroesProfile.Core.Repositories
 {
     public class SessionRepository
@@ -52,21 +54,24 @@ namespace HeroesProfile.Core.Repositories
             this.session = new Session();
         }
 
-        public void Clear()
+        public async Task ClearAsync(CancellationToken cancellationToken)
         {
-            try
-            {
-                Session = new Session();
+            Session = new Session();
 
-                foreach (var file in new DirectoryInfo(appSettings.ApplicationSessionDirectory).EnumerateFiles("*.*", SearchOption.AllDirectories))
+            await Policy
+                .Handle<Exception>()
+                .WaitAndRetryAsync(Enumerable.Range(1, 5).Select(x => TimeSpan.FromSeconds(x)))
+                .ExecuteAsync(async (token) =>
                 {
-                    file.Delete();
-                }
-            }
-            catch (Exception)
-            {
+                    await Task.Run(() =>
+                    {
+                        foreach (var file in new DirectoryInfo(appSettings.ApplicationSessionDirectory).EnumerateFiles("*.*", SearchOption.AllDirectories))
+                        {
+                            file.Delete();
+                        }
+                    }, token);
 
-            }
+                }, cancellationToken);
         }
 
         public async Task RefreshAsync(string sessionFile, CancellationToken cancellationToken)

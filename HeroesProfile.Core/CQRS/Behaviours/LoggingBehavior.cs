@@ -32,7 +32,7 @@ namespace HeroesProfile.Core.CQRS.Behaviours
             }
         }
 
-        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse?> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
             var stopwatch = Stopwatch.StartNew();
             var requestName = request.GetType().DeclaringType?.Name ?? request.GetType().Name;
@@ -41,7 +41,7 @@ namespace HeroesProfile.Core.CQRS.Behaviours
             var requestNameWithGuid = $"{requestName} [{requestGuid}]";
 
             logger.LogInformation($"[START] {requestNameWithGuid}");
-            TResponse response;
+            TResponse? response;
 
             try
             {
@@ -49,7 +49,7 @@ namespace HeroesProfile.Core.CQRS.Behaviours
                 {
                     logger.LogInformation($"[PROPS] {requestNameWithGuid} {JsonSerializer.Serialize(request, options)}");
                 }
-                catch (NotSupportedException e)
+                catch (NotSupportedException)
                 {
                     logger.LogInformation($"[Serialization ERROR] {requestNameWithGuid} Could not serialize the request.");
                 }
@@ -60,7 +60,7 @@ namespace HeroesProfile.Core.CQRS.Behaviours
                 {
                     logger.LogInformation($"[PROPS] [RESP] {requestNameWithGuid} {JsonSerializer.Serialize(response, options)}");
                 }
-                catch (NotSupportedException e)
+                catch (NotSupportedException)
                 {
                     logger.LogInformation($"[Serialization ERROR] {requestNameWithGuid} Could not serialize the response.");
                 }
