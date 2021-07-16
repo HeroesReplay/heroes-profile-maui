@@ -1,0 +1,68 @@
+﻿@page "/"
+
+@using HeroesProfile.UI.Maui.ViewModels
+@using ReactiveUI
+@using ReactiveUI.Blazor
+@using System.Reactive.Threading.Tasks
+
+@inherits ReactiveComponentBase<ReplaysViewModel>
+
+<PageProgress Visible=@(ViewModel == null) />
+
+<Row>
+    <Column>
+        <Alert Color=Color.Info>
+            <AlertDescription>This view shows scanned replays and their status.</AlertDescription>
+            <CloseButton />
+        </Alert>
+    </Column>
+</Row>
+
+<Row>
+    <Column>
+        <Heading Size=HeadingSize.Is2>Replays</Heading>
+    </Column>
+</Row>
+
+@if (ViewModel.StoredReplays != null)
+{
+    <Row>
+        <Column>
+            <DataGrid TItem=ReplaysViewModel.GridItem
+                  Data=@ViewModel.StoredReplays
+                  Filterable=true
+                  ShowPager=true
+                  PageSize=10
+                  Editable=false
+                  FilterMethod=DataGridFilterMethod.StartsWith
+                  @bind-SelectedRow="@ViewModel.SelectedRow">
+
+                <DataGridCommandColumn TItem="ReplaysViewModel.GridItem" />
+                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Path)" Caption="Path" />
+                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Created)" Caption="Created" />
+                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Deleted)" Caption="Deleted" />
+                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Fingerprint)" Caption="Fingerprint" />
+                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.ParseResult)" Caption="Parse Result" />
+                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.UploadStatus)" Caption="Upload Status" />
+                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.ProcessStatus)" Caption="Process Status" />
+
+            </DataGrid>
+        </Column>
+    </Row>
+}
+
+@code {
+
+    [Inject]
+    public ReplaysViewModel ReplaysViewModel
+    {
+        get => ViewModel;
+        set => ViewModel = value;
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        return ViewModel.LoadStoredReplays.Execute().ToTask();
+    }
+
+}

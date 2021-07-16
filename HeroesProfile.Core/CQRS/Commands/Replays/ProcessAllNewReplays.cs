@@ -5,14 +5,16 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using HeroesProfile.Core.CQRS.Queries;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
+
 using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Commands
 {
-    public static class ProcessNew
+    public static class ProcessAllNewReplays
     {
         public record Item(StoredReplay StoredReplay, ReplayParseData ParseData);
 
@@ -51,6 +53,8 @@ namespace HeroesProfile.Core.CQRS.Commands
 
                     // Map stored replays to parsed replays
                     items.AddRange(parsedResponses.Select(parsed => new Item(saveResponse.StoredReplays.Find(stored => string.Equals(stored.Fingerprint, parsed.Data.Fingerprint, StringComparison.OrdinalIgnoreCase)), parsed.Data)));
+
+                    await Task.Delay(2000);
                 }
 
                 return new Response(items);
@@ -78,7 +82,7 @@ namespace HeroesProfile.Core.CQRS.Commands
                     }
                 });
 
-                return newReplays;
+                return newReplays.OrderBy(x => x.CreationTime);
             }
 
         }

@@ -7,7 +7,6 @@ using HeroesProfile.Core.CQRS.Commands;
 
 using MediatR;
 
-using Microsoft.Extensions.Hosting;
 using Microsoft.Maui;
 using Microsoft.UI.Xaml;
 
@@ -21,8 +20,6 @@ namespace HeroesProfile.UI.Maui.WinUI
     /// </summary>
     public partial class App : MauiWinUIApplication
     {
-        private CancellationTokenSource source = new CancellationTokenSource();
-
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -39,18 +36,12 @@ namespace HeroesProfile.UI.Maui.WinUI
             base.OnLaunched(args);
             Microsoft.Maui.Essentials.Platform.OnLaunched(args);
 
-            ReplayProcessor processor = (ReplayProcessor)Services.GetService(typeof(ReplayProcessor));
-
-            IMediator mediator = (IMediator)Services.GetService(typeof(IMediator));
-            mediator.Send(new InitializeApp.Command(), source.Token);
-
-            Task task = processor.StartAsync(source.Token);
-
             MainWindow.Closed += (sender, e) =>
             {
-                source.Cancel();
-                Task.WaitAll(task);
+                Initializer.Stop();
             };
+
+            Initializer.Start();
         }
     }
 }

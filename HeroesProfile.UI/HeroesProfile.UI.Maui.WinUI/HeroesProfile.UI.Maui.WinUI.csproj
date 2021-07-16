@@ -32,9 +32,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="..\HeroesProfile.UI.Maui\wwwroot\css\**" />
+      <Compile Remove="..\HeroesProfile.UI.Maui\Pages\ReplaysView.razor.cs" />
+      <Compile Remove="..\HeroesProfile.UI.Maui\Services\INotificationService.cs" />
     </ItemGroup>
-
 
     <ItemGroup>
         <Content Include="..\HeroesProfile.UI.Maui\appsettings.Development.json">
@@ -70,6 +70,9 @@
         <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0-preview.6.*" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0-preview.6.*" />
         <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0-preview.6.*" />
+
+        <PackageReference Include="ReactiveUI" Version="14.1.1" />
+        <PackageReference Include="ReactiveUI.Blazor" Version="14.1.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -77,6 +80,7 @@
         <PackageReference Include="Microsoft.ProjectReunion.Foundation" Version="0.8.1" />
         <PackageReference Include="Microsoft.ProjectReunion.WinUI" Version="0.8.1" />
         <PackageReference Include="Microsoft.ProjectReunion.InteractiveExperiences" Version="0.8.1" NoWarn="NU1701" />
+        <PackageReference Include="ReactiveUI" Version="14.1.1" />
     </ItemGroup>
 
 </Project>

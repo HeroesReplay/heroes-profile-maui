@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,7 +50,7 @@ namespace HeroesProfile.Core.CQRS.Commands
 
                 UploadResponse uploadResponse = await uploadUploadClient.UploadToHeroesProfileAsync(response.Data.Bytes, response.Data.Fingerprint, cancellationToken);
 
-                UploadStatus  uploadStatus = uploadResponse.Status;
+                UploadStatus uploadStatus = uploadResponse.Status;
                 StoredReplay storedReplay = command.StoredReplay;
                 int replayId = uploadResponse.ReplayId;
 
@@ -69,6 +70,8 @@ namespace HeroesProfile.Core.CQRS.Commands
                 {
                     storedReplay.ProcessStatus = ProcessStatus.NotSupported;
                 }
+
+                storedReplay.Updated = DateTime.UtcNow;
 
                 await mediator.Send(new UpdateReplays.Command(storedReplay));
 

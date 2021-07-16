@@ -4,6 +4,7 @@ using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
 
 using HeroesProfile.Core;
+using HeroesProfile.UI.Maui.ViewModels;
 
 using Microsoft.AspNetCore.Components.WebView.Maui;
 using Microsoft.Extensions.DependencyInjection;
@@ -59,7 +60,14 @@ namespace HeroesProfile.UI.Maui
                     //services.AddSingleton<INotificationService, MacCatalyst.NotificationService>();
 #endif
 
-                    services.AddCore(new HostEnvironment());
+                    services
+                        .AddSingleton<ReplaysViewModel>()
+                        .AddSingleton<SessionViewModel>();
+
+                    services
+                        .AddCoreModule(new HostEnvironment())
+                        .AddCoreMediator(typeof(Startup).Assembly);
+
                 });
         }
     }

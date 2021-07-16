@@ -39,7 +39,7 @@ namespace HeroesProfile.Core.Parsers
             try
             {
                 byte[] bytes = await File.ReadAllBytesAsync(file.FullName, token);
-                var (status, replay) = DataParser.ParseReplay(bytes, ParseOptions.MinimalParsing);
+                var (status, replay) = DataParser.ParseReplay(bytes, ParseOptions.MediumParsing);
 
                 if (status == DataParser.ReplayParseResult.Success)
                 {

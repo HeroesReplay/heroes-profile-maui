@@ -1,0 +1,48 @@
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+using HeroesProfile.Core.CQRS.Commands;
+using HeroesProfile.Core.Models;
+using HeroesProfile.Core.Repositories;
+
+using MediatR;
+
+namespace HeroesProfile.Core.CQRS.Notifications
+{
+    public static class BattleLobbyCreated
+    {
+        public record Notification(ReplayParseData Data) : INotification;
+
+        public class Handler : INotificationHandler<Notification>
+        {
+            private readonly IMediator mediator;
+            private readonly UserSettingsRepository userSettingsRepository;
+
+            public Handler(IMediator mediator, UserSettingsRepository userSettingsRepository)
+            {
+                this.mediator = mediator;
+                this.userSettingsRepository = userSettingsRepository;
+            }
+
+            public async Task Handle(Notification notification, CancellationToken cancellationToken)
+            {
+                var settings = await userSettingsRepository.LoadAsync(cancellationToken);
+
+                if (settings.EnableTwitchExtension)
+                {
+                    await mediator.Send(new CreateTalents.Command(), cancellationToken);
+                }
+
+                if (settings.EnablePredictions)
+                {
+                    await mediator.Send(new CreatePrediction.Command(), cancellationToken);
+                }
+
+                if (settings.EnablePreMatch)
+                {
+                    // TODO:
+                }
+            }
+        }
+    }
+}

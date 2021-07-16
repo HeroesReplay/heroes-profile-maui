@@ -109,7 +109,7 @@ namespace HeroesProfile.Core.Clients
 
         public async Task SavePlayerData(Dictionary<string, string> identity, Session session, CancellationToken cancellationToken)
         {
-            foreach (Player player in session.StormSave.Players)
+            foreach (Player player in session.BattleLobby.Players)
             {
                 var values = new Dictionary<string, string>(identity)
                 {

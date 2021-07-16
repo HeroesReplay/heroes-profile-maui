@@ -6,7 +6,7 @@ namespace HeroesProfile.Core.Watchers
     {
         public StormReplaySystemWatcher(AppSettings appSettings)
         {
-            this.Path = appSettings.GameTempDirectory;
+            this.Path = appSettings.GameDocumentsDirectory;
             this.Filter = "*.StormReplay";
             this.EnableRaisingEvents = false;
             this.IncludeSubdirectories = true;

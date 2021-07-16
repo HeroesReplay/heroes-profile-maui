@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -38,7 +39,7 @@ namespace HeroesProfile.Core.BackgroundServices
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                await mediator.Send(new ProcessNew.Command(), stoppingToken);
+                _ = await mediator.Send(new ProcessAllNewReplays.Command(), stoppingToken);
 
                 List<GetReplays.Filter> filters = new()
                 {
@@ -48,7 +49,7 @@ namespace HeroesProfile.Core.BackgroundServices
 
                 GetReplays.Response replaysResponse = await mediator.Send(new GetReplays.Query(filters));
 
-                foreach (StoredReplay storedReplay in replaysResponse.Replays)
+                foreach (StoredReplay storedReplay in replaysResponse.Replays.OrderByDescending(replay => replay.Created).Reverse())
                 {
                     _ = await mediator.Send(new UploadAndUpdateReplay.Command(storedReplay, HotsApi: false, HotsLogs: false), stoppingToken);
                 }

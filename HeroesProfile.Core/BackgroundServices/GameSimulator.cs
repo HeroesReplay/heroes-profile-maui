@@ -9,8 +9,6 @@ using HeroesProfile.Core.Models;
 
 using Microsoft.Extensions.Hosting;
 
-using Polly;
-
 namespace HeroesProfile.Core.BackgroundServices
 {
     public class GameSimulator : BackgroundService
@@ -37,10 +35,6 @@ namespace HeroesProfile.Core.BackgroundServices
                     var destination = source.Extension.Equals(".battlelobby")
                         ? Path.Combine(appSettings.GameTempDirectory, "replay.server.battlelobby")
                         : Path.Combine(appSettings.SimulationTargetDirectory, source.Name);
-
-                    //Policy.Handle<IOException>()
-                    //    .WaitAndRetry(5, (retryAttempt) => TimeSpan.FromSeconds(0.5))
-                    //    .Execute((x) => File.Delete(destination), stoppingToken);
 
                     byte[] data = await File.ReadAllBytesAsync(source.FullName, stoppingToken);
                     await File.WriteAllBytesAsync(destination, data, stoppingToken);

@@ -17,6 +17,8 @@ namespace HeroesProfile.Console
                 IMediator mediator = host.Services.GetRequiredService<IMediator>();
                 await mediator.Send(new InitializeApp.Command());
                 await host.RunAsync();
+
+                
             }
         }
 
@@ -27,7 +29,7 @@ namespace HeroesProfile.Console
                 .ConfigureHostOptions(hostOptions => hostOptions.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.StopHost)
                 .ConfigureHostConfiguration((builder) => { })
                 .UseConsoleLifetime(x => x.SuppressStatusMessages = false)
-                .ConfigureServices((hostContext, services) => services.AddCore(hostContext.HostingEnvironment));
+                .ConfigureServices((hostContext, services) => services.AddCoreModule(hostContext.HostingEnvironment).AddCoreMediator());
         }
     }
 }

@@ -15,6 +15,8 @@ namespace HeroesProfile.Core.Repositories
 
         private readonly SemaphoreSlim semaphore = new(1, 1);
 
+        private JsonSerializerOptions options = new JsonSerializerOptions() { WriteIndented = true, AllowTrailingCommas = true };
+
         public UserSettingsRepository(AppSettings appSettings, UserSettings defaultSettings)
         {
             this.appSettings = appSettings;
@@ -25,7 +27,7 @@ namespace HeroesProfile.Core.Repositories
         {
             await semaphore.WaitAsync(token);
 
-            var json = JsonSerializer.Serialize(defaultSettings, new JsonSerializerOptions() { AllowTrailingCommas = true });
+            var json = JsonSerializer.Serialize(defaultSettings, options);
             await File.WriteAllTextAsync(appSettings.UserSettingsPath, json, token);
 
             semaphore.Release();
@@ -35,7 +37,7 @@ namespace HeroesProfile.Core.Repositories
         {
             await semaphore.WaitAsync(token);
 
-            var json = JsonSerializer.Serialize<UserSettings>(settings, new JsonSerializerOptions() { AllowTrailingCommas = true });
+            var json = JsonSerializer.Serialize<UserSettings>(settings, options);
             await File.WriteAllTextAsync(appSettings.UserSettingsPath, json, token);
 
             semaphore.Release();
@@ -48,7 +50,7 @@ namespace HeroesProfile.Core.Repositories
                 await semaphore.WaitAsync(token);
 
                 var json = await File.ReadAllTextAsync(appSettings.UserSettingsPath, token);
-                return JsonSerializer.Deserialize<UserSettings>(json, new JsonSerializerOptions() { AllowTrailingCommas = true });
+                return JsonSerializer.Deserialize<UserSettings>(json, options);
             }
             finally
             {

@@ -2,9 +2,13 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+
+using HeroesProfile.Core.CQRS.Notifications;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
+
 using MediatR;
+
 using Polly;
 
 namespace HeroesProfile.Core.CQRS.Commands
@@ -19,11 +23,13 @@ namespace HeroesProfile.Core.CQRS.Commands
         {
             private readonly AppSettings appSettings;
             private readonly SessionRepository sessionRepository;
+            private readonly IMediator mediator;
 
-            public Handler(AppSettings appSettings, SessionRepository sessionRepository)
+            public Handler(AppSettings appSettings, SessionRepository sessionRepository, IMediator mediator)
             {
                 this.appSettings = appSettings;
                 this.sessionRepository = sessionRepository;
+                this.mediator = mediator;
             }
 
             public async Task<Response> Handle(Command command, CancellationToken cancellationToken)
@@ -36,6 +42,11 @@ namespace HeroesProfile.Core.CQRS.Commands
                     .WaitAndRetryAsync(5, (attempt) => TimeSpan.FromSeconds(1))
                     .ExecuteAndCaptureAsync((context, token) => UpdateSessionFileAsync((Command)context["Command"], token), context, cancellationToken);
 
+                if (result.Outcome == OutcomeType.Successful)
+                {
+                    await mediator.Publish(new SessionUpdated.Notification(sessionRepository.Session));
+                }
+
                 return new Response(result.Outcome == OutcomeType.Successful);
             }
 
@@ -43,7 +54,7 @@ namespace HeroesProfile.Core.CQRS.Commands
             {
                 string extension = Path.GetExtension(command.FileToCopy).TrimStart('.');
                 string fullName = Path.Combine(appSettings.ApplicationSessionDirectory, $"session.{extension}");
-                
+
                 if (File.Exists(fullName))
                 {
                     File.Delete(fullName);

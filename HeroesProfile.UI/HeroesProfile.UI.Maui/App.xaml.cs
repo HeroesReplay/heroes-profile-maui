@@ -17,12 +17,5 @@ namespace HeroesProfile.UI.Maui
             On<Microsoft.Maui.Controls.PlatformConfiguration.Windows>().SetImageDirectory("Assets");
             return new Window(new MainPage());
         }
-
-        protected override void OnStart()
-        {
-            base.OnStart();
-        }
-
-
     }
 }

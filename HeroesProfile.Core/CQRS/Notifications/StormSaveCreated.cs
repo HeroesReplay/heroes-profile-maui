@@ -1,7 +1,9 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using HeroesProfile.Core.CQRS.Commands;
+using HeroesProfile.Core.CQRS.Queries;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
 
@@ -9,7 +11,8 @@ using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Notifications
 {
-    public static class CreatedBattleLobby
+
+    public static class StormSaveCreated
     {
         public record Notification(ReplayParseData Data) : INotification;
 
@@ -26,21 +29,16 @@ namespace HeroesProfile.Core.CQRS.Notifications
 
             public async Task Handle(Notification notification, CancellationToken cancellationToken)
             {
-                var settings = await userSettingsRepository.LoadAsync(cancellationToken);
+                var settings = await this.userSettingsRepository.LoadAsync(cancellationToken);
 
                 if (settings.EnableTwitchExtension)
                 {
-                    await mediator.Send(new CreateTalents.Command(), cancellationToken);
-                }
+                    var response = await mediator.Send(new GetSession.Query(), cancellationToken);
 
-                if (settings.EnablePredictions)
-                {
-                    await mediator.Send(new CreatePrediction.Command(), cancellationToken);
-                }
+                    if (response.Session.BattleLobby == null)
+                        throw new Exception("Really, why is BattleLobby null before this point?");
 
-                if (settings.EnablePreMatch)
-                {
-                    // TODO:
+                    await mediator.Send(new UpdateTalents.Command(notification.Data.Replay, notification.Data.ParseType), cancellationToken);
                 }
             }
         }

@@ -94,7 +94,7 @@
     protected async override Task OnInitializedAsync()
     {
         GetUserSettings.Response response = await Mediator.Send(new GetUserSettings.Query());
-        battleTags = string.Join("+", response.UserSettings.BattleTags);
+        battleTags = string.Join(Environment.NewLine, response.UserSettings.BattleTags);
         userSettings = response.UserSettings;
         StateHasChanged();
         await base.OnInitializedAsync();

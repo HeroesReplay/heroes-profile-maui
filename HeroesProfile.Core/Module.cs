@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text.Json.Serialization;
 
 using HeroesProfile.Core.BackgroundServices;
@@ -24,9 +26,19 @@ using TwitchLib.Api.Interfaces;
 
 namespace HeroesProfile.Core
 {
-    public static class Extensions
+    public static class Module
     {
-        public static IServiceCollection AddCore(this IServiceCollection services, IHostEnvironment environment)
+        public static IServiceCollection AddCoreMediator(this IServiceCollection services, params Assembly[] assemblies)
+        {
+            /*
+                 * Registers all the handlers and behavours.
+                 */
+            services.AddMediatR((mediatorService) => mediatorService.AsSingleton(), new[] { typeof(Module).Assembly }.Concat(assemblies).ToArray());
+
+            return services;
+        }
+
+        public static IServiceCollection AddCoreModule(this IServiceCollection services, IHostEnvironment environment)
         {
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(environment.ContentRootPath)
@@ -52,8 +64,10 @@ namespace HeroesProfile.Core
                 .AddSingleton(configuration.GetSection("UserSettings").Get<UserSettings>())
                 .AddLogging(builder =>
                 {
-                    if (appSettings.Debug)
+                    if (environment.ApplicationName.Equals("HeroesProfile.UI") && appSettings.Debug)
+                    {
                         builder.AddDebug();
+                    }
                 });
 
             /*
@@ -89,10 +103,10 @@ namespace HeroesProfile.Core
              * Parsers that parse each type of supported game file the application watches
              */
             services
-                .AddSingleton<AggregateReplayParser>()
-                .AddSingleton<IReplayParser, StormReplayParser>()
-                .AddSingleton<IReplayParser, BattleLobbyParser>()
-                .AddSingleton<IReplayParser, StormSaveParser>();
+                .AddTransient<AggregateReplayParser>()
+                .AddTransient<IReplayParser, StormReplayParser>()
+                .AddTransient<IReplayParser, BattleLobbyParser>()
+                .AddTransient<IReplayParser, StormSaveParser>();
 
             /*
              * Upload client is used for Uploading Replays to Heroes Profile /Upload endpoint.
@@ -149,10 +163,7 @@ namespace HeroesProfile.Core
                     .AddSingleton<ReplayProcessor>();
             }
 
-            /*
-             * Registers all the handlers and behavours.
-             */
-            services.AddMediatR((mediatorService) => mediatorService.AsSingleton(), typeof(Extensions).Assembly);
+
 
             return services;
         }

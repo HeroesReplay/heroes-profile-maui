@@ -51,7 +51,7 @@ namespace HeroesProfile.Core.BackgroundServices
             {
                 try
                 {
-                    WaitForChangedResult waitForChangedResult = watcher.WaitForChanged(WatcherChangeTypes.Created | WatcherChangeTypes.Changed);
+                    WaitForChangedResult waitForChangedResult = watcher.WaitForChanged(WatcherChangeTypes.Created | WatcherChangeTypes.Changed, Timeout.Infinite);
 
                     string fullName = Path.IsPathFullyQualified(waitForChangedResult.Name) ? waitForChangedResult.Name : Directory.GetFiles(watcher.Path, waitForChangedResult.Name, SearchOption.AllDirectories).First();
 
@@ -61,15 +61,15 @@ namespace HeroesProfile.Core.BackgroundServices
                     {
                         if (response.Data.ParseType == ParseType.BattleLobby)
                         {
-                            await mediator.Publish(new CreatedBattleLobby.Notification(response.Data), stoppingToken);
+                            await mediator.Publish(new BattleLobbyCreated.Notification(response.Data), stoppingToken);
                         }
                         else if (response.Data.ParseType == ParseType.StormSave)
                         {
-                            await mediator.Publish(new StormSave.Created(response.Data), stoppingToken);
+                            await mediator.Publish(new StormSaveCreated.Notification(response.Data), stoppingToken);
                         }
                         else if (response.Data.ParseType == ParseType.StormReplay)
                         {
-                            await mediator.Publish(new StormReplay.Created(response.Data), stoppingToken);
+                            await mediator.Publish(new StormReplayCreated.Notification(response.Data), stoppingToken);
                         }
                     }
                 }
@@ -84,15 +84,22 @@ namespace HeroesProfile.Core.BackgroundServices
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                WaitForChangedResult waitForChangedResult = watcher.WaitForChanged(WatcherChangeTypes.Created | WatcherChangeTypes.Changed);
+                WaitForChangedResult waitForChangedResult = watcher.WaitForChanged(WatcherChangeTypes.Created | WatcherChangeTypes.Changed, Timeout.Infinite);
 
                 if (!string.IsNullOrWhiteSpace(waitForChangedResult.Name))
                 {
-                    string fullName = Path.IsPathFullyQualified(waitForChangedResult.Name) ? waitForChangedResult.Name : Directory.GetFiles(watcher.Path, waitForChangedResult.Name, SearchOption.AllDirectories).First();
+                    try
+                    {
+                        string fullName = Path.IsPathFullyQualified(waitForChangedResult.Name) ? waitForChangedResult.Name : Directory.GetFiles(watcher.Path, waitForChangedResult.Name, SearchOption.AllDirectories).First();
 
-                    await Task.Delay(waitForUnlock, stoppingToken);
+                        await Task.Delay(waitForUnlock, stoppingToken);
 
-                    await mediator.Send(new CopyToSessionAndRefresh.Command(fullName), stoppingToken);
+                        await mediator.Send(new CopyToSessionAndRefresh.Command(fullName), stoppingToken);
+                    }
+                    catch
+                    {
+
+                    }
                 }
             }
         }

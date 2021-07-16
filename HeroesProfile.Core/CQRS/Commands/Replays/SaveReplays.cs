@@ -1,32 +1,38 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
+
 using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Commands
 {
     public static class SaveReplays
     {
-        public record Command(params ReplayParseData[] ParseDatas): IRequest<Response>;
+        public record Command(params ReplayParseData[] ParseDatas) : IRequest<Response>;
 
         public record Response(List<StoredReplay> StoredReplays);
 
         public class Handler : IRequestHandler<Command, Response>
         {
             private readonly ReplaysRepository replaysRepository;
+            private readonly IMediator mediator;
 
-            public Handler(ReplaysRepository replaysRepository)
+            public Handler(ReplaysRepository replaysRepository, IMediator mediator)
             {
                 this.replaysRepository = replaysRepository;
+                this.mediator = mediator;
             }
 
             public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
             {
                 var storedReplays = request.ParseDatas.Select(data => new StoredReplay()
                 {
+                    Updated = DateTime.UtcNow,
                     Created = data.File.CreationTime,
                     Path = data.File.FullName,
                     ParseResult = data.ParseResult,
@@ -37,6 +43,8 @@ namespace HeroesProfile.Core.CQRS.Commands
                 var list = storedReplays.ToList();
 
                 await replaysRepository.InsertAsync(list, cancellationToken);
+
+                await mediator.Publish(new Notifications.StoredReplaysUpdated.Notification(list), cancellationToken);
 
                 return new Response(list);
             }

@@ -21,7 +21,7 @@
                 <BarMenu>
                     <BarStart>
                         <BarItem>
-                            <BarLink To="/replays">
+                            <BarLink To="/">
                                 <BarIcon IconName=@("fas fa-file-upload") /> Replays
                             </BarLink>
                         </BarItem>
@@ -73,7 +73,8 @@
 
 @code {
 
-    [Inject] protected ITextLocalizerService LocalizationService { get; set; }
+    [Inject] 
+    protected ITextLocalizerService LocalizationService { get; set; }
 
     private bool uiElementsVisible = true;
 
@@ -84,8 +85,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await SelectCulture("en-US");
-
         await base.OnInitializedAsync();
     }
 }

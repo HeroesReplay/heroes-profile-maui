@@ -2,12 +2,12 @@
 
 namespace HeroesProfile.Core.Models
 {
-    [Serializable]
     public class StoredReplay : IEquatable<StoredReplay>
     {
         public string Path { get; set; }
         public string Fingerprint { get; set; }
         public DateTime Created { get; set; }
+        public DateTime Updated { get; set; }
         public ParseResult ParseResult { get; set; }
         public ProcessStatus ProcessStatus { get; set; }
         public UploadStatus UploadStatus { get; set; }

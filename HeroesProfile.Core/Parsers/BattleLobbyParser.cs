@@ -1,8 +1,10 @@
 ﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Heroes.ReplayParser;
 using Heroes.ReplayParser.MPQFiles;
+
 using HeroesProfile.Core.Models;
 
 namespace HeroesProfile.Core.Parsers
@@ -20,7 +22,7 @@ namespace HeroesProfile.Core.Parsers
 
                 return new ReplayParseData
                 {
-                    Bytes =  bytes,
+                    Bytes = bytes,
                     File = file,
                     ParseResult = ParseResult.Success,
                     Replay = StandaloneBattleLobbyParser.Parse(bytes),
