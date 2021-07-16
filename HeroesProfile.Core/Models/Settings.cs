@@ -61,6 +61,8 @@ namespace HeroesProfile.Core.Models
         public bool EnableFileSimulator { get; set; }
         public bool EnableFakeTwitch { get; set; }
         public bool EnableFakeHttp { get; set; }
+
+        public bool DefaultUserSettingsOnStart { get; set; }
         public bool ClearStoredReplaysOnStart { get; set; }
     }
 }

@@ -1,76 +1,91 @@
 ﻿@page "/settings"
 @using HeroesProfile.Core.CQRS.Queries
+@using HeroesProfile.Core.CQRS.Commands
 @using HeroesProfile.Core.Models
 @using MediatR
 
-<h1>Settings</h1>
+<PageProgress Visible=@(userSettings == null) />
 
-@if (userSettings == null)
+<Row>
+    <Heading Size=HeadingSize.Is2>Settings</Heading>
+</Row>
+
+@if (userSettings != null)
 {
-    <p>Loading...</p>
+    <!-- Auth Row -->
+    <Row>
+        <Column>
+            <Field Horizontal="false">
+                <FieldLabel>Twitch BroadcasterId</FieldLabel>
+                <TextEdit Placeholder="Twitch Broadcaster Id" Text=@userSettings.BroadcasterId />
+            </Field>
+            <Field Horizontal="false">
+                <FieldLabel>Twitch ClientId</FieldLabel>
+                <TextEdit Placeholder="Twitch Client Id" Text=@userSettings.TwitchClientId />
+            </Field>
+            <Field Horizontal="false">
+                <FieldLabel>Twitch AccessToken</FieldLabel>
+                <TextEdit Placeholder="Twitch Access Token" Text=@userSettings.TwitchAccessToken />
+            </Field>
+        </Column>
+        <Column>
+            <Field Horizontal="false">
+                <FieldLabel>Heroes Profile Api Email</FieldLabel>
+                <TextEdit Placeholder="Heroes Profile Email" Text=@userSettings.HeroesProfileApiEmail />
+            </Field>
+            <Field Horizontal="false">
+                <FieldLabel>Heroes Profile Api UserId</FieldLabel>
+                <TextEdit Placeholder="Heroes Profile User Id" Text=@userSettings.HeroesProfileUserId />
+            </Field>
+            <Field Horizontal="false">
+                <FieldLabel>Heroes Profile Twitch Key</FieldLabel>
+                <TextEdit Placeholder="Heroes Profile API Key" Text=@userSettings.HeroesProfileTwitchKey />
+            </Field>
+        </Column>
+    </Row>
+
+    <!-- Toggles Row -->
+    <Row>
+        <Column>
+            <Field Horizontal="false">
+                <FieldLabel>Auto Predictions</FieldLabel>
+                <Switch TValue="bool" @bind-Checked=@userSettings.EnablePredictions />
+            </Field>
+            <Field Horizontal="false">
+                <FieldLabel>BattleTags for Predictions</FieldLabel>
+                <MemoEdit Rows="5" @bind-Text="battleTags" />
+            </Field>
+            <Field Horizontal="false">
+                <FieldLabel>Talents Extension</FieldLabel>
+                <Switch TValue="bool" @bind-Checked=@userSettings.EnableTwitchExtension />
+            </Field>
+            <Field Horizontal="false">
+                <FieldLabel>Purge Deleted Replays from the Database</FieldLabel>
+                <Switch TValue="bool" />
+            </Field>
+        </Column>
+        <Column>
+            <Field Field Horizontal="false">
+                <FieldLabel>Launch PreMatch Analysis</FieldLabel>
+                <Switch TValue="bool" @bind-Checked=@userSettings.EnablePreMatch />
+            </Field>
+            <Field Horizontal="false">
+                <FieldLabel>Launch PostMatch Analysis</FieldLabel>
+                <Switch TValue="bool" @bind-Checked=@userSettings.EnablePostMatch />
+            </Field>
+        </Column>
+    </Row>
+    <Row>
+        <Field>
+            <Button Color="Color.Primary" Type="ButtonType.Submit" PreventDefaultOnSubmit="true" Clicked=@(() => SaveChanges())>Save Changes</Button>
+        </Field>
+    </Row>
 }
-else
-{
-    <Form>
-
-        <Field>
-            <FieldLabel>Twitch Broadcaster Id</FieldLabel>
-            <TextEdit Placeholder="" Text=@userSettings.BroadcasterId />
-        </Field>
-
-        <Field>
-            <FieldLabel>Heroes Profile Email</FieldLabel>
-            <TextEdit Placeholder="Enter email" Text=@userSettings.HeroesProfileApiEmail />
-        </Field>
-
-        <Field>
-            <FieldLabel>Heroes Profile User Id</FieldLabel>
-            <TextEdit Placeholder="Enter user id" Text=@userSettings.HeroesProfileUserId />
-        </Field>
-
-        <Field>
-            <FieldLabel>Heroes Profile API Key</FieldLabel>
-            <TextEdit Placeholder="Enter api key" Text=@userSettings.HeroesProfileTwitchKey />
-        </Field>
-
-        <Field>
-            <FieldLabel>Enable/Disable Pre Match</FieldLabel>
-            <Check Checked=@userSettings.EnablePreMatch />
-        </Field>
-
-        <Field>
-            <FieldLabel>Enable/Disable Post Match</FieldLabel>
-            <Check Checked=@userSettings.EnablePostMatch />
-        </Field>
-
-        <Field>
-            <FieldLabel>Enable/Disable Auto Predictions</FieldLabel>
-            <Check Checked=@userSettings.EnablePredictions />
-        </Field>
-
-        <Field>
-            <FieldLabel>Twitch ClientId </FieldLabel>
-            <TextEdit Text=@userSettings.TwitchClientId />
-        </Field>
-
-        <Field>
-            <FieldLabel>Twitch Access Token </FieldLabel>
-            <TextEdit Text=@userSettings.TwitchAccessToken />
-        </Field>
-
-
-         <Button Color="Color.Primary" Type="ButtonType.Submit" PreventDefaultOnSubmit="true">Save Changes</Button>
-
-    </Form>
-
-}
-
-
-
 
 @code {
 
     private UserSettings userSettings;
+    private string battleTags;
 
     [Inject]
     private IMediator Mediator { get; set; }
@@ -79,12 +94,16 @@ else
     protected async override Task OnInitializedAsync()
     {
         GetUserSettings.Response response = await Mediator.Send(new GetUserSettings.Query());
-
+        battleTags = string.Join("+", response.UserSettings.BattleTags);
         userSettings = response.UserSettings;
-
-        this.StateHasChanged();
-
+        StateHasChanged();
         await base.OnInitializedAsync();
     }
 
+    protected async Task SaveChanges()
+    {
+        userSettings.BattleTags.Clear();
+        userSettings.BattleTags.AddRange(battleTags.Split(Environment.NewLine));
+        await Mediator.Send(new UpdateUserSettings.Command(userSettings));
+    }
 }

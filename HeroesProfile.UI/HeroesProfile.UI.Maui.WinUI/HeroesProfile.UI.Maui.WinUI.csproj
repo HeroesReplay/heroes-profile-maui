@@ -31,6 +31,10 @@
         <None Include="..\HeroesProfile.UI.Maui\*.json" Link="%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="..\HeroesProfile.UI.Maui\wwwroot\css\**" />
+    </ItemGroup>
+
 
     <ItemGroup>
         <Content Include="..\HeroesProfile.UI.Maui\appsettings.Development.json">

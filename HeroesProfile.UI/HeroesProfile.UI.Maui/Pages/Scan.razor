@@ -1,0 +1,71 @@
+﻿@page "/session"
+
+<Row>
+    <Column>
+        <Heading Size=HeadingSize.Is2>Session</Heading>
+    </Column>
+</Row>
+
+<PageProgress Visible="@(session == null)" />
+
+@if (session != null)
+{
+    <!-- Show the state progression from BattleLobby -> StormSave -> StormReplay -->
+    <!-- https://rcbootstrapdemo.blazorise.com/tests/steps -->
+
+    <Row>
+        <Column>
+            <Label></Label>
+        </Column>
+    </Row>
+
+    <Tabs SelectedTab="@selectedTab" SelectedTabChanged="@OnSelectedTabChanged">
+        <Items>
+            <Tab Name="BattleLobby" Disabled="@(session.BattleLobby != null)">BattleLobby</Tab>
+            <Tab Name="StormSave" Disabled="@(session.StormSave != null)">StormSave</Tab>
+            <Tab Name="StormReplay" Disabled="@(session.StormReplay != null)">StormReplay</Tab>
+        </Items>
+        <Content>
+            <TabPanel Name="BattleLobby">
+                @if (session.BattleLobby != null)
+                {
+                    <Paragraph>Display StormSave data</Paragraph>
+                }
+            </TabPanel>
+            <TabPanel Name="StormSave">
+                @if  (session.StormSave!= null)
+                {
+                    <Paragraph>Display StormSave data</Paragraph>
+                }
+            </TabPanel>
+            <TabPanel Name="StormReplay">
+                @if  (session.StormReplay!= null)
+                {
+                    <Paragraph>Display StormReplay data</Paragraph>
+                }
+            </TabPanel>
+        </Content>
+    </Tabs>
+}
+
+@code {
+
+    private Session session;
+    string selectedTab = "BattleLobby";
+
+    private void OnSelectedTabChanged(string name)
+    {
+        selectedTab = name;
+    }
+
+    [Inject]
+    private IMediator Mediator { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        GetSession.Response response = await Mediator.Send(new GetSession.Query());
+        session = response.Session;
+    }
+
+
+}

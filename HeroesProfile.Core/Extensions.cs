@@ -123,6 +123,7 @@ namespace HeroesProfile.Core
             if (appSettings.EnableFakeHttp)
             {
                 services.AddTransient<FakeHeroesProfileDelegatingHandler>();
+
                 talentsClientBuilder.ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<FakeHeroesProfileDelegatingHandler>());
                 uploadClientBuilder.ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<FakeHeroesProfileDelegatingHandler>());
             }

@@ -6,49 +6,74 @@
 @using HeroesProfile.Core.CQRS.Queries
 @using HeroesProfile.Core.Models
 
-@*
-    This shows using @inject method.
-    You can also define a getter/setter property on the component and use the C# [Inject] Attribute
-*@
+<PageProgress Visible=@(replays == null) />
 
-@inject IMediator mediator;
+<Row>
+    <Column>
+        <Alert Color=Color.Info @bind-Visible="@visible">
+            <AlertDescription>This view shows scanned replays and their status.</AlertDescription>
+            <CloseButton />
+        </Alert>
+    </Column>
+</Row>
 
-<h1>Replays</h1>
+<Row>
+    <Column>
+        <Heading Size=HeadingSize.Is2>Replays</Heading>
+    </Column>
+</Row>
 
-<Alert Color=Color.Info @bind-Visible="@visible">
-    <AlertDescription>This view shows scanned replays and their status.</AlertDescription>
-    <CloseButton />
-</Alert>
 
-@if (response == null)
+@if (replays != null)
 {
-   <PageProgress Visible=true  />
-}
-else
-{
-    <DataGrid TItem=StoredReplay Data=@response.Replays Filterable=true ShowPager=true PageSize=10 Editable=false FilterMethod=DataGridFilterMethod.StartsWith @bind-SelectedRow=@selected>
-        <DataGridCommandColumn TItem="StoredReplay" />
-        <DataGridColumn TItem="StoredReplay" Field="@nameof(StoredReplay.Path)" Caption="Path" Sortable="true" />
-        <DataGridColumn TItem="StoredReplay" Field="@nameof(StoredReplay.Created)" Caption="Date created" Editable="false" />
-        <DataGridColumn TItem="StoredReplay" Field="@nameof(StoredReplay.Fingerprint)" Caption="Fingerprint" Editable="false" />
-        <DataGridColumn TItem="StoredReplay" Field="@nameof(StoredReplay.ParseResult)" Caption="Parse Result" Editable="false" />
-        <DataGridColumn TItem="StoredReplay" Field="@nameof(StoredReplay.UploadStatus)" Caption="Upload Status" Editable="false" />
-        <DataGridColumn TItem="StoredReplay" Field="@nameof(StoredReplay.ProcessStatus)" Caption="Process Status" Editable="false" />
-    </DataGrid>
+            <Row>
+                <Column>
+                     <DataGrid TItem=DataGridItem Data=@replays Filterable=true ShowPager=true PageSize=10 Editable=false FilterMethod=DataGridFilterMethod.StartsWith @bind-SelectedRow=@selected>
+                        <DataGridCommandColumn TItem="DataGridItem" />
+                        <DataGridColumn TItem="DataGridItem" Field="@nameof(DataGridItem.Path)" Caption="Path" Sortable="true" />
+                        <DataGridColumn TItem="DataGridItem" Field="@nameof(DataGridItem.Created)" Caption="Date created" />
+                        <DataGridColumn TItem="DataGridItem" Field="@nameof(DataGridItem.Deleted)" Caption="Deleted" />
+                        <DataGridColumn TItem="DataGridItem" Field="@nameof(DataGridItem.Fingerprint)" Caption="Fingerprint" />
+                        <DataGridColumn TItem="DataGridItem" Field="@nameof(DataGridItem.ParseResult)" Caption="Parse Result" />
+                        <DataGridColumn TItem="DataGridItem" Field="@nameof(DataGridItem.UploadStatus)" Caption="Upload Status" />
+                        <DataGridColumn TItem="DataGridItem" Field="@nameof(DataGridItem.ProcessStatus)" Caption="Process Status" />
+                </DataGrid>
+                </Column>
+            </Row>
 }
 
 @code {
 
-    private GetReplays.Response response;
+    // Custom View of Data
+    public class DataGridItem
+    {
+        public StoredReplay Item { get; set; }
 
-    private StoredReplay selected;
+        public DateTime Created => Item.Created;
+        public string Path => System.IO.Path.GetFileName(Item.Path);
+        public bool Deleted => !System.IO.File.Exists(Item.Path);
+        public string Fingerprint => Item.Fingerprint;
+        public ParseResult ParseResult => Item.ParseResult;
+        public UploadStatus UploadStatus => Item.UploadStatus;
+        public ProcessStatus ProcessStatus => Item.ProcessStatus;
+    }
 
-    bool visible = true;
+    [Inject]
+    private IMediator Mediator { get; set; }
+
+    private List<DataGridItem> replays;
+    private DataGridItem selected;
+    private bool visible = true;
 
     protected override async Task OnInitializedAsync()
     {
-        response = await mediator.Send(new GetReplays.Query(new List<GetReplays.Filter>()));
+        GetReplays.Response response = await Mediator.Send(new GetReplays.Query(new List<GetReplays.Filter>()));
+
+        if (response.Replays.Any())
+        {
+            replays = response.Replays.Select(x => new DataGridItem { Item = x }).ToList();
+        }
+
         StateHasChanged();
     }
-
 }

@@ -1,6 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+
 using HeroesProfile.Core.Models;
+
 using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Commands
@@ -27,7 +29,11 @@ namespace HeroesProfile.Core.CQRS.Commands
                     await mediator.Send(new ClearStoredReplays.Command(), cancellationToken);
                 }
 
-                await mediator.Send(new InitializeUserSettings.Command(), cancellationToken);
+                if (appSettings.DefaultUserSettingsOnStart)
+                {
+                    await mediator.Send(new InitializeUserSettings.Command(), cancellationToken);
+                }
+
 
                 return Unit.Value;
             }
