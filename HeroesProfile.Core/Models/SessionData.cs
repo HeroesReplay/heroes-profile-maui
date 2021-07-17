@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using Heroes.ReplayParser;
 
 namespace HeroesProfile.Core.Models
 {
-    public class Session
+    public class SessionData
     {
         public SessionState State
         {
@@ -17,37 +18,33 @@ namespace HeroesProfile.Core.Models
             }
         }
 
-        public SessionFiles Files { get; set; } = new();
+        public Replay? BattleLobby => Files?.BattleLobby?.Replay;
+        public Replay? StormSave => Files?.StormSave?.Replay;
+        public Replay? StormReplay => Files?.StormReplay?.Replay;
 
-        public TwitchPredictionData Prediction { get; set; } = new();
 
-        public TwitchExtensionData Extension { get; set; } = new();
+        public ReplayFilesData Files { get; set; }
 
-        public Replay? BattleLobby => Files?.BattleLobby;
+        public TwitchPredictionData Prediction { get; set; }
 
-        public Replay? StormSave => Files?.StormSave;
+        public TwitchTalentsData TalentsExtension { get; set; }
 
-        public Replay? StormReplay => Files?.StormReplay;
-
-        public Session()
+        public SessionData()
         {
-            Files = new SessionFiles();
+            Files = new ReplayFilesData();
             Prediction = new TwitchPredictionData();
-            Extension = new TwitchExtensionData();
+            TalentsExtension = new TwitchTalentsData();
         }
     }
 
-    public class SessionFiles
+    public class ReplayFilesData
     {
-        public Replay? BattleLobby { get; set; }
-        public Replay? StormSave { get; set; }
-        public Replay? StormReplay { get; set; }
-
-        public SessionFiles()
-        {
-
-        }
+        public SessionFile? BattleLobby { get; set; }
+        public SessionFile? StormSave { get; set; }
+        public SessionFile? StormReplay { get; set; }
     }
+
+    public record SessionFile(Replay Replay, ParseType ParseType, DateTime Created);
 
     public class TwitchPredictionData
     {
@@ -61,7 +58,7 @@ namespace HeroesProfile.Core.Models
         }
     }
 
-    public class TwitchExtensionData
+    public class TwitchTalentsData
     {
         public string? SessionId { get; set; }
         public int TrackerEventIndex { get; set; }
@@ -69,7 +66,7 @@ namespace HeroesProfile.Core.Models
         public bool GameModeUpdated { get; set; }
         public List<string> PlayerFoundTalents { get; set; }
 
-        public TwitchExtensionData()
+        public TwitchTalentsData()
         {
             PlayerFoundTalents = new List<string>();
         }

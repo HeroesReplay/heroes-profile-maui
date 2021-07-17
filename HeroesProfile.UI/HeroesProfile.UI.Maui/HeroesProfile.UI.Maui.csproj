@@ -29,22 +29,21 @@
         <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.3.10" />
         <PackageReference Include="Blazorise.Sidebar" Version="0.9.3.10" />
         <PackageReference Include="Blazorise.Snackbar" Version="0.9.3.10" />
+        <PackageReference Include="FluentValidation" Version="10.3.0" />
     </ItemGroup>
     
-    <ItemGroup>      
+    <ItemGroup>
         <PackageReference Include="MediatR" Version="9.0.0" />
-        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
-        
+        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />        
         <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0-preview.6.*" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0-preview.6.*" />
-        <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0-preview.6.*" />
-        
-        <PackageReference Include="ReactiveUI" Version="14.1.1" />        
+        <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0-preview.6.*" />        
+        <PackageReference Include="ReactiveUI" Version="14.1.1" />
         <PackageReference Include="ReactiveUI.Blazor" Version="14.1.1" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\HeroesProfile.Core\HeroesProfile.Core.csproj" />
     </ItemGroup>
-
+    
 </Project>

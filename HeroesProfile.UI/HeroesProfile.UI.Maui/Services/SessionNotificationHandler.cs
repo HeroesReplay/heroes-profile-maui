@@ -3,17 +3,16 @@ using HeroesProfile.UI.Maui.ViewModels;
 
 using MediatR;
 
-using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HeroesProfile.UI.Maui.Services
+namespace HeroesProfile.UI.Maui
 {
-    public class SessionUpdatedNotificationHandler : INotificationHandler<SessionUpdated.Notification>
+    public class SessionNotificationHandler : INotificationHandler<SessionUpdated.Notification>
     {
-        private readonly SessionViewModel sessionViewModel;
+        private readonly AnalysisViewModel sessionViewModel;
 
-        public SessionUpdatedNotificationHandler(SessionViewModel sessionViewModel)
+        public SessionNotificationHandler(AnalysisViewModel sessionViewModel)
         {
             this.sessionViewModel = sessionViewModel;
         }

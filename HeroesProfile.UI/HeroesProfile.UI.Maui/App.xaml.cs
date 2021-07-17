@@ -13,9 +13,11 @@ namespace HeroesProfile.UI.Maui
 
         protected override Window CreateWindow(IActivationState activationState)
         {
-            Microsoft.Maui.Controls.Compatibility.Forms.Init(activationState);
+            // Microsoft.Maui.Controls.Compatibility.Forms.Init(activationState);
+
             On<Microsoft.Maui.Controls.PlatformConfiguration.Windows>().SetImageDirectory("Assets");
-            return new Window(new MainPage());
+
+            return new Window(new MainPage()) { Title = "Heroes Profile Desktop - Alpha" };
         }
     }
 }

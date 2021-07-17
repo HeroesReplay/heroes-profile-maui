@@ -27,7 +27,7 @@ namespace HeroesProfile.Core.CQRS.Commands
             private readonly AppSettings appSettings;
             private readonly ITwitchWrapper twitchWrapper;
 
-            private Session session => sessionRepository.Session;
+            private SessionData session => sessionRepository.Session;
 
             public Handler(UserSettingsRepository settingsRepository, SessionRepository sessionRepository, AppSettings appSettings, ITwitchWrapper twitchWrapper)
             {

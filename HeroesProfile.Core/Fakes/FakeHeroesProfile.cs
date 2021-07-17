@@ -59,7 +59,7 @@ namespace HeroesProfile.Core.Fakes
             {
                 int replayID = random.Next(1, 500);
 
-                UploadStatus status = UploadStatus.InProgress;
+                UploadStatus status;
 
                 if (Uploaded.Contains(replayID))
                 {
@@ -70,8 +70,6 @@ namespace HeroesProfile.Core.Fakes
                     status = Enum.GetValues(typeof(UploadStatus)).OfType<UploadStatus>().OrderBy(x => Guid.NewGuid()).First();
                     Uploaded.Add(replayID);
                 }
-
-
 
                 return Task.FromResult(new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent($@"{{""replayID"": {replayID}, ""success"": {(status == UploadStatus.Success).ToString().ToLower()}, ""status"": ""{status}"" }}") });
             }

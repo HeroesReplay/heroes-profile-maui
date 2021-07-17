@@ -94,7 +94,7 @@ namespace HeroesProfile.Core.BackgroundServices
 
                         await Task.Delay(waitForUnlock, stoppingToken);
 
-                        await mediator.Send(new CopyToSessionAndRefresh.Command(fullName), stoppingToken);
+                        await mediator.Send(new UpdateSessionData.Command(fullName), stoppingToken);
                     }
                     catch
                     {

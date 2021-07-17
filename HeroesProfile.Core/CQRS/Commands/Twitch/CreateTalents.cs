@@ -13,7 +13,7 @@ namespace HeroesProfile.Core.CQRS.Commands
     {
         public record Command : IRequest<Response>;
 
-        public record Response(Session Session);
+        public record Response(SessionData Session);
 
         public class Handler : IRequestHandler<Command, Response>
         {
@@ -32,7 +32,7 @@ namespace HeroesProfile.Core.CQRS.Commands
             {
                 UserSettings userSettings = await userSettingsRepository.LoadAsync(cancellationToken);
 
-                sessionRepository.Session.Extension.SessionId = await talentsClient.CreateSession(userSettings.TalentsIdentity, cancellationToken);
+                sessionRepository.Session.TalentsExtension.SessionId = await talentsClient.CreateSession(userSettings.TalentsIdentity, cancellationToken);
 
                 await talentsClient.SavePlayerData(userSettings.TalentsIdentity, sessionRepository.Session, cancellationToken);
                 await talentsClient.NotifyTwitchTalentChange(userSettings.TalentsIdentity, cancellationToken);

@@ -39,7 +39,7 @@ namespace HeroesProfile.Core.CQRS.Commands
             {
                 UserSettings userSettings = await settingsRepository.LoadAsync(cancellationToken);
 
-                Session session = sessionRepository.Session;
+                SessionData session = sessionRepository.Session;
 
                 if (!string.IsNullOrWhiteSpace(session.Prediction?.PredictionId))
                 {

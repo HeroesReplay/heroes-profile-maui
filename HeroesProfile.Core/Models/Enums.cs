@@ -29,7 +29,6 @@ namespace HeroesProfile.Core.Models
 
     public enum ParseType
     {
-        All,
         BattleLobby,
         StormSave,
         StormReplay
@@ -46,9 +45,8 @@ namespace HeroesProfile.Core.Models
 
     public enum UploadStatus
     {
-        None,
+        Pending,
         Success,
-        InProgress,
         UploadError,
         Duplicate,
         AiDetected,

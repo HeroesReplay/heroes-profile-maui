@@ -4,25 +4,11 @@
 @using ReactiveUI
 @using ReactiveUI.Blazor
 @using System.Reactive.Threading.Tasks
+@using System.Threading
 
 @inherits ReactiveComponentBase<ReplaysViewModel>
 
 <PageProgress Visible=@(ViewModel == null) />
-
-<Row>
-    <Column>
-        <Alert Color=Color.Info>
-            <AlertDescription>This view shows scanned replays and their status.</AlertDescription>
-            <CloseButton />
-        </Alert>
-    </Column>
-</Row>
-
-<Row>
-    <Column>
-        <Heading Size=HeadingSize.Is2>Replays</Heading>
-    </Column>
-</Row>
 
 @if (ViewModel.StoredReplays != null)
 {
@@ -73,9 +59,6 @@
         set => ViewModel = value;
     }
 
-    protected override Task OnInitializedAsync()
-    {
-        return ViewModel.LoadStoredReplays.Execute().ToTask();
-    }
+    protected async override Task OnInitializedAsync() => await ViewModel.LoadAsync(CancellationToken.None);
 
 }

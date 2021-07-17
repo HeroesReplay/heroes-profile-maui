@@ -3,8 +3,8 @@
              xmlns:local="clr-namespace:HeroesProfile.UI.Maui"
              x:Class="HeroesProfile.UI.Maui.App">
     <Application.Resources>
-        <ResourceDictionary>
-            <!-- Add any additional resources here. -->
+        <!--<ResourceDictionary>
+            --><!-- Add any additional resources here. --><!--
             <Color x:Key="PageBackgroundColor">White</Color>
             <Color x:Key="PrimaryTextColor">Black</Color>
             <Color x:Key="GlyphColor">#2B0B98</Color>
@@ -16,6 +16,6 @@
                 <Setter Property="FontFamily" Value="IonIcons" />
                 <Setter Property="FontSize" Value="32" />
             </Style>
-        </ResourceDictionary>
+        </ResourceDictionary>-->
     </Application.Resources>
 </Application>

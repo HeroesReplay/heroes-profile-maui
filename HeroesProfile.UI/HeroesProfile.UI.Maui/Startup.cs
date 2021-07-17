@@ -1,5 +1,4 @@
-﻿
-using Blazorise;
+﻿using Blazorise;
 using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
 
@@ -32,13 +31,18 @@ namespace HeroesProfile.UI.Maui
                 {
 
                 })
-                .ConfigureLifecycleEvents((context, lifecycleBuilder) =>
+                .ConfigureLifecycleEvents((context, lifecycle) =>
                 {
 #if WINDOWS
-                    //lifecycle
-                    //    .AddWindows(windows => windows.OnLaunched((app, args) => {
-                    //        MauiWinUIApplication.Current.MainWindow.SetIcon("Platforms/Windows/trayicon.ico");
-                    //    }));
+                    lifecycle
+                        .AddWindows(window => window.OnClosed((window, args) =>
+                        {
+
+                        }))
+                        .AddWindows(window => window.OnLaunched((window, args) =>
+                        {
+
+                        }));
 #endif
                 })
                 .ConfigureServices((appBuilder, services) =>
@@ -53,16 +57,19 @@ namespace HeroesProfile.UI.Maui
                         .AddBootstrapProviders()
                         .AddFontAwesomeIcons();
 #if WINDOWS
-                    //services.AddSingleton<ITrayService, WinUI.TrayService>();
-                    //services.AddSingleton<INotificationService, WinUI.NotificationService>();
+                    services
+                        .AddSingleton<ITrayService, Platforms.Windows.TrayService>();
+                        //.AddSingleton<INotificationService, Platforms.Windows.NotificationService>();
 #elif MACCATALYST
-                    //services.AddSingleton<ITrayService, MacCatalyst.TrayService>();
-                    //services.AddSingleton<INotificationService, MacCatalyst.NotificationService>();
+                    services
+                        .AddSingleton<ITrayService, MacCatalyst.TrayService>()
+                        .AddSingleton<INotificationService, MacCatalyst.NotificationService>();
 #endif
 
                     services
                         .AddSingleton<ReplaysViewModel>()
-                        .AddSingleton<SessionViewModel>();
+                        .AddSingleton<AnalysisViewModel>()
+                        .AddSingleton<SettingsViewModel>();
 
                     services
                         .AddCoreModule(new HostEnvironment())

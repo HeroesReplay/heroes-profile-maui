@@ -52,13 +52,13 @@ namespace HeroesProfile.Core.Clients
             throw new Exception($"Could not create session at {SaveReplayUri}");
         }
 
-        public async Task UpdateReplayData(Dictionary<string, string> identity, Session session, CancellationToken cancellationToken)
+        public async Task UpdateReplayData(Dictionary<string, string> identity, SessionData session, CancellationToken cancellationToken)
         {
-            if (session.StormSave != null && session.Extension.SessionId != null)
+            if (session.StormSave != null && session.TalentsExtension.SessionId != null)
             {
                 Dictionary<string, string> values = new(identity)
                 {
-                    { "replayID", session.Extension.SessionId },
+                    { "replayID", session.TalentsExtension.SessionId },
                     { "game_type", $"{session.StormSave.GameMode}" },
                     { "game_map", session.StormSave.Map },
                     { "game_version", session.StormSave.ReplayVersion },
@@ -81,11 +81,11 @@ namespace HeroesProfile.Core.Clients
             }
         }
 
-        public async Task SaveTalentData(Dictionary<string, string> identity, Session session, Player player, Talent talent, CancellationToken cancellationToken)
+        public async Task SaveTalentData(Dictionary<string, string> identity, SessionData session, Player player, Talent talent, CancellationToken cancellationToken)
         {
             var values = new Dictionary<string, string>(identity)
             {
-                { "replayID", session.Extension.SessionId },
+                { "replayID", session.TalentsExtension.SessionId },
                 { "blizz_id", player.BattleNetId.ToString() },
                 { "battletag", player.Name + "#" + player.BattleTag },
                 { "region", player.BattleNetRegionId.ToString() },
@@ -107,13 +107,13 @@ namespace HeroesProfile.Core.Clients
             }
         }
 
-        public async Task SavePlayerData(Dictionary<string, string> identity, Session session, CancellationToken cancellationToken)
+        public async Task SavePlayerData(Dictionary<string, string> identity, SessionData session, CancellationToken cancellationToken)
         {
             foreach (Player player in session.BattleLobby.Players)
             {
                 var values = new Dictionary<string, string>(identity)
                 {
-                    { "replayID", session.Extension.SessionId },
+                    { "replayID", session.TalentsExtension.SessionId },
                     { "battletag", player.Name + "#" +  player.BattleTag },
                     { "team", player.Team.ToString() },
                 };
@@ -133,13 +133,13 @@ namespace HeroesProfile.Core.Clients
             }
         }
 
-        public async Task UpdatePlayerData(Dictionary<string, string> identity, Session session, CancellationToken cancellationToken)
+        public async Task UpdatePlayerData(Dictionary<string, string> identity, SessionData session, CancellationToken cancellationToken)
         {
             foreach (Player player in session.StormSave.Players)
             {
                 var values = new Dictionary<string, string>(identity)
                 {
-                    { "replayID", session.Extension.SessionId },
+                    { "replayID", session.TalentsExtension.SessionId },
                     { "blizz_id", player.BattleNetId.ToString() },
                     { "battletag", player.Name + "#" + player.BattleTag},
                     { "hero", player.Character },
@@ -176,9 +176,9 @@ namespace HeroesProfile.Core.Clients
             }
         }
 
-        public async Task SaveMissingTalents(Dictionary<string, string> identity, Session session, CancellationToken cancellationToken)
+        public async Task SaveMissingTalents(Dictionary<string, string> identity, SessionData session, CancellationToken cancellationToken)
         {
-            if (!string.IsNullOrWhiteSpace(session.Extension.SessionId))
+            if (!string.IsNullOrWhiteSpace(session.TalentsExtension.SessionId))
             {
                 Replay replay = session.StormReplay;
 
@@ -192,7 +192,7 @@ namespace HeroesProfile.Core.Clients
                             {
                                 var playerTalent = $"{player.Name}:{talent.TalentName}";
 
-                                if (!session.Extension.PlayerFoundTalents.Contains(playerTalent))
+                                if (!session.TalentsExtension.PlayerFoundTalents.Contains(playerTalent))
                                 {
                                     await SaveTalentData(identity, session, player, talent, cancellationToken);
                                     await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);

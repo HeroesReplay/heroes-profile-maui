@@ -13,7 +13,7 @@ using Polly;
 
 namespace HeroesProfile.Core.CQRS.Commands
 {
-    public static class CopyToSessionAndRefresh
+    public static class UpdateSessionData
     {
         public record Command(string FileToCopy) : IRequest<Response>;
 
@@ -64,7 +64,7 @@ namespace HeroesProfile.Core.CQRS.Commands
                     File.Copy(command.FileToCopy, fullName, overwrite: true);
                 }
 
-                await sessionRepository.RefreshAsync(fullName, cancellationToken);
+                await sessionRepository.UpdateAsync(fullName, cancellationToken);
             }
         }
     }

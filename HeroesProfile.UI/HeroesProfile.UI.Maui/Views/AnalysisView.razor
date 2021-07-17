@@ -1,0 +1,164 @@
+﻿@page "/analysis"
+@using ReactiveUI.Blazor
+@using System.Reactive.Threading.Tasks
+@using System.Text.Json
+@inherits ReactiveComponentBase<AnalysisViewModel>
+
+<PageProgress Visible="@(ViewModel == null)" />
+
+<Row>
+
+    <!-- Files -->
+    <Column ColumnSize=ColumnSize.IsFull>
+        <Card Margin="Margin.Is4.OnY">
+            <CardHeader>
+                <CardTitle>File Detection</CardTitle>
+            </CardHeader>
+            <CardBody>
+                <Field Horizontal="true">
+                    <FieldLabel ColumnSize="ColumnSize.IsFull.OnTablet.Is2.OnDesktop">BattleLobby</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.IsFull.OnTablet.Is2.OnDesktop">
+                        @if (ViewModel.HasBattleLobby)
+                        {
+                            <TextEdit Text=@ViewModel.Session.Files.BattleLobby.Created.ToString() ReadOnly=true />
+                        }
+                        else
+                        {
+                            <TextEdit Text="Pending" ReadOnly=true />
+                        }
+                    </FieldBody>
+                </Field>
+                <Field Horizontal="true">
+                    <FieldLabel ColumnSize="ColumnSize.IsFull.OnTablet.Is2.OnDesktop">StormSave</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.IsFull.OnTablet.Is2.OnDesktop">
+                        @if (ViewModel.HasStormSave)
+                        {
+                            <TextEdit Text=@ViewModel.Session.Files.StormSave.Created.ToString() ReadOnly=true />
+                        }
+                        else
+                        {
+                            <TextEdit Text="Pending" ReadOnly=true />
+                        }
+                    </FieldBody>
+                </Field>
+                <Field Horizontal="true">
+                    <FieldLabel ColumnSize="ColumnSize.IsFull.OnTablet.Is2.OnDesktop">StormReplay</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.IsFull.OnTablet.Is2.OnDesktop">
+                        @if (ViewModel.HasStormReplay)
+                        {
+                            <TextEdit Text=@ViewModel.Session.Files.StormReplay.Created.ToString() ReadOnly=true />
+                        }
+                        else
+                        {
+                            <TextEdit Text="Pending" ReadOnly=true />
+                        }
+                    </FieldBody>
+                </Field>
+            </CardBody>
+        </Card>
+    </Column>
+
+</Row>
+
+<Row>
+    <!-- Talents -->
+    <Column ColumnSize=ColumnSize.IsHalf>
+        <Card Margin="Margin.Is4.OnY">
+            <CardHeader>
+                <CardTitle>Twitch Talents Extension</CardTitle>
+            </CardHeader>
+            <CardBody>
+                <Field Horizontal="true">
+                    <FieldLabel ColumnSize="ColumnSize.IsFull.OnTablet.Is4.OnDesktop">Session ID</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.IsFull.OnTablet.Is2.OnDesktop">
+                        @if (ViewModel.Session.TalentsExtension.SessionId != null)
+                        {
+                            <TextEdit Text=@ViewModel.Session.TalentsExtension.SessionId ReadOnly=true />
+                        }
+                        else
+                        {
+                            <TextEdit Placeholder="None" ReadOnly=true />
+                        }
+                    </FieldBody>
+                </Field>
+                <Field Horizontal="true">
+                    <FieldLabel ColumnSize="ColumnSize.IsFull.OnTablet.Is4.OnDesktop">Tracker Event Index</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.IsFull.OnTablet.Is2.OnDesktop">
+                        <TextEdit Text=@ViewModel.Session.TalentsExtension.TrackerEventIndex.ToString() ReadOnly=true />
+                    </FieldBody>
+                </Field>
+                <Field Horizontal="true">
+                    <FieldLabel ColumnSize="ColumnSize.IsFull.OnTablet.Is4.OnDesktop">Player Talents Detected</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.IsFull.OnTablet.Is2.OnDesktop">
+                        <TextEdit Text=@ViewModel.Session.TalentsExtension.PlayerFoundTalents.Count().ToString() ReadOnly=true />
+                    </FieldBody>
+                </Field>
+            </CardBody>
+        </Card>
+    </Column>
+
+    <!-- Prediction -->
+    <Column ColumnSize=ColumnSize.IsHalf>
+        <Card Margin="Margin.Is4.OnY">
+            <CardHeader>
+                <CardTitle>Twitch Auto Predictions</CardTitle>
+            </CardHeader>
+            <CardBody>
+                <Field Horizontal="true">
+                    <FieldLabel ColumnSize="ColumnSize.IsFull.OnTablet.Is4.OnDesktop">Prediction ID</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.IsFull.OnTablet.Is2.OnDesktop">
+                        @if (ViewModel.Session.Prediction.PredictionId != null)
+                        {
+                            <TextEdit Text=@ViewModel.Session.Prediction.PredictionId ReadOnly=true />
+                        }
+                        else
+                        {
+                            <TextEdit Placeholder="None" ReadOnly=true />
+                        }
+                    </FieldBody>
+                </Field>
+                <Field Horizontal="true">
+                    <FieldLabel ColumnSize="ColumnSize.IsFull.OnTablet.Is4.OnDesktop">Winning Outcome Id</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.IsFull.OnTablet.Is2.OnDesktop">
+                        @if (ViewModel.Session.Prediction.WinningOutcomeId != null)
+                        {
+                            <TextEdit Text=@ViewModel.Session.Prediction.WinningOutcomeId ReadOnly=true />
+                        }
+                        else
+                        {
+                            <TextEdit Placeholder="None" ReadOnly=true />
+                        }
+                    </FieldBody>
+                </Field>
+                <Field Horizontal="true">
+                    <FieldLabel ColumnSize="ColumnSize.IsFull.OnTablet.Is4.OnDesktop"> Other Outcome Id</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.IsFull.OnTablet.Is2.OnDesktop">
+                        @if (ViewModel.Session.Prediction.OtherOutcomeId != null)
+                        {
+                            <TextEdit Text=@ViewModel.Session.Prediction.OtherOutcomeId ReadOnly=true />
+                        }
+                        else
+                        {
+                            <TextEdit Placeholder="None" ReadOnly=true />
+                        }
+                    </FieldBody>
+                </Field>
+            </CardBody>
+        </Card>
+    </Column>
+</Row>
+
+@code {
+
+    [Inject]
+    public AnalysisViewModel AnalysisViewModel
+    {
+        get => ViewModel;
+        set => ViewModel = value;
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await AnalysisViewModel.LoadAsync();
+    }
+}

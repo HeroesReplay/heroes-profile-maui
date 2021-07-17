@@ -14,8 +14,6 @@ using Microsoft.Extensions.Hosting;
 
 namespace HeroesProfile.Core.BackgroundServices
 {
-
-
     public class ReplayProcessor : BackgroundService
     {
         private readonly IMediator mediator;

@@ -1,13 +1,8 @@
 ﻿using HeroesProfile.Core.BackgroundServices;
 using HeroesProfile.Core.CQRS.Commands;
-using HeroesProfile.Core.CQRS.Notifications;
-using HeroesProfile.UI.Maui.ViewModels;
 
 using MediatR;
 
-using Microsoft.Maui.Controls;
-
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,26 +14,13 @@ namespace HeroesProfile.UI.Maui
         private static List<Task> backgroundTasks = new List<Task>();
         private static CancellationTokenSource TokenSource = new CancellationTokenSource();
 
-        private static IServiceProvider ServiceProvider
-        {
-            get
-            {
-                IServiceProvider provider = null;
-#if WINDOWS
-                provider = Microsoft.Maui.MauiWinUIApplication.Current.Services;
-#elif MACCATALYST
-                provider = Microsoft.Maui.MauiUIApplicationDelegate.Current.Services;
-#endif
-                return provider;
-            }
-        }
-
         public static void Start()
         {
-            ReplayProcessor processor = (ReplayProcessor)ServiceProvider.GetService(typeof(ReplayProcessor));
-            FileWatchers watchers = (FileWatchers)ServiceProvider.GetService(typeof(FileWatchers));
+            ReplayProcessor processor = ServiceProvider.GetService<ReplayProcessor>();
+            FileWatchers watchers = ServiceProvider.GetService<FileWatchers>();
 
-            IMediator mediator = (IMediator)ServiceProvider.GetService(typeof(IMediator));
+            IMediator mediator = ServiceProvider.GetService<IMediator>();
+
             mediator.Send(new InitializeApp.Command(), TokenSource.Token);
 
             backgroundTasks.Add(processor.StartAsync(TokenSource.Token));

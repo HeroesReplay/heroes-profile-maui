@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Heroes.ReplayParser;
+
 using HeroesProfile.Core.Clients;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
+
 using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Commands
@@ -13,7 +16,7 @@ namespace HeroesProfile.Core.CQRS.Commands
     {
         public record Command(Replay Replay, ParseType ParseType) : IRequest<Response>;
 
-        public record Response(Session Session);
+        public record Response(SessionData Session);
 
         public class Handler : IRequestHandler<Command, Response>
         {
@@ -31,35 +34,34 @@ namespace HeroesProfile.Core.CQRS.Commands
             public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
             {
                 UserSettings userSettings = await userSettingsRepository.LoadAsync(cancellationToken);
-                Dictionary<string, string> identity = userSettings.TalentsIdentity;
 
                 if (request.ParseType == ParseType.BattleLobby)
                 {
                     // BattleLobby is only used for session creation
                 }
-                else if (request.ParseType == ParseType.StormReplay)
-                {
-                    await SaveMissingTalents(identity, cancellationToken);
-                }
                 else if (request.ParseType == ParseType.StormSave)
                 {
-                    await UpdateSession(identity, sessionRepository.Session, cancellationToken);
+                    await UpdateTwitchTalents(userSettings.TalentsIdentity, cancellationToken);
+                }
+                else if (request.ParseType == ParseType.StormReplay)
+                {
+                    await UpdateFinalTwitchTalents(userSettings.TalentsIdentity, cancellationToken);
                 }
 
                 return new Response(sessionRepository.Session);
             }
 
-            private async Task SaveMissingTalents(Dictionary<string, string> identity, CancellationToken cancellationToken)
+            private async Task UpdateFinalTwitchTalents(Dictionary<string, string> identity, CancellationToken cancellationToken)
             {
                 await client.SaveMissingTalents(identity, sessionRepository.Session, cancellationToken);
             }
 
-            private async Task UpdateSession(Dictionary<string, string> identity, Session session, CancellationToken cancellationToken)
+            private async Task UpdateTwitchTalents(Dictionary<string, string> identity, CancellationToken cancellationToken)
             {
-                if (session.StormSave == null || session.Files.BattleLobby == null || session.BattleLobby == null)
-                {
-                    return;
-                }
+                SessionData session = sessionRepository.Session;
+
+                // We need BOTH BattleLobby data and StormSave data
+                if (session.StormSave == null || session.BattleLobby == null) return;
 
                 // Can this not be processed once? IsBattleLobbyToStormSaveSynced = false/true
                 for (int stormPlayIndex = 0; stormPlayIndex < session.StormSave.Players.Length; stormPlayIndex++)
@@ -76,7 +78,7 @@ namespace HeroesProfile.Core.CQRS.Commands
 
                 if (session.StormSave.TrackerEvents != null)
                 {
-                    for (int i = session.Extension.TrackerEventIndex; i < session.StormSave.TrackerEvents.Count; i++)
+                    for (int i = session.TalentsExtension.TrackerEventIndex; i < session.StormSave.TrackerEvents.Count; i++)
                     {
                         var trackerEvent = session.StormSave.TrackerEvents[i];
                         string eventName = trackerEvent.Data.dictionary[0].blobText;
@@ -93,38 +95,38 @@ namespace HeroesProfile.Core.CQRS.Commands
                                 TimeSpanSelected = trackerEvent.TimeSpan
                             };
 
-                            if (!session.Extension.GameModeUpdated)
+                            if (!session.TalentsExtension.GameModeUpdated)
                             {
                                 await client.UpdateReplayData(identity, session, cancellationToken);
                                 await client.UpdatePlayerData(identity, session, cancellationToken);
-                                session.Extension.GameModeUpdated = true;
+                                session.TalentsExtension.GameModeUpdated = true;
                             }
 
                             var playerTalent = $"{player.Name}:{talent.TalentName}";
 
-                            if (!session.Extension.PlayerFoundTalents.Contains(playerTalent))
+                            if (!session.TalentsExtension.PlayerFoundTalents.Contains(playerTalent))
                             {
-                                session.Extension.PlayerFoundTalents.Add(playerTalent);
+                                session.TalentsExtension.PlayerFoundTalents.Add(playerTalent);
                                 await client.SaveTalentData(identity, session, player, talent, cancellationToken);
-                                session.Extension.TalentsUpdated = true;
+                                session.TalentsExtension.TalentsUpdated = true;
                             }
 
-                            session.Extension.TrackerEventIndex = i;
+                            session.TalentsExtension.TrackerEventIndex = i;
                         }
                     }
 
-                    if (session.Extension.TalentsUpdated)
+                    if (session.TalentsExtension.TalentsUpdated)
                     {
                         await client.NotifyTwitchTalentChange(identity, cancellationToken);
-                        session.Extension.TalentsUpdated = false;
+                        session.TalentsExtension.TalentsUpdated = false;
                     }
                 }
 
-                if (!session.Extension.GameModeUpdated)
+                if (!session.TalentsExtension.GameModeUpdated)
                 {
                     await client.UpdateReplayData(identity, session, cancellationToken);
                     await client.UpdatePlayerData(identity, session, cancellationToken);
-                    session.Extension.GameModeUpdated = true;
+                    session.TalentsExtension.GameModeUpdated = true;
                 }
             }
         }

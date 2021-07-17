@@ -4,7 +4,6 @@
 			 xmlns:local="clr-namespace:HeroesProfile.UI.Maui"
 			 x:Class="HeroesProfile.UI.Maui.MainPage"
 			 BackgroundColor="{DynamicResource PageBackgroundColor}">
-
     <b:BlazorWebView HostPage="wwwroot/index.html">
         <b:BlazorWebView.RootComponents>
             <b:RootComponent Selector="app" ComponentType="{x:Type local:Main}" />

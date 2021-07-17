@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HeroesProfile.UI.Maui.Services
+namespace HeroesProfile.UI.Maui
 {
     public interface ITrayService
     {

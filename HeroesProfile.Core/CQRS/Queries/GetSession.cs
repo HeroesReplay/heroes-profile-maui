@@ -12,7 +12,7 @@ namespace HeroesProfile.Core.CQRS.Queries
 
     public static class GetSession
     {
-        public record Response(Session Session);
+        public record Response(SessionData Session);
 
         public record Query : IRequest<Response>;
 

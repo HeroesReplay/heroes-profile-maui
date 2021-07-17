@@ -22,6 +22,7 @@ namespace HeroesProfile.Core.Models
         public string? TwitchClientId { get; set; }
         public List<string> BattleTags { get; set; }
 
+
         [JsonIgnore]
         public Dictionary<string, string> TalentsIdentity => new()
         {
@@ -61,8 +62,12 @@ namespace HeroesProfile.Core.Models
         public bool EnableFileSimulator { get; set; }
         public bool EnableFakeTwitch { get; set; }
         public bool EnableFakeHttp { get; set; }
-
         public bool DefaultUserSettingsOnStart { get; set; }
         public bool ClearStoredReplaysOnStart { get; set; }
+
+        public AppSettings()
+        {
+
+        }
     }
 }

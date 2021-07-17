@@ -17,9 +17,9 @@ namespace HeroesProfile.Core.Repositories
         private readonly AggregateReplayParser replayParser;
         private readonly ReaderWriterLockSlim readerWriterLockSlim = new(LockRecursionPolicy.NoRecursion);
 
-        private Session session;
+        private SessionData session;
 
-        public Session Session
+        public SessionData Session
         {
             get
             {
@@ -51,12 +51,12 @@ namespace HeroesProfile.Core.Repositories
         {
             this.appSettings = appSettings;
             this.replayParser = replayParser;
-            this.session = new Session();
+            this.session = new SessionData();
         }
 
         public async Task ClearAsync(CancellationToken cancellationToken)
         {
-            Session = new Session();
+            Session = new SessionData();
 
             await Policy
                 .Handle<Exception>()
@@ -74,7 +74,7 @@ namespace HeroesProfile.Core.Repositories
                 }, cancellationToken);
         }
 
-        public async Task RefreshAsync(string sessionFile, CancellationToken cancellationToken)
+        public async Task UpdateAsync(string sessionFile, CancellationToken cancellationToken)
         {
             ReplayParseData parseData = await replayParser.ParseAsync(new FileInfo(sessionFile), cancellationToken);
 
@@ -82,17 +82,17 @@ namespace HeroesProfile.Core.Repositories
             {
                 case ParseType.BattleLobby:
                     {
-                        Session.Files.BattleLobby = parseData.Replay;
+                        Session.Files.BattleLobby = new SessionFile(parseData.Replay, parseData.ParseType, DateTime.Now);
                         break;
                     }
                 case ParseType.StormReplay:
                     {
-                        Session.Files.StormReplay = parseData.Replay;
+                        Session.Files.StormReplay = new SessionFile(parseData.Replay, parseData.ParseType, DateTime.Now);
                         break;
                     }
                 case ParseType.StormSave:
                     {
-                        Session.Files.StormSave = parseData.Replay;
+                        Session.Files.StormSave = new SessionFile(parseData.Replay, parseData.ParseType, DateTime.Now);
                         break;
                     }
             }

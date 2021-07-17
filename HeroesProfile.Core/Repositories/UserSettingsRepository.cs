@@ -11,7 +11,7 @@ namespace HeroesProfile.Core.Repositories
     public class UserSettingsRepository
     {
         private readonly AppSettings appSettings;
-        private readonly UserSettings defaultSettings;
+        private readonly UserSettings defaultUserSettings;
 
         private readonly SemaphoreSlim semaphore = new(1, 1);
 
@@ -20,16 +20,13 @@ namespace HeroesProfile.Core.Repositories
         public UserSettingsRepository(AppSettings appSettings, UserSettings defaultSettings)
         {
             this.appSettings = appSettings;
-            this.defaultSettings = defaultSettings;
+            this.defaultUserSettings = defaultSettings;
         }
 
         public async Task InitilizeAsync(CancellationToken token)
         {
             await semaphore.WaitAsync(token);
-
-            var json = JsonSerializer.Serialize(defaultSettings, options);
-            await File.WriteAllTextAsync(appSettings.UserSettingsPath, json, token);
-
+            await File.WriteAllTextAsync(appSettings.UserSettingsPath, JsonSerializer.Serialize(defaultUserSettings, options), token);
             semaphore.Release();
         }
 
@@ -37,10 +34,14 @@ namespace HeroesProfile.Core.Repositories
         {
             await semaphore.WaitAsync(token);
 
-            var json = JsonSerializer.Serialize<UserSettings>(settings, options);
-            await File.WriteAllTextAsync(appSettings.UserSettingsPath, json, token);
-
-            semaphore.Release();
+            try
+            {
+                await File.WriteAllTextAsync(appSettings.UserSettingsPath, JsonSerializer.Serialize(settings, options), token);
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
         public async Task<UserSettings> LoadAsync(CancellationToken token)
@@ -48,9 +49,7 @@ namespace HeroesProfile.Core.Repositories
             try
             {
                 await semaphore.WaitAsync(token);
-
-                var json = await File.ReadAllTextAsync(appSettings.UserSettingsPath, token);
-                return JsonSerializer.Deserialize<UserSettings>(json, options);
+                return JsonSerializer.Deserialize<UserSettings>(await File.ReadAllTextAsync(appSettings.UserSettingsPath, token), options);
             }
             finally
             {
