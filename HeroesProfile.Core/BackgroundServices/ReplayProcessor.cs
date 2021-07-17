@@ -35,11 +35,9 @@ namespace HeroesProfile.Core.BackgroundServices
 
             if (!appSettings.EnableReplayProcessing) return;
 
-            TimeSpan TimeBetweenScans = TimeSpan.FromMinutes(10);
-
             while (!stoppingToken.IsCancellationRequested)
             {
-                _ = await mediator.Send(new ProcessAllNewReplays.Command(), stoppingToken);
+                _ = await mediator.Send(new ProcessOldestUnknownReplay.Command(Take: 10), stoppingToken);
 
                 List<GetReplays.Filter> filters = new()
                 {
@@ -54,7 +52,7 @@ namespace HeroesProfile.Core.BackgroundServices
                     _ = await mediator.Send(new UploadAndUpdateReplay.Command(storedReplay, HotsApi: false, HotsLogs: false), stoppingToken);
                 }
 
-                await Task.Delay(TimeBetweenScans, stoppingToken);
+                await Task.Delay(5000, stoppingToken);
             }
         }
     }

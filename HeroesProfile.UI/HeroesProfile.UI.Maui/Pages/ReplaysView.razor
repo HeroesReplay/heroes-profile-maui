@@ -40,11 +40,24 @@
                 <DataGridCommandColumn TItem="ReplaysViewModel.GridItem" />
                 <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Path)" Caption="Path" />
                 <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Created)" Caption="Created" />
+                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Updated)" Caption="Updated" />
                 <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Deleted)" Caption="Deleted" />
                 <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Fingerprint)" Caption="Fingerprint" />
-                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.ParseResult)" Caption="Parse Result" />
-                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.UploadStatus)" Caption="Upload Status" />
-                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.ProcessStatus)" Caption="Process Status" />
+                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.ParseResult)" Caption="Parse Result">
+                    <DisplayTemplate>
+                        <Badge Color=context.ParseResultColor>@context.ParseResult</Badge>
+                    </DisplayTemplate>
+                </DataGridColumn>
+                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.UploadStatus)" Caption="Upload Status">
+                    <DisplayTemplate>
+                        <Badge Color=context.UploadStatusColor>@context.UploadStatus</Badge>
+                    </DisplayTemplate>
+                </DataGridColumn>
+                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.ProcessStatus)" Caption="Process Status">
+                    <DisplayTemplate>
+                        <Badge Color=context.ProcessStatusColor>@context.ProcessStatus</Badge>
+                    </DisplayTemplate>
+                </DataGridColumn>
 
             </DataGrid>
         </Column>

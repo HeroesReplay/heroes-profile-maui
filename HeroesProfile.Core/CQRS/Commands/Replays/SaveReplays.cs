@@ -33,7 +33,7 @@ namespace HeroesProfile.Core.CQRS.Commands
                 var storedReplays = request.ParseDatas.Select(data => new StoredReplay()
                 {
                     Updated = DateTime.UtcNow,
-                    Created = data.File.CreationTime,
+                    Created = data.ParseResult == ParseResult.Success ? data.Replay.Timestamp : data.File.CreationTime,
                     Path = data.File.FullName,
                     ParseResult = data.ParseResult,
                     Fingerprint = data.Fingerprint,

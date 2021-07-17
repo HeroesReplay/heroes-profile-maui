@@ -14,13 +14,13 @@ using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Commands
 {
-    public static class ProcessAllNewReplays
+    public static class ProcessOldestUnknownReplay
     {
         public record Item(StoredReplay StoredReplay, ReplayParseData ParseData);
 
         public record Response(IEnumerable<Item> Processed);
 
-        public record Command : IRequest<Response>;
+        public record Command(int Take) : IRequest<Response>;
 
         public class Handler : IRequestHandler<Command, Response>
         {
@@ -35,11 +35,11 @@ namespace HeroesProfile.Core.CQRS.Commands
                 this.mediator = mediator;
             }
 
-            public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Response> Handle(Command command, CancellationToken cancellationToken)
             {
                 List<Item> items = new List<Item>();
 
-                IEnumerable<FileInfo> replays = await GetNewReplaysAsync(cancellationToken);
+                IEnumerable<FileInfo> replays = (await GetOldestUknownReplays(cancellationToken)).Take(command.Take);
 
                 int batchSize = Math.Max(Environment.ProcessorCount / 4, 1);
 
@@ -60,31 +60,17 @@ namespace HeroesProfile.Core.CQRS.Commands
                 return new Response(items);
             }
 
-            private IEnumerable<FileInfo> GetAllReplays()
+            private IEnumerable<FileInfo> GetAllReplaysOrderedByOldest()
             {
-                return new DirectoryInfo(appSettings.GameDocumentsDirectory).EnumerateFiles("*.StormReplay", SearchOption.AllDirectories);
+                return new DirectoryInfo(appSettings.GameDocumentsDirectory).EnumerateFiles("*.StormReplay", SearchOption.AllDirectories).OrderBy(x => x.CreationTime);
             }
 
-            private async Task<IEnumerable<FileInfo>> GetNewReplaysAsync(CancellationToken token)
+            private async Task<IEnumerable<FileInfo>> GetOldestUknownReplays(CancellationToken token)
             {
-                IEnumerable<StoredReplay> loadedReplays = await repository.LoadAsync(token);
-                IEnumerable<FileInfo> replays = GetAllReplays();
-
-                ConcurrentDictionary<string, StoredReplay> storedReplays = new ConcurrentDictionary<string, StoredReplay>(loadedReplays.ToDictionary(x => x.Path, x => x));
-
-                ConcurrentBag<FileInfo> newReplays = new ConcurrentBag<FileInfo>();
-
-                Parallel.ForEach(replays, (replay) =>
-                {
-                    if (!storedReplays.ContainsKey(replay.FullName))
-                    {
-                        newReplays.Add(replay);
-                    }
-                });
-
-                return newReplays.OrderBy(x => x.CreationTime);
+                List<StoredReplay> storedReplays = await repository.LoadAsync(token);
+                IEnumerable<FileInfo> replays = GetAllReplaysOrderedByOldest();
+                return replays.Where(replay => storedReplays.Find(stored => stored.Path == replay.FullName) == null).OrderBy(x => x.CreationTime);
             }
-
         }
     }
 }

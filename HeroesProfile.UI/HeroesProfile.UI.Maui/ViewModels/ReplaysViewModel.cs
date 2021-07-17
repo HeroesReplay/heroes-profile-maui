@@ -1,8 +1,12 @@
-﻿using HeroesProfile.Core.CQRS.Notifications;
+﻿using Blazorise;
+
+using HeroesProfile.Core.CQRS.Notifications;
 using HeroesProfile.Core.CQRS.Queries;
 using HeroesProfile.Core.Models;
 
 using MediatR;
+
+using Microsoft.AspNetCore.Components;
 
 using ReactiveUI;
 
@@ -29,7 +33,7 @@ namespace HeroesProfile.UI.Maui.ViewModels
         private async Task<IEnumerable<GridItem>> LoadStoredReplaysAsync()
         {
             GetReplays.Response result = await this.mediator.Send(new GetReplays.Query(new List<GetReplays.Filter>()));
-            return result.Replays.OrderByDescending(x => x.Updated).ThenByDescending(x => x.Created).Select(storedReplay => new GridItem(storedReplay));
+            return result.Replays.Select(storedReplay => new GridItem(storedReplay)).OrderByDescending(x => x.Updated).ThenByDescending(x => x.Created);
         }
 
         public ReactiveCommand<System.Reactive.Unit, IEnumerable<GridItem>> LoadStoredReplays { get; }
@@ -45,6 +49,72 @@ namespace HeroesProfile.UI.Maui.ViewModels
             public GridItem(StoredReplay replay)
             {
                 Item = replay;
+            }
+
+            public Color ParseResultColor
+            {
+                get
+                {
+                    return ParseResult switch
+                    {
+                        ParseResult.ComputerPlayerFound => Color.Info,
+                        ParseResult.Exception => Color.Danger,
+                        ParseResult.FileNotFound => Color.Danger,
+                        ParseResult.FileSizeTooLarge => Color.Danger,
+                        ParseResult.PtrRegion => Color.Info,
+                        ParseResult.PreAlphaWipe => Color.Info,
+                        ParseResult.Incomplete => Color.Danger,
+                        ParseResult.TryMeMode => Color.Danger,
+                        ParseResult.UnexpectedResult => Color.Warning,
+                        ParseResult.Success => Color.Success,
+                        ParseResult.CustomGame => Color.Info,
+                        _ => Color.Danger,
+                    };
+                }
+            }
+
+            public Color UploadStatusColor
+            {
+                get
+                {
+                    return UploadStatus switch
+                    {
+                        UploadStatus.None => Color.Info,
+                        UploadStatus.InProgress => Color.Primary,
+
+                        UploadStatus.Success => Color.Success,
+
+                        UploadStatus.PtrRegion => Color.Info,
+                        UploadStatus.Incomplete => Color.Info,
+                        UploadStatus.TooOld => Color.Info,
+                        UploadStatus.AiDetected => Color.Info,
+                        UploadStatus.CustomGame => Color.Info,
+                        UploadStatus.Duplicate => Color.Info,
+
+                        UploadStatus.UploadError => Color.Danger,
+
+                        _ => Color.Danger,
+                    };
+                }
+            }
+
+            public Color ProcessStatusColor
+            {
+                get
+                {
+                    return ProcessStatus switch
+                    {
+                        ProcessStatus.Success => Color.Success,
+
+                        ProcessStatus.Duplicate => Color.Info,
+                        ProcessStatus.NotSupported => Color.Info,
+                        ProcessStatus.Pending => Color.Info,
+
+                        ProcessStatus.Error => Color.Danger,
+
+                        _ => Color.Danger,
+                    };
+                }
             }
 
             // Customize the format 

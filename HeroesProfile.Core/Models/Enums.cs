@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Heroes.ReplayParser;
 
 namespace HeroesProfile.Core.Models
@@ -11,20 +12,19 @@ namespace HeroesProfile.Core.Models
         StormReplay
     }
 
-    [Flags]
     public enum ParseResult
     {
-        PtrRegion = DataParser.ReplayParseResult.PTRRegion,
+        Success = DataParser.ReplayParseResult.Success,
         ComputerPlayerFound = DataParser.ReplayParseResult.ComputerPlayerFound,
+        Incomplete = DataParser.ReplayParseResult.Incomplete,
+        PtrRegion = DataParser.ReplayParseResult.PTRRegion,
         TryMeMode = DataParser.ReplayParseResult.TryMeMode,
         Exception = DataParser.ReplayParseResult.Exception,
         PreAlphaWipe = DataParser.ReplayParseResult.PreAlphaWipe,
         FileSizeTooLarge = DataParser.ReplayParseResult.FileSizeTooLarge,
-        Incomplete = DataParser.ReplayParseResult.Incomplete,
         FileNotFound = DataParser.ReplayParseResult.FileNotFound,
         UnexpectedResult = DataParser.ReplayParseResult.UnexpectedResult,
-        Success = DataParser.ReplayParseResult.Success,
-        CustomGame
+        CustomGame = 1000
     }
 
     public enum ParseType

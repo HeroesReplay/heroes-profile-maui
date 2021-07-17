@@ -72,6 +72,7 @@ namespace HeroesProfile.Core.CQRS.Commands
                 }
 
                 storedReplay.Updated = DateTime.UtcNow;
+                storedReplay.UploadStatus = uploadStatus;
 
                 await mediator.Send(new UpdateReplays.Command(storedReplay));
 
