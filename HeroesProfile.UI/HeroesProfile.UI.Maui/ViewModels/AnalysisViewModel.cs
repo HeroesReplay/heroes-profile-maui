@@ -40,7 +40,12 @@ namespace HeroesProfile.UI.Maui.ViewModels
         {
             if (System.OperatingSystem.IsWindows())
             {
-                Process.Start(uri);
+                using (Process proc = new Process())
+                {
+                    proc.StartInfo.UseShellExecute = true;
+                    proc.StartInfo.FileName = uri;
+                    proc.Start();
+                }
             }
             else if (System.OperatingSystem.IsMacCatalyst())
             {

@@ -20,7 +20,7 @@
                   ShowPager=true
                   PageSize=10
                   Editable=false
-                  FilterMethod=DataGridFilterMethod.StartsWith
+                  FilterMethod=DataGridFilterMethod.Contains
                   @bind-SelectedRow="@ViewModel.SelectedRow">
 
                 <DataGridCommandColumn TItem="ReplaysViewModel.GridItem" />
@@ -44,9 +44,19 @@
                         <Badge Color=context.ProcessStatusColor>@context.ProcessStatus</Badge>
                     </DisplayTemplate>
                 </DataGridColumn>
-                <!-- TODO: Add Button to Open / Navigate to Heroes Profile Replay Page -->
-
-        </DataGrid>
+                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.WebLink)" Caption="Web Link">
+                    <DisplayTemplate>
+                        @if (context.WebLink != null && context.UploadStatus == UploadStatus.Success)
+                        {
+                            <Button Color=Color.Primary @onclick="@context.OpenInBrowser">Open WebLink</Button>
+                        }
+                        else
+                        {
+                            <Badge Color=Color.Info>No ReplayID</Badge>
+                        }
+                    </DisplayTemplate>
+                </DataGridColumn>
+            </DataGrid>
         </Column>
     </Row>
 }

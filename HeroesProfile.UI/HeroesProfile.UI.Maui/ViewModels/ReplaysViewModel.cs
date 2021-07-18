@@ -7,11 +7,13 @@ using HeroesProfile.Core.Models;
 using MediatR;
 
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 
 using ReactiveUI;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,16 +23,23 @@ namespace HeroesProfile.UI.Maui.ViewModels
     public class ReplaysViewModel : ReactiveObject
     {
         private readonly IMediator mediator;
+        private readonly AppSettings appSettings;
 
-        public ReplaysViewModel(IMediator mediator)
+        public static Uri RelativeMatchUri = new Uri("Match/Single", UriKind.Relative);
+
+        private Uri matchUri;
+
+        public ReplaysViewModel(IMediator mediator, AppSettings appSettings)
         {
             this.mediator = mediator;
+            this.appSettings = appSettings;
+            this.matchUri = new Uri(appSettings.HeroesProfileUri, RelativeMatchUri);
         }
 
         public async Task LoadAsync(CancellationToken cancellationToken)
         {
             GetReplays.Response result = await this.mediator.Send(new GetReplays.Query(new List<GetReplays.Filter>()), cancellationToken);
-            StoredReplays = result.Replays.Select(storedReplay => new GridItem(storedReplay)).OrderByDescending(x => x.Updated).ThenByDescending(x => x.Created);
+            StoredReplays = result.Replays.Select(storedReplay => new GridItem(storedReplay, matchUri)).OrderByDescending(x => x.Updated).ThenByDescending(x => x.Created);
         }
 
         private IEnumerable<GridItem> storedReplays;
@@ -51,9 +60,10 @@ namespace HeroesProfile.UI.Maui.ViewModels
         {
             public StoredReplay Item { get; }
 
-            public GridItem(StoredReplay replay)
+            public GridItem(StoredReplay replay, Uri MatchUri)
             {
                 Item = replay;
+                this.WebLink = replay.ReplayId != null ? new Uri(MatchUri, $"?replayID={Item.ReplayId.Value}") : null;
             }
 
             public Color ParseResultColor
@@ -126,7 +136,26 @@ namespace HeroesProfile.UI.Maui.ViewModels
                 }
             }
 
-            // Customize the format 
+
+            public void OpenInBrowser(MouseEventArgs e)
+            {
+                if (WebLink != null)
+                {
+                    if (OperatingSystem.IsWindows())
+                    {
+                        using (Process proc = new Process())
+                        {
+                            proc.StartInfo.UseShellExecute = true;
+                            proc.StartInfo.FileName = WebLink.ToString();
+                            proc.Start();
+                        }
+                    }
+
+                    // TODO: Mac Catalyst
+                }
+            }
+
+            public Uri? WebLink { get; set; }
 
             public DateTime Created => Item.Created;
             public DateTime Updated => Item.Updated;

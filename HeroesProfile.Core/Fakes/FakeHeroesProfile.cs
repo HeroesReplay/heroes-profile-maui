@@ -38,7 +38,7 @@ namespace HeroesProfile.Core.Fakes
         {
             // Simulate API request throttling
             // 25% chance to trigger 429
-            if (random.Next(1, 4) == 1)
+            if (random.Next(1, 5) == 1)
             {
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.TooManyRequests)
                 {
@@ -64,7 +64,7 @@ namespace HeroesProfile.Core.Fakes
             // Fake file uploads
             if (request.RequestUri.LocalPath.Equals("/upload"))
             {
-                int replayID = random.Next(1, 500);
+                int replayID = random.Next(1, 1000);
 
                 UploadStatus status;
 
@@ -74,7 +74,16 @@ namespace HeroesProfile.Core.Fakes
                 }
                 else
                 {
-                    status = Enum.GetValues(typeof(UploadStatus)).OfType<UploadStatus>().OrderBy(x => Guid.NewGuid()).First();
+                    if (random.Next(1, 4) != 4) // 75% chance its success
+                    {
+                        status = UploadStatus.Success;
+                    }
+                    else
+                    {
+                        status = Enum.GetValues(typeof(UploadStatus)).OfType<UploadStatus>().OrderBy(x => Guid.NewGuid()).First();
+                    }
+
+
                     Uploaded.Add(replayID);
                 }
 
