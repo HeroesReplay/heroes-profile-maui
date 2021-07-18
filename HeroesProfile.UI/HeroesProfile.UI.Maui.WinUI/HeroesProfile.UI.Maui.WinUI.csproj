@@ -74,4 +74,12 @@
         <PackageReference Include="Microsoft.ProjectReunion.WinUI" Version="0.8.1" />
         <PackageReference Include="Microsoft.ProjectReunion.InteractiveExperiences" Version="0.8.1" NoWarn="NU1701" />
     </ItemGroup>
+    <ItemGroup>
+      <None Update="Platforms\Windows\icon.ico">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Platforms\Windows\icon.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
 </Project>

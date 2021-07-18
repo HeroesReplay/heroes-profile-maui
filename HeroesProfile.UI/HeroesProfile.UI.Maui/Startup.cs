@@ -35,13 +35,14 @@ namespace HeroesProfile.UI.Maui
                 {
 #if WINDOWS
                     lifecycle
-                        .AddWindows(window => window.OnClosed((window, args) =>
+                        .AddWindows(window => window.OnClosed((app, args) =>
                         {
-
+                            Initializer.Stop();
                         }))
-                        .AddWindows(window => window.OnLaunched((window, args) =>
+                        .AddWindows(window => window.OnLaunched((app, args) =>
                         {
-
+                            Initializer.Start();
+                            Platforms.Windows.WindowExtensions.SetIcon(MauiWinUIApplication.Current.MainWindow, "Platforms/Windows/icon.ico");
                         }));
 #endif
                 })
@@ -58,8 +59,8 @@ namespace HeroesProfile.UI.Maui
                         .AddFontAwesomeIcons();
 #if WINDOWS
                     services
-                        .AddSingleton<ITrayService, Platforms.Windows.TrayService>();
-                        //.AddSingleton<INotificationService, Platforms.Windows.NotificationService>();
+                        .AddSingleton<ITrayService, Platforms.Windows.TrayService>()
+                        .AddSingleton<INotificationService, Platforms.Windows.NotificationService>();
 #elif MACCATALYST
                     services
                         .AddSingleton<ITrayService, MacCatalyst.TrayService>()

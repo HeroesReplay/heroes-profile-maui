@@ -35,13 +35,6 @@ namespace HeroesProfile.UI.Maui.WinUI
         {
             base.OnLaunched(args);
             Microsoft.Maui.Essentials.Platform.OnLaunched(args);
-
-            MainWindow.Closed += (sender, e) =>
-            {
-                Initializer.Stop();
-            };
-
-            Initializer.Start();
         }
     }
 }
