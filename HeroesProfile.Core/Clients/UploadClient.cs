@@ -7,13 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using HeroesProfile.Core.Models;
-using HeroesProfile.Core.Repositories;
-
-using TwitchLib.Api.Core.Enums;
-using TwitchLib.Api.Helix.Models.Predictions;
-using TwitchLib.Api.Helix.Models.Predictions.CreatePrediction;
-using TwitchLib.Api.Helix.Models.Predictions.EndPrediction;
-using TwitchLib.Api.Interfaces;
 
 namespace HeroesProfile.Core.Clients
 {
@@ -27,7 +20,7 @@ namespace HeroesProfile.Core.Clients
     }
 
 
-    public record UploadResponse(int ReplayId, bool Success, UploadStatus Status);
+    public record UploadResponse(bool Success, UploadStatus Status, int? ReplayId = null);
 
     public class UploadClient : IUploadClient
     {
@@ -63,13 +56,13 @@ namespace HeroesProfile.Core.Clients
                             bool success = document.RootElement.GetProperty("success").GetBoolean();
                             UploadStatus status = Enum.Parse<UploadStatus>(document.RootElement.GetProperty("status").GetString(), ignoreCase: true);
 
-                            return new UploadResponse(replayId, success, status);
+                            return new UploadResponse(Success: success, Status: status, ReplayId: replayId);
                         }
                     }
                 }
             }
 
-            return new UploadResponse(0, false, UploadStatus.UploadError);
+            return new UploadResponse(Success: false, Status: UploadStatus.UploadError, ReplayId: null);
         }
 
         public async Task<UploadResponse> UploadToHotsApiAsync(byte[] data, string fingerprint, CancellationToken cancellationToken)

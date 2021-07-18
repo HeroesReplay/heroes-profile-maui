@@ -33,11 +33,6 @@ namespace HeroesProfile.Core.CQRS.Notifications
 
                 if (settings.EnableTwitchExtension)
                 {
-                    var response = await mediator.Send(new GetSession.Query(), cancellationToken);
-
-                    if (response.Session.BattleLobby == null)
-                        throw new Exception("Really, why is BattleLobby null before this point?");
-
                     await mediator.Send(new UpdateTalents.Command(notification.Data.Replay, notification.Data.ParseType), cancellationToken);
                 }
             }

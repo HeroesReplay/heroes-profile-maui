@@ -25,11 +25,11 @@ namespace HeroesProfile.Core.CQRS.Commands
             private readonly SessionRepository sessionRepository;
             private readonly UserSettingsRepository settingsRepository;
             private readonly AppSettings appSettings;
-            private readonly ITwitchWrapper twitchWrapper;
+            private readonly ITwitchApiClient twitchWrapper;
 
-            private SessionData session => sessionRepository.Session;
+            private SessionData session => sessionRepository.SessionData;
 
-            public Handler(UserSettingsRepository settingsRepository, SessionRepository sessionRepository, AppSettings appSettings, ITwitchWrapper twitchWrapper)
+            public Handler(UserSettingsRepository settingsRepository, SessionRepository sessionRepository, AppSettings appSettings, ITwitchApiClient twitchWrapper)
             {
                 this.settingsRepository = settingsRepository;
                 this.sessionRepository = sessionRepository;

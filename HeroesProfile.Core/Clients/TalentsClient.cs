@@ -11,6 +11,7 @@ using HeroesProfile.Core.Models;
 
 namespace HeroesProfile.Core.Clients
 {
+
     public class TalentsClient
     {
         private readonly AppSettings appSettings;

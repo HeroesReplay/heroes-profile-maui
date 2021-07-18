@@ -5,6 +5,7 @@ using MediatR;
 
 using ReactiveUI;
 
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace HeroesProfile.UI.Maui.ViewModels
@@ -16,9 +17,8 @@ namespace HeroesProfile.UI.Maui.ViewModels
         public bool HasBattleLobby => Session.BattleLobby != null;
         public bool HasStormSave => Session.StormSave != null;
         public bool HasStormReplay => Session.StormReplay != null;
-
-        public bool HasPreMatch => false;
-        public bool HasPostMatch => false;
+        public bool HasPreMatch => session.PreMatchUri != null;
+        public bool HasPostMatch => session.PostMatchUri != null;
 
 
         private SessionData session;
@@ -33,6 +33,18 @@ namespace HeroesProfile.UI.Maui.ViewModels
             {
                 session = value;
                 this.RaisePropertyChanged();
+            }
+        }
+
+        public void OpenInBrowser(string uri)
+        {
+            if (System.OperatingSystem.IsWindows())
+            {
+                Process.Start(uri);
+            }
+            else if (System.OperatingSystem.IsMacCatalyst())
+            {
+
             }
         }
 

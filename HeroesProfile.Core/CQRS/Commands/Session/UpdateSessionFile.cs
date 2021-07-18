@@ -13,7 +13,8 @@ using Polly;
 
 namespace HeroesProfile.Core.CQRS.Commands
 {
-    public static class UpdateSessionData
+
+    public static class UpdateSessionFile
     {
         public record Command(string FileToCopy) : IRequest<Response>;
 
@@ -44,7 +45,7 @@ namespace HeroesProfile.Core.CQRS.Commands
 
                 if (result.Outcome == OutcomeType.Successful)
                 {
-                    await mediator.Publish(new SessionUpdated.Notification(sessionRepository.Session));
+                    await mediator.Publish(new SessionUpdated.Notification(sessionRepository.SessionData));
                 }
 
                 return new Response(result.Outcome == OutcomeType.Successful);

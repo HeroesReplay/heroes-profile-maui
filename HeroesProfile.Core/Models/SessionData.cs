@@ -22,6 +22,10 @@ namespace HeroesProfile.Core.Models
         public Replay? StormSave => Files?.StormSave?.Replay;
         public Replay? StormReplay => Files?.StormReplay?.Replay;
 
+        public Uri? PostMatchUri { get; set; }
+
+        public Uri? PreMatchUri { get; set;  }
+
 
         public ReplayFilesData Files { get; set; }
 

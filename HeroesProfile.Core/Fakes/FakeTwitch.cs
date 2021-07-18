@@ -70,11 +70,11 @@ namespace HeroesProfile.Core.Fakes
         }
     }
 
-    public class FakeTwitchWrapperClient : ITwitchWrapper
+    public class FakeTwitchApiClient : ITwitchApiClient
     {
         TwitchPredictionData data;
 
-        public FakeTwitchWrapperClient()
+        public FakeTwitchApiClient()
         {
             data = new TwitchPredictionData()
             {

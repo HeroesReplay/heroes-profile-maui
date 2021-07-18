@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using HeroesProfile.Core.Clients;
 using HeroesProfile.Core.CQRS.Queries;
 using HeroesProfile.Core.Models;
+using HeroesProfile.Core.Repositories;
 
 using MediatR;
 
@@ -22,11 +23,17 @@ namespace HeroesProfile.Core.CQRS.Commands
         {
             private readonly IUploadClient uploadUploadClient;
             private readonly IMediator mediator;
+            private readonly SessionRepository sessionRepository;
+            private readonly AppSettings appSettings;
+            private readonly UserSettingsRepository userSettingsRepository;
 
-            public Handler(IUploadClient uploadUploadClient, IMediator mediator)
+            public Handler(IUploadClient uploadUploadClient, IMediator mediator, SessionRepository sessionRepository, AppSettings appSettings, UserSettingsRepository userSettingsRepository)
             {
                 this.uploadUploadClient = uploadUploadClient;
                 this.mediator = mediator;
+                this.sessionRepository = sessionRepository;
+                this.appSettings = appSettings;
+                this.userSettingsRepository = userSettingsRepository;
             }
 
             public async Task<Response> Handle(Command command, CancellationToken cancellationToken)
@@ -52,7 +59,7 @@ namespace HeroesProfile.Core.CQRS.Commands
 
                 UploadStatus uploadStatus = uploadResponse.Status;
                 StoredReplay storedReplay = command.StoredReplay;
-                int replayId = uploadResponse.ReplayId;
+                int? replayId = uploadResponse.ReplayId;
 
                 if (uploadResponse.Success)
                 {
@@ -73,8 +80,10 @@ namespace HeroesProfile.Core.CQRS.Commands
 
                 storedReplay.Updated = DateTime.UtcNow;
                 storedReplay.UploadStatus = uploadStatus;
+                storedReplay.ReplayId = replayId;
 
                 await mediator.Send(new UpdateReplays.Command(storedReplay));
+
 
                 return new(uploadResponse.Success, replayId, uploadStatus);
             }

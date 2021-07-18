@@ -37,18 +37,25 @@ namespace HeroesProfile.Core.Fakes
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             // Simulate API request throttling
+            // 25% chance to trigger 429
             if (random.Next(1, 4) == 1)
             {
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.TooManyRequests)
                 {
                     Headers =
                     {
-                        RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(10))
+                        RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(5))
                     }
                 });
             }
 
+            // Fake PreMatch Id
+            if (new Uri(appSettings.HeroesProfileUri, PreMatchClient.PreMatchUri).Equals(request.RequestUri))
+            {
+                return Task.FromResult(new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent(DateTime.Now.Millisecond.ToString()) });
+            }
 
+            // Fake Save Replay
             if (new Uri(appSettings.HeroesProfileApiUri, TalentsClient.SaveReplayUri).Equals(request.RequestUri))
             {
                 return Task.FromResult(new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent(DateTime.Now.Millisecond.ToString()) });
@@ -74,6 +81,7 @@ namespace HeroesProfile.Core.Fakes
                 return Task.FromResult(new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent($@"{{""replayID"": {replayID}, ""success"": {(status == UploadStatus.Success).ToString().ToLower()}, ""status"": ""{status}"" }}") });
             }
 
+            // Fake the success of everything other request
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
         }
     }

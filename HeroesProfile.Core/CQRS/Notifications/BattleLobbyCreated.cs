@@ -40,7 +40,7 @@ namespace HeroesProfile.Core.CQRS.Notifications
 
                 if (settings.EnablePreMatch)
                 {
-                    // TODO:
+                    await mediator.Send(new UpdateSessionPreMatch.Command(notification.Data), cancellationToken);
                 }
             }
         }

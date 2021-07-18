@@ -11,17 +11,17 @@ using TwitchLib.Api.Interfaces;
 
 namespace HeroesProfile.Core.Clients
 {
-    public interface ITwitchWrapper
+    public interface ITwitchApiClient
     {
         Task<EndPredictionResponse> EndPrediction(string broadcasterId, string predictionId, PredictionStatusEnum status, string? outcomeId = null, string? accessToken = null);
         Task<CreatePredictionResponse> CreatePrediction(CreatePredictionRequest request, string? accessToken = null);
     }
 
-    public class TwitchWrapperClient : ITwitchWrapper
+    public class TwitchApiClient : ITwitchApiClient
     {
         private readonly ITwitchAPI twitchAPI;
 
-        public TwitchWrapperClient(ITwitchAPI twitchAPI)
+        public TwitchApiClient(ITwitchAPI twitchAPI)
         {
             this.twitchAPI = twitchAPI;
         }

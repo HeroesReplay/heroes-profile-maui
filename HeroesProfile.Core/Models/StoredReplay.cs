@@ -11,6 +11,7 @@ namespace HeroesProfile.Core.Models
         public ParseResult ParseResult { get; set; }
         public ProcessStatus ProcessStatus { get; set; }
         public UploadStatus UploadStatus { get; set; }
+        public int? ReplayId { get; set; }
 
         public StoredReplay()
         {

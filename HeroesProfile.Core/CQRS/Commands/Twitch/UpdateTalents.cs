@@ -48,17 +48,17 @@ namespace HeroesProfile.Core.CQRS.Commands
                     await UpdateFinalTwitchTalents(userSettings.TalentsIdentity, cancellationToken);
                 }
 
-                return new Response(sessionRepository.Session);
+                return new Response(sessionRepository.SessionData);
             }
 
             private async Task UpdateFinalTwitchTalents(Dictionary<string, string> identity, CancellationToken cancellationToken)
             {
-                await client.SaveMissingTalents(identity, sessionRepository.Session, cancellationToken);
+                await client.SaveMissingTalents(identity, sessionRepository.SessionData, cancellationToken);
             }
 
             private async Task UpdateTwitchTalents(Dictionary<string, string> identity, CancellationToken cancellationToken)
             {
-                SessionData session = sessionRepository.Session;
+                SessionData session = sessionRepository.SessionData;
 
                 // We need BOTH BattleLobby data and StormSave data
                 if (session.StormSave == null || session.BattleLobby == null) return;

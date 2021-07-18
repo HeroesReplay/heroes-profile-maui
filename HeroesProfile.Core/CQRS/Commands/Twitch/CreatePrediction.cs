@@ -22,12 +22,12 @@ namespace HeroesProfile.Core.CQRS.Commands
 
         public class Handler : IRequestHandler<Command, Response>
         {
-            private readonly ITwitchWrapper twitchWrapper;
+            private readonly ITwitchApiClient twitchWrapper;
             private readonly AppSettings appSettings;
             private readonly SessionRepository sessionRepository;
             private readonly UserSettingsRepository settingsRepository;
 
-            public Handler(ITwitchWrapper twitchWrapper, AppSettings appSettings, SessionRepository sessionRepository, UserSettingsRepository settingsRepository)
+            public Handler(ITwitchApiClient twitchWrapper, AppSettings appSettings, SessionRepository sessionRepository, UserSettingsRepository settingsRepository)
             {
                 this.twitchWrapper = twitchWrapper;
                 this.appSettings = appSettings;
@@ -39,7 +39,7 @@ namespace HeroesProfile.Core.CQRS.Commands
             {
                 UserSettings userSettings = await settingsRepository.LoadAsync(cancellationToken);
 
-                SessionData session = sessionRepository.Session;
+                SessionData session = sessionRepository.SessionData;
 
                 if (!string.IsNullOrWhiteSpace(session.Prediction?.PredictionId))
                 {

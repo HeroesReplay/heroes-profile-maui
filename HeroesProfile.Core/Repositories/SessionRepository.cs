@@ -19,7 +19,7 @@ namespace HeroesProfile.Core.Repositories
 
         private SessionData session;
 
-        public SessionData Session
+        public SessionData SessionData
         {
             get
             {
@@ -56,7 +56,7 @@ namespace HeroesProfile.Core.Repositories
 
         public async Task ClearAsync(CancellationToken cancellationToken)
         {
-            Session = new SessionData();
+            SessionData = new SessionData();
 
             await Policy
                 .Handle<Exception>()
@@ -82,17 +82,17 @@ namespace HeroesProfile.Core.Repositories
             {
                 case ParseType.BattleLobby:
                     {
-                        Session.Files.BattleLobby = new SessionFile(parseData.Replay, parseData.ParseType, DateTime.Now);
+                        SessionData.Files.BattleLobby = new SessionFile(parseData.Replay, parseData.ParseType, DateTime.Now);
                         break;
                     }
                 case ParseType.StormReplay:
                     {
-                        Session.Files.StormReplay = new SessionFile(parseData.Replay, parseData.ParseType, DateTime.Now);
+                        SessionData.Files.StormReplay = new SessionFile(parseData.Replay, parseData.ParseType, DateTime.Now);
                         break;
                     }
                 case ParseType.StormSave:
                     {
-                        Session.Files.StormSave = new SessionFile(parseData.Replay, parseData.ParseType, DateTime.Now);
+                        SessionData.Files.StormSave = new SessionFile(parseData.Replay, parseData.ParseType, DateTime.Now);
                         break;
                     }
             }

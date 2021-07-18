@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using HeroesProfile.Core.CQRS.Commands;
 using HeroesProfile.Core.CQRS.Queries;
 using HeroesProfile.Core.Models;
+using HeroesProfile.Core.Repositories;
 
 using MediatR;
 
@@ -18,12 +19,14 @@ namespace HeroesProfile.Core.BackgroundServices
     {
         private readonly IMediator mediator;
         private readonly AppSettings appSettings;
+        private readonly UserSettingsRepository userSettingsRepository;
         private bool started;
 
-        public ReplayProcessor(IMediator mediator, AppSettings appSettings)
+        public ReplayProcessor(IMediator mediator, AppSettings appSettings, UserSettingsRepository userSettingsRepository)
         {
             this.mediator = mediator;
             this.appSettings = appSettings;
+            this.userSettingsRepository = userSettingsRepository;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -35,6 +38,8 @@ namespace HeroesProfile.Core.BackgroundServices
 
             while (!stoppingToken.IsCancellationRequested)
             {
+                var userSettings = await userSettingsRepository.LoadAsync(stoppingToken);
+
                 _ = await mediator.Send(new ProcessOldestUnknownReplay.Command(Take: 10), stoppingToken);
 
                 List<GetReplays.Filter> filters = new()
@@ -47,7 +52,12 @@ namespace HeroesProfile.Core.BackgroundServices
 
                 foreach (StoredReplay storedReplay in replaysResponse.Replays.OrderByDescending(replay => replay.Created).Reverse())
                 {
-                    _ = await mediator.Send(new UploadAndUpdateReplay.Command(storedReplay, HotsApi: false, HotsLogs: false), stoppingToken);
+                    UploadAndUpdateReplay.Response? response = await mediator.Send(new UploadAndUpdateReplay.Command(storedReplay, HotsApi: false, HotsLogs: false), stoppingToken);
+
+                    if (userSettings.EnablePostMatch && response.Success && response.ReplayId.HasValue)
+                    {
+                        await mediator.Send(new UpdateSessionPostMatch.Command(storedReplay, response.ReplayId.Value), stoppingToken);
+                    }
                 }
 
                 await Task.Delay(5000, stoppingToken);

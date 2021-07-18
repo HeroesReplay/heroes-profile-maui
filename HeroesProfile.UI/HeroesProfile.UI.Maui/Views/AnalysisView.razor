@@ -8,15 +8,15 @@
 
 <Row>
     <!-- Files -->
-    <Column ColumnSize=ColumnSize.IsHalf>
+    <Column ColumnSize=ColumnSize.Is4>
         <Card Margin="Margin.Is4.OnY">
             <CardHeader>
                 <CardTitle>File Detection</CardTitle>
             </CardHeader>
             <CardBody>
                 <Field Horizontal="true">
-                    <FieldLabel ColumnSize="ColumnSize.Is2">BattleLobby</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is4">
+                    <FieldLabel ColumnSize="ColumnSize.Is4">BattleLobby</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.Is8">
                         @if (ViewModel.HasBattleLobby)
                         {
                             <TextEdit Text=@ViewModel.Session.Files.BattleLobby.Created.ToString() ReadOnly=true />
@@ -28,8 +28,8 @@
                     </FieldBody>
                 </Field>
                 <Field Horizontal="true">
-                    <FieldLabel ColumnSize="ColumnSize.Is2">StormSave</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is4">
+                    <FieldLabel ColumnSize="ColumnSize.Is4">StormSave</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.Is8">
                         @if (ViewModel.HasStormSave)
                         {
                             <TextEdit Text=@ViewModel.Session.Files.StormSave.Created.ToString() ReadOnly=true />
@@ -41,8 +41,8 @@
                     </FieldBody>
                 </Field>
                 <Field Horizontal="true">
-                    <FieldLabel ColumnSize="ColumnSize.Is2">StormReplay</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is4">
+                    <FieldLabel ColumnSize="ColumnSize.Is4">StormReplay</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.Is8">
                         @if (ViewModel.HasStormReplay)
                         {
                             <TextEdit Text=@ViewModel.Session.Files.StormReplay.Created.ToString() ReadOnly=true />
@@ -57,35 +57,39 @@
         </Card>
     </Column>
     <!-- Match Analysis -->
-    <Column>
+    <Column ColumnSize=ColumnSize.Is8>
         <Card Margin="Margin.Is4.OnY">
             <CardHeader>
                 <CardTitle>Heroes Profile Analysis</CardTitle>
             </CardHeader>
             <CardBody>
                 <Field Horizontal="true">
-                    <FieldLabel ColumnSize="ColumnSize.Is4">PreMatch Analysis</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is6">
+                    <FieldLabel ColumnSize="ColumnSize.Is3">PreMatch Analysis</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.Is9">
                         @if (ViewModel.HasPreMatch)
                         {
-                           <CardLink Class="form-control" Source="http://heroesprofile.com">http://heroesprofile.com</CardLink>
+                            var uri = ViewModel.Session.PreMatchUri.ToString();
+
+                            <CardLink Class="form-control" @onclick=@((e) => ViewModel.OpenInBrowser(uri)) Source="@uri">@uri</CardLink>
                         }
                         else
                         {
-                            <CardLink Class="form-control" Source="http://heroesprofile.com">http://heroesprofile.com</CardLink>
+                            <TextEdit Text="No Pre Match Link found" ReadOnly=true />
                         }
                     </FieldBody>
                 </Field>
                 <Field Horizontal="true">
-                    <FieldLabel ColumnSize="ColumnSize.Is4">PostMatch Analysis</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is6">
+                    <FieldLabel ColumnSize="ColumnSize.Is3">PostMatch Analysis</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.Is9">
                         @if (ViewModel.HasPostMatch)
                         {
-                            <CardLink Class="form-control" Source="http://heroesprofile.com">http://heroesprofile.com</CardLink>
+                            var uri = ViewModel.Session.PostMatchUri.ToString();
+
+                            <CardLink Class="form-control" @onclick=@((e) => ViewModel.OpenInBrowser(uri)) Source="@uri">@uri</CardLink>
                         }
                         else
                         {
-                            <CardLink Class="form-control" Source="http://heroesprofile.com">http://heroesprofile.com</CardLink>
+                            <TextEdit Text="No Post Match Link found" ReadOnly=true />
                         }
                     </FieldBody>
                 </Field>
@@ -96,7 +100,7 @@
 
 <Row>
     <!-- Talents -->
-    <Column ColumnSize=ColumnSize.IsHalf>
+    <Column ColumnSize=ColumnSize.IsThird>
         <Card Margin="Margin.Is4.OnY">
             <CardHeader>
                 <CardTitle>Twitch Talents Extension</CardTitle>
@@ -104,7 +108,7 @@
             <CardBody>
                 <Field Horizontal="true">
                     <FieldLabel ColumnSize="ColumnSize.Is4">Session ID</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is2">
+                    <FieldBody ColumnSize="ColumnSize.Is8">
                         @if (ViewModel.Session.TalentsExtension.SessionId != null)
                         {
                             <TextEdit Text=@ViewModel.Session.TalentsExtension.SessionId ReadOnly=true />
@@ -117,13 +121,13 @@
                 </Field>
                 <Field Horizontal="true">
                     <FieldLabel ColumnSize="ColumnSize.Is4">Tracker Event Index</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is2">
+                    <FieldBody ColumnSize="ColumnSize.Is8">
                         <TextEdit Text=@ViewModel.Session.TalentsExtension.TrackerEventIndex.ToString() ReadOnly=true />
                     </FieldBody>
                 </Field>
                 <Field Horizontal="true">
                     <FieldLabel ColumnSize="ColumnSize.Is4">Player Talents Detected</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is2">
+                    <FieldBody ColumnSize="ColumnSize.Is8">
                         <TextEdit Text=@ViewModel.Session.TalentsExtension.PlayerFoundTalents.Count().ToString() ReadOnly=true />
                     </FieldBody>
                 </Field>
@@ -131,7 +135,7 @@
         </Card>
     </Column>
     <!-- Prediction -->
-    <Column ColumnSize=ColumnSize.IsHalf>
+    <Column ColumnSize=ColumnSize.IsThird>
         <Card Margin="Margin.Is4.OnY">
             <CardHeader>
                 <CardTitle>Twitch Auto Predictions</CardTitle>
@@ -139,7 +143,7 @@
             <CardBody>
                 <Field Horizontal="true">
                     <FieldLabel ColumnSize="ColumnSize.Is4">Prediction ID</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is2">
+                    <FieldBody ColumnSize="ColumnSize.Is8">
                         @if (ViewModel.Session.Prediction.PredictionId != null)
                         {
                             <TextEdit Text=@ViewModel.Session.Prediction.PredictionId ReadOnly=true />
@@ -152,7 +156,7 @@
                 </Field>
                 <Field Horizontal="true">
                     <FieldLabel ColumnSize="ColumnSize.Is4">Winning Outcome Id</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is2">
+                    <FieldBody ColumnSize="ColumnSize.Is8">
                         @if (ViewModel.Session.Prediction.WinningOutcomeId != null)
                         {
                             <TextEdit Text=@ViewModel.Session.Prediction.WinningOutcomeId ReadOnly=true />
@@ -165,7 +169,7 @@
                 </Field>
                 <Field Horizontal="true">
                     <FieldLabel ColumnSize="ColumnSize.Is4"> Other Outcome Id</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is2">
+                    <FieldBody ColumnSize="ColumnSize.Is8">
                         @if (ViewModel.Session.Prediction.OtherOutcomeId != null)
                         {
                             <TextEdit Text=@ViewModel.Session.Prediction.OtherOutcomeId ReadOnly=true />

@@ -47,6 +47,7 @@ namespace HeroesProfile.Core
                 .Build();
 
             AppSettings appSettings = configuration.GetSection("AppSettings").Get<AppSettings>();
+            UserSettings defaultUserSettings = configuration.GetSection("UserSettings").Get<UserSettings>();
 
             Directory.CreateDirectory(appSettings.GameTempDirectory);
             Directory.CreateDirectory(appSettings.GameDocumentsDirectory);
@@ -60,8 +61,8 @@ namespace HeroesProfile.Core
             */
             services
                 .AddSingleton(configuration)
-                .AddSingleton(configuration.GetSection("AppSettings").Get<AppSettings>())
-                .AddSingleton(configuration.GetSection("UserSettings").Get<UserSettings>())
+                .AddSingleton(appSettings)
+                .AddSingleton(defaultUserSettings)
                 .AddLogging(builder =>
                 {
                     if (environment.ApplicationName.Equals("HeroesProfile.UI") && appSettings.Debug)
@@ -108,22 +109,32 @@ namespace HeroesProfile.Core
                 .AddTransient<IReplayParser, BattleLobbyParser>()
                 .AddTransient<IReplayParser, StormSaveParser>();
 
+            services
+                .AddSingleton<ITwitchAPI, TwitchAPI>(provider => new TwitchAPI(provider.GetRequiredService<ILoggerFactory>(), rateLimiter: null, settings: null));
+
             /*
              * Upload client is used for Uploading Replays to Heroes Profile /Upload endpoint.
              * Talents client is used for the Heroes Profile Twitch Extension using /twitch/extension endpoint.
+             * PreMatch client is used for posting players + returning a PreMatch ID for unique Uri
+             * TwitchApiClient is a wrapper around the actual TwitchAPI (easier to create fake response objects than figure out the correct JSON to fake for the real client)
              */
             services
                 .AddSingleton<IUploadClient, UploadClient>()
                 .AddSingleton<TalentsClient, TalentsClient>()
-                .AddSingleton<ITwitchAPI, TwitchAPI>(provider => new TwitchAPI(provider.GetRequiredService<ILoggerFactory>(), rateLimiter: null, settings: null));
-
-            services.AddSingleton(typeof(ITwitchWrapper), appSettings.EnableFakeTwitch ? typeof(FakeTwitchWrapperClient) : typeof(TwitchWrapperClient));
+                .AddSingleton<PreMatchClient>()
+                .AddSingleton(typeof(ITwitchApiClient), appSettings.EnableFakeTwitch ? typeof(FakeTwitchApiClient) : typeof(TwitchApiClient));
 
             var talentsClientBuilder = services
                     .AddHttpClient<TalentsClient>()
                     .ConfigureHttpClient(client => client.BaseAddress = appSettings.HeroesProfileApiUri)
                     .AddPolicyHandler((provider, ctx) => PollyPolicies.GetHeroesProfileRetryPolicy(provider.GetRequiredService<ILogger<TalentsClient>>()))
                     .SetHandlerLifetime(TimeSpan.FromMinutes(5));
+
+            var preMatchClientBuilder = services
+                .AddHttpClient<PreMatchClient>()
+                .ConfigureHttpClient(client => client.BaseAddress = appSettings.HeroesProfileUri)
+                .AddPolicyHandler((provider, ctx) => PollyPolicies.GetHeroesProfileRetryPolicy(provider.GetRequiredService<ILogger<TalentsClient>>()))
+                .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
             var uploadClientBuilder = services
                 .AddHttpClient<IUploadClient, UploadClient>()
@@ -138,6 +149,7 @@ namespace HeroesProfile.Core
             {
                 services.AddTransient<FakeHeroesProfileDelegatingHandler>();
 
+                preMatchClientBuilder.ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<FakeHeroesProfileDelegatingHandler>());
                 talentsClientBuilder.ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<FakeHeroesProfileDelegatingHandler>());
                 uploadClientBuilder.ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<FakeHeroesProfileDelegatingHandler>());
             }

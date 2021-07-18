@@ -27,7 +27,7 @@ namespace HeroesProfile.Core.CQRS.Queries
 
             public Task<Response> Handle(Query request, CancellationToken cancellationToken)
             {
-                return Task.FromResult(new Response(sessionManager.Session));
+                return Task.FromResult(new Response(sessionManager.SessionData));
             }
         }
     }

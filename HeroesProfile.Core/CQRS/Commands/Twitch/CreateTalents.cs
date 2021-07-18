@@ -38,15 +38,15 @@ namespace HeroesProfile.Core.CQRS.Commands
 
                 if (!string.IsNullOrWhiteSpace(sessionId))
                 {
-                    sessionRepository.Session.TalentsExtension.SessionId = sessionId;
-                    await talentsClient.SavePlayerData(userSettings.TalentsIdentity, sessionRepository.Session, cancellationToken);
+                    sessionRepository.SessionData.TalentsExtension.SessionId = sessionId;
+                    await talentsClient.SavePlayerData(userSettings.TalentsIdentity, sessionRepository.SessionData, cancellationToken);
                     await talentsClient.NotifyTwitchTalentChange(userSettings.TalentsIdentity, cancellationToken);
 
-                    await mediator.Publish(new Notifications.SessionUpdated.Notification(sessionRepository.Session), cancellationToken);
+                    await mediator.Publish(new Notifications.SessionUpdated.Notification(sessionRepository.SessionData), cancellationToken);
                 }
 
 
-                return new Response(this.sessionRepository.Session);
+                return new Response(this.sessionRepository.SessionData);
             }
         }
     }

@@ -13,7 +13,7 @@ namespace HeroesProfile.Core.CQRS.Notifications
 {
     public static class StormReplayCreated
     {
-        public record Notification(ReplayParseData ParseResult) : INotification;
+        public record Notification(ReplayParseData ReplayParseData) : INotification;
 
         public class Handler : INotificationHandler<Notification>
         {
@@ -30,9 +30,9 @@ namespace HeroesProfile.Core.CQRS.Notifications
             {
                 UserSettings settings = await userSettingsRepository.LoadAsync(cancellationToken);
 
-                if (settings.EnableTwitchExtension && notification.ParseResult.ParseResult == ParseResult.Success)
+                if (settings.EnableTwitchExtension && notification.ReplayParseData.ParseResult == ParseResult.Success)
                 {
-                    await mediator.Send(new UpdateTalents.Command(notification.ParseResult.Replay, notification.ParseResult.ParseType), cancellationToken);
+                    await mediator.Send(new UpdateTalents.Command(notification.ReplayParseData.Replay, notification.ReplayParseData.ParseType), cancellationToken);
                 }
 
                 if (settings.EnablePredictions)
@@ -42,11 +42,10 @@ namespace HeroesProfile.Core.CQRS.Notifications
 
                 if (settings.EnablePostMatch)
                 {
-                    // TODO: OpenPostMatch.Command()
+                    // await mediator.Send(new CreatePostMatchLink.Command(), cancellationToken);
                 }
 
-
-                await mediator.Send(new SaveReplays.Command(notification.ParseResult), cancellationToken);
+                await mediator.Send(new SaveReplays.Command(notification.ReplayParseData), cancellationToken);
             }
         }
     }

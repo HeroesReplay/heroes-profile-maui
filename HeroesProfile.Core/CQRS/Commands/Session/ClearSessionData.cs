@@ -32,7 +32,7 @@ namespace HeroesProfile.Core.CQRS.Commands
             {
                 await sessionRepository.ClearAsync(cancellationToken);
 
-                await mediator.Publish(new SessionUpdated.Notification(sessionRepository.Session));
+                await mediator.Publish(new SessionUpdated.Notification(sessionRepository.SessionData));
 
                 return new Response();
             }

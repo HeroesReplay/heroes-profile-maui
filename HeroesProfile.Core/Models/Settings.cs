@@ -47,6 +47,7 @@ namespace HeroesProfile.Core.Models
         public bool Debug { get; set; }
         public Uri? HeroesProfileUri { get; set; }
         public Uri? HeroesProfileApiUri { get; set; }
+
         public string GameTempDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Temp", "Heroes of the Storm");
         public string GameDocumentsDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Heroes of the Storm");
         public string SimulationTargetDirectory => Path.Combine(GameDocumentsDirectory, "Simulation");
