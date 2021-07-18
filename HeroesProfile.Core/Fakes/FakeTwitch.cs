@@ -2,6 +2,8 @@
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
 
+using MediatR;
+
 using System;
 using System.Net;
 using System.Net.Http;
@@ -43,6 +45,17 @@ namespace HeroesProfile.Core.Fakes
         }
     }
 
+    public class FakeEndPredictionResponse : EndPredictionResponse
+    {
+        public FakeEndPredictionResponse(TwitchPredictionData data)
+        {
+            this.Data = new Prediction[]
+            {
+                new FakePrediction(data),
+            };
+        }
+    }
+
     public class FakePrediction : Prediction
     {
         public FakePrediction(TwitchPredictionData data)
@@ -59,25 +72,29 @@ namespace HeroesProfile.Core.Fakes
 
     public class FakeTwitchWrapperClient : ITwitchWrapper
     {
-        private readonly SessionRepository sessionRepository;
+        TwitchPredictionData data;
 
-        public FakeTwitchWrapperClient(SessionRepository sessionRepository)
+        public FakeTwitchWrapperClient()
         {
-            this.sessionRepository = sessionRepository;
+            data = new TwitchPredictionData()
+            {
+                OtherOutcomeId = Guid.NewGuid().ToString(),
+                PredictionId = Guid.NewGuid().ToString(),
+                WinningOutcomeId = Guid.NewGuid().ToString()
+            };
         }
 
         public Task<CreatePredictionResponse> CreatePrediction(CreatePredictionRequest request, string? accessToken = null)
         {
-            sessionRepository.Session.Prediction.PredictionId = Guid.NewGuid().ToString();
-            sessionRepository.Session.Prediction.WinningOutcomeId = Guid.NewGuid().ToString();
-            sessionRepository.Session.Prediction.OtherOutcomeId = Guid.NewGuid().ToString();
+            var response = new FakeCreatePredictionResponse(data);
 
-            return Task.FromResult<CreatePredictionResponse>(new FakeCreatePredictionResponse(sessionRepository.Session.Prediction));
+            return Task.FromResult<CreatePredictionResponse>(response);
         }
 
         public Task<EndPredictionResponse> EndPrediction(string broadcasterId, string predictionId, PredictionStatusEnum status, string? outcomeId = null, string? accessToken = null)
         {
-            throw new NotImplementedException();
+            var response = new FakeEndPredictionResponse(data);
+            return Task.FromResult<EndPredictionResponse>(response);
         }
     }
 }

@@ -17,6 +17,9 @@ namespace HeroesProfile.UI.Maui.ViewModels
         public bool HasStormSave => Session.StormSave != null;
         public bool HasStormReplay => Session.StormReplay != null;
 
+        public bool HasPreMatch => false;
+        public bool HasPostMatch => false;
+
 
         private SessionData session;
 
