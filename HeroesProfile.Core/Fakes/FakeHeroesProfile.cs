@@ -36,12 +36,25 @@ namespace HeroesProfile.Core.Fakes
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            if (TalentsClient.ValidateUri.Equals(request.RequestUri.GetComponents(UriComponents.Path, UriFormat.Unescaped)))
+            {
+                if (random.Next(1, 3) == 1)
+                {
+                    return Task.FromResult(new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent(DateTime.Now.Millisecond.ToString()) });
+                }
+                else
+                {
+                    return Task.FromResult(new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent("Authentication failed") });
+                }
+            }
+
             // Simulate API request throttling
             // 25% chance to trigger 429
             if (random.Next(1, 5) == 1)
             {
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.TooManyRequests)
                 {
+                    Content = new StringContent("Slow down"),
                     Headers =
                     {
                         RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(5))

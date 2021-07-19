@@ -23,7 +23,6 @@ namespace HeroesProfile.UI.Maui.ViewModels
     public class ReplaysViewModel : ReactiveObject
     {
         private readonly IMediator mediator;
-        private readonly AppSettings appSettings;
 
         public static Uri RelativeMatchUri = new Uri("Match/Single", UriKind.Relative);
 
@@ -32,7 +31,6 @@ namespace HeroesProfile.UI.Maui.ViewModels
         public ReplaysViewModel(IMediator mediator, AppSettings appSettings)
         {
             this.mediator = mediator;
-            this.appSettings = appSettings;
             this.matchUri = new Uri(appSettings.HeroesProfileUri, RelativeMatchUri);
         }
 
@@ -155,12 +153,29 @@ namespace HeroesProfile.UI.Maui.ViewModels
                 }
             }
 
-            public Uri? WebLink { get; set; }
+            public void LaunchReplay(MouseEventArgs e)
+            {
+                if (WebLink != null)
+                {
+                    if (OperatingSystem.IsWindows())
+                    {
+                        using (Process proc = new Process())
+                        {
+                            proc.StartInfo.UseShellExecute = true;
+                            proc.StartInfo.FileName = Item.Path;
+                            proc.Start();
+                        }
+                    }
 
+                    // TODO: Mac Catalyst
+                }
+            }
+
+            public Uri? WebLink { get; set; }
             public DateTime Created => Item.Created;
             public DateTime Updated => Item.Updated;
             public string Path => System.IO.Path.GetFileName(Item.Path);
-            public bool Deleted => !System.IO.File.Exists(Item.Path);
+            public bool Exists => System.IO.File.Exists(Item.Path);
             public string Fingerprint => Item.Fingerprint;
             public ParseResult ParseResult => Item.ParseResult;
             public UploadStatus UploadStatus => Item.UploadStatus;

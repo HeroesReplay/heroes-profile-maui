@@ -24,7 +24,7 @@ namespace HeroesProfile.UI.Maui
                 .UseMauiApp<App>()
                 .ConfigureFonts(fonts =>
                 {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+
                 })
                 .EnableHotReload()
                 .ConfigureHostConfiguration(configBuilder =>
@@ -53,7 +53,9 @@ namespace HeroesProfile.UI.Maui
                     services
                         .AddBlazorise(options =>
                         {
-                            options.ChangeTextOnKeyPress = true; // optional
+                            options.ChangeTextOnKeyPress = false;
+                            // options.DelayTextOnKeyPressInterval
+                            // options.DelayTextOnKeyPress
                         })
                         .AddBootstrapProviders()
                         .AddFontAwesomeIcons();

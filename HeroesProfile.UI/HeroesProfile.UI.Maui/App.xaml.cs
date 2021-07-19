@@ -6,9 +6,6 @@ namespace HeroesProfile.UI.Maui
 {
     public partial class App : Microsoft.Maui.Controls.Application
     {
-        private Window window;
-        private MainPage mainPage;
-
         public App()
         {
             InitializeComponent();
@@ -16,12 +13,7 @@ namespace HeroesProfile.UI.Maui
 
         protected override Window CreateWindow(IActivationState activationState)
         {
-            On<Microsoft.Maui.Controls.PlatformConfiguration.Windows>().SetImageDirectory("Assets");
-
-            mainPage = new MainPage();
-            window = new Window(mainPage) { Title = "Heroes Profile Desktop - Alpha" };
-            
-            return window;
-        }        
+            return new Window(new MainPage()) { Title = "Heroes Profile Desktop - Alpha" };
+        }
     }
 }

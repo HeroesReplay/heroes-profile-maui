@@ -11,12 +11,12 @@ using HeroesProfile.Core.Models;
 
 namespace HeroesProfile.Core.Clients
 {
-
     public class TalentsClient
     {
         private readonly AppSettings appSettings;
         private readonly HttpClient httpClient;
 
+        public static readonly Uri ValidateUri = new("twitch/validate/heroesprofile/token", UriKind.Relative);
         public static readonly Uri SaveReplayUri = new("twitch/extension/save/replay", UriKind.Relative);
         public static readonly Uri UpdateReplayDataUri = new("twitch/extension/update/replay/", UriKind.Relative);
         public static readonly Uri SavePlayersUri = new("twitch/extension/save/player", UriKind.Relative);
@@ -28,6 +28,28 @@ namespace HeroesProfile.Core.Clients
         {
             this.appSettings = appSettings;
             this.httpClient = httpClient;
+        }
+
+        public async Task<(string? Error, string? UserId)> GetUserIdByAuth(string email, string twitchBroadcasterId, string twitchKey, CancellationToken cancellationToken)
+        {
+            var authParameters = new Uri($"?email={email}&twitch_nickname={twitchBroadcasterId}&hp_twitch_key={twitchKey}", UriKind.Relative);
+            HttpResponseMessage? response = await httpClient.GetAsync(new Uri(new Uri(httpClient.BaseAddress, ValidateUri), authParameters), cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+
+                if (int.TryParse(content, out int userId))
+                {
+                    return (null, $"{userId}");
+                }
+                else
+                {
+                    return (content, null);
+                }
+            }
+
+            return ($"HTTP ERROR: {response.StatusCode}", null);
         }
 
         public async Task<string> CreateSession(Dictionary<string, string> identity, CancellationToken cancellationToken)

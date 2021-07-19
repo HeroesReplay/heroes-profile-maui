@@ -14,7 +14,7 @@
   <Properties>
     <DisplayName>Heroes Profile</DisplayName>
     <PublisherDisplayName>Skill Tree Development, LLC</PublisherDisplayName>
-    <Logo>Assets\appiconStoreLogo.png</Logo>
+    <Logo>Assets\logoStoreLogo.png</Logo>
   </Properties>
 
   <Dependencies>
@@ -32,21 +32,21 @@
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
         DisplayName="Heroes Profile"
-        Description="Heroes Profile"
+        Description="Heroes Profile Desktop is the desktop component of the Heroes Profile Twitch features package as well as a Heroes of the Storm Replay Uploader."
         BackgroundColor="transparent"
-        Square150x150Logo="Assets\appiconMediumTile.png"
-        Square44x44Logo="Assets\appiconLogo.png">
+        Square150x150Logo="Assets\logoMediumTile.png"
+        Square44x44Logo="Assets\logoLogo.png">
         <uap:DefaultTile
-          Wide310x150Logo="Assets\appiconWideTile.png"
-          Square71x71Logo="Assets\appiconSmallTile.png"
-          Square310x310Logo="Assets\appiconLargeTile.png"
+          Wide310x150Logo="Assets\logoWideTile.png"
+          Square71x71Logo="Assets\logoSmallTile.png"
+          Square310x310Logo="Assets\logoLargeTile.png"
           ShortName="Heroes Replay">
           <uap:ShowNameOnTiles>
             <uap:ShowOn Tile="square150x150Logo"/>
             <uap:ShowOn Tile="wide310x150Logo"/>
           </uap:ShowNameOnTiles>
         </uap:DefaultTile >
-        <uap:SplashScreen Image="Assets\appiconfgSplashScreen.png" />
+        <uap:SplashScreen Image="Assets\deathwingSplashScreen.png" />
       </uap:VisualElements>
     </Application>
   </Applications>

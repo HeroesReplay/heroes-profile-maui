@@ -13,8 +13,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <MauiImage Include="..\HeroesProfile.UI.Maui\Resources\appicon.svg" Link="Resources\appicon.svg" ForegroundFile="..\HeroesProfile.UI.Maui\Resources\appiconfg.svg" IsAppIcon="true" Color="#512BD4" />
-        <MauiSplashScreen Include="..\HeroesProfile.UI.Maui\Resources\appiconfg.svg" Link="Resources\appiconfg.svg" Color="#512BD4" />
+        <MauiImage Include="..\HeroesProfile.UI.Maui\Resources\logo.svg" Link="Resources\logo.svg" IsAppIcon="true" Color="#00000000" />
+        <MauiSplashScreen Include="..\HeroesProfile.UI.Maui\Resources\deathwing.png" Link="Resources\deathwing.png" Color="#222222" />
         <MauiImage Include="..\HeroesProfile.UI.Maui\Resources\Images\*" Link="Resources\Images\%(Filename)%(Extension)" />
         <MauiFont Include="..\HeroesProfile.UI.Maui\Resources\Fonts\*" Link="Resources\Fonts\%(Filename)%(Extension)" />
     </ItemGroup>
@@ -23,7 +23,7 @@
         <Compile Include="..\HeroesProfile.UI.Maui\**\*.cs" Exclude="..\HeroesProfile.UI.Maui\bin\**;..\HeroesProfile.UI.Maui\obj\**;..\HeroesProfile.UI.Maui\Platforms\**" Link="%(RecursiveDir)%(Filename)%(Extension)" />
         <MauiXaml Include="..\HeroesProfile.UI.Maui\**\*.xaml" Exclude="..\HeroesProfile.UI.Maui\bin\**;..\HeroesProfile.UI.Maui\obj\**" Link="%(RecursiveDir)%(FileName)%(Extension)" />
         <_ThisProjectStaticWebAsset Include="..\HeroesProfile.UI.Maui\wwwroot\**" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" RelativePath="%(RecursiveDir)%(Filename)%(Extension)" />
-        <None Include="@(_ThisProjectStaticWebAsset)"/>
+        <None Include="@(_ThisProjectStaticWebAsset)" />
         <RazorComponent Include="..\HeroesProfile.UI.Maui\**\*.razor" Exclude="..\HeroesProfile.UI.Maui\bin\**;..\HeroesProfile.UI.Maui\obj\**" Link="%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
@@ -44,21 +44,21 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Blazorise" Version="0.9.3.10" />
-        <PackageReference Include="Blazorise.Animate" Version="0.9.3.10" />
-        <PackageReference Include="Blazorise.Bootstrap" Version="0.9.3.10" />
-        <PackageReference Include="Blazorise.Components" Version="0.9.3.10" />
-        <PackageReference Include="Blazorise.DataGrid" Version="0.9.3.10" />
-        <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.3.10" />
-        <PackageReference Include="Blazorise.Sidebar" Version="0.9.3.10" />
-        <PackageReference Include="Blazorise.Snackbar" Version="0.9.3.10" />
+        <PackageReference Include="Blazorise" Version="0.9.*" />
+        <PackageReference Include="Blazorise.Animate" Version="0.9.*" />
+        <PackageReference Include="Blazorise.Bootstrap" Version="0.9.*" />
+        <PackageReference Include="Blazorise.Components" Version="0.9.*" />
+        <PackageReference Include="Blazorise.DataGrid" Version="0.9.*" />
+        <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.*" />
+        <PackageReference Include="Blazorise.Sidebar" Version="0.9.*" />
+        <PackageReference Include="Blazorise.Snackbar" Version="0.9.*" />
         <PackageReference Include="CommunityToolkit.WinUI.Notifications" Version="7.0.3" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="MediatR" Version="9.0.0" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
-        
+
         <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0-preview.6.*" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0-preview.6.*" />
         <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0-preview.6.*" />

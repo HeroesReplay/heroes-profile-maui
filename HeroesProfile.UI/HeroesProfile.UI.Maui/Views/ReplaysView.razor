@@ -17,38 +17,57 @@
             <DataGrid TItem=ReplaysViewModel.GridItem
                   Data=@ViewModel.StoredReplays
                   Filterable=true
+                  PageSizes="@(new int[] { 5, 10 })"
                   ShowPager=true
                   PageSize=10
+                  Responsive=true
                   Editable=false
                   FilterMethod=DataGridFilterMethod.Contains
                   @bind-SelectedRow="@ViewModel.SelectedRow">
 
                 <DataGridCommandColumn TItem="ReplaysViewModel.GridItem" />
                 <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Path)" Caption="Path" />
-                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Created)" Caption="Created" />
+
+                @* Date of Replay is usually part of file name. So no need to actually show this *@
+                @*<DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Created)" Caption="Created" />*@
+
                 <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Updated)" Caption="Updated" />
-                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Deleted)" Caption="Deleted" />
-                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Fingerprint)" Caption="Fingerprint" />
-                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.ParseResult)" Caption="Parse Result">
+
+                @* Users dont really care for fingerprint, nor would they know what to do with it *@
+                @*<DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Fingerprint)" Caption="Fingerprint" />*@
+
+                <DataGridColumn Filterable=false TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.ParseResult)" Caption="Parse">
                     <DisplayTemplate>
                         <Badge Color=context.ParseResultColor>@context.ParseResult</Badge>
                     </DisplayTemplate>
                 </DataGridColumn>
-                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.UploadStatus)" Caption="Upload Status">
+                <DataGridColumn Filterable=false TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.UploadStatus)" Caption="Upload">
                     <DisplayTemplate>
                         <Badge Color=context.UploadStatusColor>@context.UploadStatus</Badge>
                     </DisplayTemplate>
                 </DataGridColumn>
-                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.ProcessStatus)" Caption="Process Status">
+                <DataGridColumn Filterable=false TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.ProcessStatus)" Caption="Status">
                     <DisplayTemplate>
                         <Badge Color=context.ProcessStatusColor>@context.ProcessStatus</Badge>
                     </DisplayTemplate>
                 </DataGridColumn>
-                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.WebLink)" Caption="Web Link">
+                <DataGridColumn Filterable=false TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Exists)" Caption="Launch">
+                    <DisplayTemplate>
+                        @if (!context.Exists)
+                        {
+                            <Badge Color=Color.Warning>No Local file</Badge>
+                        }
+                        else
+                        {
+                            <Button Size=Size.Small Color=Color.Primary @onclick="@context.LaunchReplay">Launch Replay</Button>
+                        }
+                    </DisplayTemplate>
+                </DataGridColumn>
+                <DataGridColumn Filterable=false TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.WebLink)" Caption="Web Link">
                     <DisplayTemplate>
                         @if (context.WebLink != null && context.UploadStatus == UploadStatus.Success)
                         {
-                            <Button Color=Color.Primary @onclick="@context.OpenInBrowser">Open WebLink</Button>
+                            <Button Size=Size.Small Color=Color.Primary @onclick="@context.OpenInBrowser">Open WebLink</Button>
                         }
                         else
                         {

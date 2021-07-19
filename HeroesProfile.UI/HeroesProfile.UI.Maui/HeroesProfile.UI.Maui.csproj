@@ -14,30 +14,30 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <MauiImage Include="Resources\appicon.svg" ForegroundFile="Resources\appiconfg.svg" IsAppIcon="true" Color="#512BD4" />
-        <MauiSplashScreen Include="Resources\appiconfg.svg" Color="#512BD4" />
+        <MauiImage Include="Resources\logo.svg" ForegroundFile="Resources\logo.svg" IsAppIcon="true" />
+        <MauiSplashScreen Include="Resources\deathwing.png" Color="#222222" />
         <MauiImage Include="Resources\Images\*" />
         <MauiFont Include="Resources\Fonts\*" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Blazorise" Version="0.9.3.10" />
-        <PackageReference Include="Blazorise.Animate" Version="0.9.3.10" />
-        <PackageReference Include="Blazorise.Bootstrap" Version="0.9.3.10" />
-        <PackageReference Include="Blazorise.Components" Version="0.9.3.10" />
-        <PackageReference Include="Blazorise.DataGrid" Version="0.9.3.10" />
-        <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.3.10" />
-        <PackageReference Include="Blazorise.Sidebar" Version="0.9.3.10" />
-        <PackageReference Include="Blazorise.Snackbar" Version="0.9.3.10" />
+        <PackageReference Include="Blazorise" Version="0.9.*" />
+        <PackageReference Include="Blazorise.Animate" Version="0.9.*" />
+        <PackageReference Include="Blazorise.Bootstrap" Version="0.9.*" />
+        <PackageReference Include="Blazorise.Components" Version="0.9.*" />
+        <PackageReference Include="Blazorise.DataGrid" Version="0.9.*" />
+        <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.*" />
+        <PackageReference Include="Blazorise.Sidebar" Version="0.9.*" />
+        <PackageReference Include="Blazorise.Snackbar" Version="0.9.*" />
         <PackageReference Include="FluentValidation" Version="10.3.0" />
     </ItemGroup>
-    
+
     <ItemGroup>
         <PackageReference Include="MediatR" Version="9.0.0" />
-        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />        
+        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
         <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0-preview.6.*" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0-preview.6.*" />
-        <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0-preview.6.*" />        
+        <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0-preview.6.*" />
         <PackageReference Include="ReactiveUI" Version="14.1.1" />
         <PackageReference Include="ReactiveUI.Blazor" Version="14.1.1" />
     </ItemGroup>
@@ -45,5 +45,19 @@
     <ItemGroup>
         <ProjectReference Include="..\..\HeroesProfile.Core\HeroesProfile.Core.csproj" />
     </ItemGroup>
-    
+
+    <ItemGroup>
+      <None Update="Platforms\MacCatalyst\trayicon.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Resources\logo.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Resources\Fonts\" />
+      <Folder Include="Resources\Images\" />
+    </ItemGroup>
+
 </Project>
