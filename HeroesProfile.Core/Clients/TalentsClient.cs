@@ -132,6 +132,7 @@ namespace HeroesProfile.Core.Clients
 
         public async Task SavePlayerData(Dictionary<string, string> identity, SessionData session, CancellationToken cancellationToken)
         {
+            // TODO: Serialize and POST as ARRAY of data
             foreach (Player player in session.BattleLobby.Players)
             {
                 var values = new Dictionary<string, string>(identity)
@@ -158,6 +159,7 @@ namespace HeroesProfile.Core.Clients
 
         public async Task UpdatePlayerData(Dictionary<string, string> identity, SessionData session, CancellationToken cancellationToken)
         {
+            // TODO: Serialize and POST as ARRAY of data
             foreach (Player player in session.StormSave.Players)
             {
                 var values = new Dictionary<string, string>(identity)
@@ -207,6 +209,7 @@ namespace HeroesProfile.Core.Clients
 
                 if (replay != null)
                 {
+                    // TODO: Serialize and POST as ARRAY of data
                     foreach (Player player in replay.Players.OrderByDescending(i => i.IsWinner))
                     {
                         if (player.Talents != null)

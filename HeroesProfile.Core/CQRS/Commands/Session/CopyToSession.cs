@@ -14,7 +14,7 @@ using Polly;
 namespace HeroesProfile.Core.CQRS.Commands
 {
 
-    public static class UpdateSessionFile
+    public static class CopyToSession
     {
         public record Command(string FileToCopy) : IRequest<Response>;
 

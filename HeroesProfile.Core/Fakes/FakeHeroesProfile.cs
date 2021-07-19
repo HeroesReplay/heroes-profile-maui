@@ -50,7 +50,7 @@ namespace HeroesProfile.Core.Fakes
 
             // Simulate API request throttling
             // 25% chance to trigger 429
-            if (random.Next(1, 6) == 1)
+            if (random.Next(1, 8) == 1)
             {
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.TooManyRequests)
                 {
@@ -87,7 +87,7 @@ namespace HeroesProfile.Core.Fakes
                 }
                 else
                 {
-                    if (random.Next(1, 4) != 4) // 75% chance its success
+                    if (random.Next(1, 4) <= 2) // 75% chance its success
                     {
                         status = UploadStatus.Success;
                     }

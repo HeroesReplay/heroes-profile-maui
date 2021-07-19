@@ -41,7 +41,7 @@ namespace HeroesProfile.Core.Repositories
         {
             try
             {
-                await semaphore.WaitAsync();
+                await semaphore.WaitAsync(token);
                 await File.WriteAllTextAsync(appSettings.StoredReplaysPath, "[]", token);
             }
             finally
@@ -89,7 +89,7 @@ namespace HeroesProfile.Core.Repositories
         {
             try
             {
-                await semaphore.WaitAsync();
+                await semaphore.WaitAsync(token);
                 var json = JsonSerializer.Serialize(replays, writeOptions);
                 await File.WriteAllTextAsync(appSettings.StoredReplaysPath, json, token);
             }

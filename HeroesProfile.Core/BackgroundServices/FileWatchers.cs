@@ -109,8 +109,12 @@ namespace HeroesProfile.Core.BackgroundServices
                     {
                         string fullName = Path.IsPathFullyQualified(waitForChangedResult.Name) ? waitForChangedResult.Name : Directory.GetFiles(watcher.Path, waitForChangedResult.Name, SearchOption.AllDirectories).First();
 
-                        // COPY TO SESSION FOLDER
-                        await mediator.Send(new UpdateSessionFile.Command(fullName), stoppingToken);
+                        if (fullName.EndsWith(".battlelobby", StringComparison.OrdinalIgnoreCase))
+                        {
+                            await mediator.Send(new ClearSession.Command(), stoppingToken);
+                        }
+
+                        await mediator.Send(new CopyToSession.Command(fullName), stoppingToken);
 
                         if (waitForChangedResult.Name.EndsWith(".StormReplay"))
                         {

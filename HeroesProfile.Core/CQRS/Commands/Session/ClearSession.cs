@@ -9,9 +9,9 @@ using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Commands
 {
-    public static class ClearSessionData
+    public static class ClearSession
     {
-        public record Command(string FileToCopy) : IRequest<Response>;
+        public record Command : IRequest<Response>;
 
         public record Response();
 

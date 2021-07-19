@@ -34,6 +34,7 @@ namespace HeroesProfile.Core.CQRS.Commands
                     await mediator.Send(new InitializeDefaultUserSettings.Command(), cancellationToken);
                 }
 
+                await mediator.Send(new ClearSession.Command(), cancellationToken);
 
                 return Unit.Value;
             }
