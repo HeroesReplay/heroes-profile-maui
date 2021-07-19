@@ -12,14 +12,14 @@ namespace HeroesProfile.Core.CQRS.Commands
 {
     public static class UpdateSessionPostMatch
     {
-        public record Command(StoredReplay StoredReplay, int ReplayId) : IRequest;
+        public record Command(int ReplayId) : IRequest;
 
         public class Handler : IRequestHandler<Command>
         {
             private readonly SessionRepository sessionRepository;
             private readonly AppSettings appSettings;
             private readonly IMediator mediator;
-            
+
             private Uri PostMatchUri = new Uri("openApi/Replay/Parsed", UriKind.Relative);
 
             public Handler(SessionRepository sessionRepository, AppSettings appSettings, IMediator mediator)
@@ -31,7 +31,7 @@ namespace HeroesProfile.Core.CQRS.Commands
 
             public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
             {
-                if (sessionRepository.SessionData.StormReplay != null && sessionRepository.SessionData.StormReplay.Timestamp.Equals(request.StoredReplay.Created))
+                if (sessionRepository.SessionData.StormReplay != null)
                 {
                     sessionRepository.SessionData.PostMatchUri = new Uri(new Uri(appSettings.HeroesProfileApiUri, PostMatchUri), new Uri($"?replayID={request.ReplayId}", UriKind.Relative));
                     await mediator.Publish(new SessionUpdated.Notification(sessionRepository.SessionData), cancellationToken);

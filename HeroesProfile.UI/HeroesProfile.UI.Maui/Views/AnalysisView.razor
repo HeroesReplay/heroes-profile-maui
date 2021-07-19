@@ -13,9 +13,18 @@
             <CardHeader>
                 <CardTitle>File Detection</CardTitle>
             </CardHeader>
-             <CardBody>
-                <!-- TODO: Notice Alert if feature disabled -->
-            </CardBody>
+            @*
+                @if (ViewModel.FeatureDisabled)
+                {
+                <CardBody>
+                <Alert Color=Color.Info>This feature is toggled off in the settings</Alert>
+                </CardBody>
+                }
+                else
+                {
+
+                }*@
+
             <CardBody>
                 <Field Horizontal="true">
                     <FieldLabel ColumnSize="ColumnSize.Is4">BattleLobby</FieldLabel>
@@ -65,7 +74,7 @@
             <CardHeader>
                 <CardTitle>Heroes Profile Analysis</CardTitle>
             </CardHeader>
-             <CardBody>
+            <CardBody>
                 <!-- TODO: Notice Alert if feature disabled -->
             </CardBody>
             <CardBody>
@@ -74,11 +83,18 @@
                     <FieldBody ColumnSize="ColumnSize.Is8">
                         @if (ViewModel.HasPreMatch)
                         {
-                           <Button Size=Size.Small @onclick=@((e) => ViewModel.OpenInBrowser(ViewModel.Session.PreMatchUri.ToString()))>Open WebLink</Button>
+                            <Addons>
+                                <Addon AddonType="AddonType.Body">
+                                    <TextEdit Size=Size.Small Text="Pre match data available." ReadOnly=true />
+                                </Addon>
+                                <Addon AddonType="AddonType.End">
+                                    <Button Color=Color.Primary Size=Size.Small @onclick=@((e) => ViewModel.OpenInBrowser(ViewModel.Session.PreMatchUri.ToString()))>Open WebLink</Button>
+                                </Addon>
+                            </Addons>
                         }
                         else
                         {
-                            <TextEdit Text="No Data" ReadOnly=true />
+                            <TextEdit Text="No data available." ReadOnly=true />
                         }
                     </FieldBody>
                 </Field>
@@ -87,11 +103,18 @@
                     <FieldBody ColumnSize="ColumnSize.Is8">
                         @if (ViewModel.HasPostMatch)
                         {
-                            <Button Size=Size.Small @onclick=@((e) => ViewModel.OpenInBrowser(ViewModel.Session.PostMatchUri.ToString()))>Open WebLink</Button>
+                            <Addons>
+                                <Addon AddonType="AddonType.Body">
+                                    <TextEdit Size=Size.Small Text="Post match data available." ReadOnly=true />
+                                </Addon>
+                                <Addon AddonType="AddonType.End">
+                                    <Button Color=Color.Primary Size=Size.Small @onclick=@((e) => ViewModel.OpenInBrowser(ViewModel.Session.PostMatchUri.ToString()))>Open WebLink</Button>
+                                </Addon>
+                            </Addons>
                         }
                         else
                         {
-                            <TextEdit Text="No Data" ReadOnly=true />
+                            <TextEdit Text="No data available." ReadOnly=true />
                         }
                     </FieldBody>
                 </Field>

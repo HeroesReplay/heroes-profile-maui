@@ -11,23 +11,14 @@ namespace HeroesProfile.Core.Repositories
     public class UserSettingsRepository
     {
         private readonly AppSettings appSettings;
-        private readonly UserSettings defaultUserSettings;
 
         private readonly SemaphoreSlim semaphore = new(1, 1);
 
         private JsonSerializerOptions options = new JsonSerializerOptions() { WriteIndented = true, AllowTrailingCommas = true };
 
-        public UserSettingsRepository(AppSettings appSettings, UserSettings defaultSettings)
+        public UserSettingsRepository(AppSettings appSettings)
         {
             this.appSettings = appSettings;
-            this.defaultUserSettings = defaultSettings;
-        }
-
-        public async Task InitilizeAsync(CancellationToken token)
-        {
-            await semaphore.WaitAsync(token);
-            await File.WriteAllTextAsync(appSettings.UserSettingsPath, JsonSerializer.Serialize(defaultUserSettings, options), token);
-            semaphore.Release();
         }
 
         public async Task SaveAsync(UserSettings settings, CancellationToken token)

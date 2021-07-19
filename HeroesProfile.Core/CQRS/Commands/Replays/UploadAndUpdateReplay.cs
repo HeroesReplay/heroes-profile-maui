@@ -15,7 +15,7 @@ namespace HeroesProfile.Core.CQRS.Commands
 {
     public static class UploadAndUpdateReplay
     {
-        public record Command(StoredReplay StoredReplay, bool HotsApi = false, bool HotsLogs = false) : IRequest<Response>;
+        public record Command(StoredReplay StoredReplay) : IRequest<Response>;
 
         public record Response(bool Success, int? ReplayId, UploadStatus UploadStatus);
 
@@ -45,12 +45,12 @@ namespace HeroesProfile.Core.CQRS.Commands
                     return new(false, null, UploadStatus.UploadError);
 
                 // Upload the Replay
-                if (command.HotsApi)
+                if (false)
                 {
                     await uploadUploadClient.UploadToHotsApiAsync(response.Data.Bytes, response.Data.Fingerprint, cancellationToken);
                 }
 
-                if (command.HotsLogs)
+                if (false)
                 {
                     await uploadUploadClient.UploadToHeroesProfileAsync(response.Data.Bytes, response.Data.Fingerprint, cancellationToken);
                 }

@@ -39,13 +39,6 @@ namespace HeroesProfile.Core.CQRS.Notifications
                 {
                     await mediator.Send(new ClosePrediction.Command(), cancellationToken);
                 }
-
-                if (settings.EnablePostMatch)
-                {
-                    // await mediator.Send(new CreatePostMatchLink.Command(), cancellationToken);
-                }
-
-                await mediator.Send(new SaveReplays.Command(notification.ReplayParseData), cancellationToken);
             }
         }
     }

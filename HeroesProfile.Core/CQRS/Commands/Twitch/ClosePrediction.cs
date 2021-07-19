@@ -39,7 +39,6 @@ namespace HeroesProfile.Core.CQRS.Commands
 
             public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
             {
-
                 UserSettings userSettings = await settingsRepository.LoadAsync(cancellationToken);
 
                 if (session.StormReplay != null && session.Prediction != null)

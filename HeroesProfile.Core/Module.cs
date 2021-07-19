@@ -165,14 +165,14 @@ namespace HeroesProfile.Core
                 services
                     .AddHostedService<GameSimulator>()
                     .AddHostedService<FileWatchers>()
-                    .AddHostedService<ReplayProcessor>();
+                    .AddHostedService<OnLaunchReplayProcessor>();
             }
             else
             {
                 services
                     .AddSingleton<GameSimulator>()
                     .AddSingleton<FileWatchers>()
-                    .AddSingleton<ReplayProcessor>();
+                    .AddSingleton<OnLaunchReplayProcessor>();
             }
 
 

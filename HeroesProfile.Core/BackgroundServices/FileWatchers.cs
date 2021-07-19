@@ -9,6 +9,7 @@ using HeroesProfile.Core.CQRS.Commands;
 using HeroesProfile.Core.CQRS.Notifications;
 using HeroesProfile.Core.CQRS.Queries;
 using HeroesProfile.Core.Models;
+using HeroesProfile.Core.Repositories;
 using HeroesProfile.Core.Watchers;
 
 using MediatR;
@@ -23,17 +24,24 @@ namespace HeroesProfile.Core.BackgroundServices
         private readonly ILogger<FileWatchers> logger;
         private readonly IMediator mediator;
         private readonly SessionFileSystemWatcher sessionFileSystemWatcher;
+        private readonly UserSettingsRepository settingsRepository;
         private readonly IEnumerable<AbstractGameFileSystemWatcher> watchers;
 
         private readonly TimeSpan waitForUnlock = TimeSpan.FromSeconds(0.500);
 
         private bool started;
 
-        public FileWatchers(ILogger<FileWatchers> logger, IMediator mediator, IEnumerable<AbstractGameFileSystemWatcher> watchers, SessionFileSystemWatcher sessionFileSystemWatcher)
+        public FileWatchers(
+        ILogger<FileWatchers> logger,
+        IMediator mediator,
+        IEnumerable<AbstractGameFileSystemWatcher> watchers,
+        SessionFileSystemWatcher sessionFileSystemWatcher,
+        UserSettingsRepository settingsRepository)
         {
             this.logger = logger;
             this.mediator = mediator;
             this.sessionFileSystemWatcher = sessionFileSystemWatcher;
+            this.settingsRepository = settingsRepository;
             this.watchers = watchers;
         }
 
@@ -52,6 +60,13 @@ namespace HeroesProfile.Core.BackgroundServices
                 try
                 {
                     WaitForChangedResult waitForChangedResult = watcher.WaitForChanged(WatcherChangeTypes.Created | WatcherChangeTypes.Changed, Timeout.Infinite);
+
+                    /*
+                     * FileSystemWatcher is extremely fast. 
+                     * The file is almost certainly still locked.
+                     * Delay before continuing once the notification is recieved.
+                     */
+                    await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
 
                     string fullName = Path.IsPathFullyQualified(waitForChangedResult.Name) ? waitForChangedResult.Name : Directory.GetFiles(watcher.Path, waitForChangedResult.Name, SearchOption.AllDirectories).First();
 
@@ -86,19 +101,46 @@ namespace HeroesProfile.Core.BackgroundServices
             {
                 WaitForChangedResult waitForChangedResult = watcher.WaitForChanged(WatcherChangeTypes.Created | WatcherChangeTypes.Changed, Timeout.Infinite);
 
+                await Task.Delay(waitForUnlock, stoppingToken);
+
                 if (!string.IsNullOrWhiteSpace(waitForChangedResult.Name))
                 {
                     try
                     {
                         string fullName = Path.IsPathFullyQualified(waitForChangedResult.Name) ? waitForChangedResult.Name : Directory.GetFiles(watcher.Path, waitForChangedResult.Name, SearchOption.AllDirectories).First();
 
-                        await Task.Delay(waitForUnlock, stoppingToken);
-
+                        // COPY TO SESSION FOLDER
                         await mediator.Send(new UpdateSessionFile.Command(fullName), stoppingToken);
-                    }
-                    catch
-                    {
 
+                        if (waitForChangedResult.Name.EndsWith(".StormReplay"))
+                        {
+                            // PARSE
+                            GetParsedReplay.Response response = await mediator.Send(new GetParsedReplay.Query(new FileInfo(fullName)), stoppingToken);
+
+                            if (response.Data.ParseResult == ParseResult.Success)
+                            {
+                                // STORE
+                                SaveReplays.Response saveResponse = await mediator.Send(new SaveReplays.Command(response.Data), stoppingToken);
+                                StoredReplay storedReplay = saveResponse.StoredReplays.Single();
+
+                                // UPLOAD
+                                UploadAndUpdateReplay.Response? uploadAndUpdateResponse = await mediator.Send(new UploadAndUpdateReplay.Command(storedReplay), stoppingToken);
+
+                                if (uploadAndUpdateResponse.Success && uploadAndUpdateResponse.ReplayId.HasValue)
+                                {
+                                    UserSettings settings = await settingsRepository.LoadAsync(stoppingToken);
+
+                                    if (settings.EnablePostMatch)
+                                    {
+                                        await mediator.Send(new UpdateSessionPostMatch.Command(uploadAndUpdateResponse.ReplayId.Value));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        logger.LogError(e, $"Error in watcher: {watcher.GetType().Name}");
                     }
                 }
             }

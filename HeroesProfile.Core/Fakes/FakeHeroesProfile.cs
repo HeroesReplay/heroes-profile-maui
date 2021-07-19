@@ -50,14 +50,14 @@ namespace HeroesProfile.Core.Fakes
 
             // Simulate API request throttling
             // 25% chance to trigger 429
-            if (random.Next(1, 5) == 1)
+            if (random.Next(1, 6) == 1)
             {
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.TooManyRequests)
                 {
                     Content = new StringContent("Slow down"),
                     Headers =
                     {
-                        RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(5))
+                        RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(2))
                     }
                 });
             }

@@ -77,7 +77,6 @@ namespace HeroesProfile.UI.Maui
                     services
                         .AddCoreModule(new HostEnvironment())
                         .AddCoreMediator(typeof(Startup).Assembly);
-
                 });
         }
     }

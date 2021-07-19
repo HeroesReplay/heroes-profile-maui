@@ -31,7 +31,7 @@ namespace HeroesProfile.Core.CQRS.Commands
 
                 if (appSettings.DefaultUserSettingsOnStart)
                 {
-                    await mediator.Send(new InitializeUserSettings.Command(), cancellationToken);
+                    await mediator.Send(new InitializeDefaultUserSettings.Command(), cancellationToken);
                 }
 
 
