@@ -10,10 +10,10 @@
         <LayoutSiderContent>
             <Bar Breakpoint="Breakpoint.Desktop" NavigationBreakpoint="Breakpoint.Tablet" ThemeContrast="ThemeContrast.Dark" Mode="BarMode.VerticalInline" CollapseMode="BarCollapseMode.Small">
                 <BarToggler />
-                 <BarBrand>
-                     <BarItem>
+                <BarBrand>
+                    <BarItem>
                         <BarLink To="">
-                            <BarIcon IconName="customIcon" />
+                            <BarIcon IconName="@Logo" />
                             Heroes Profile
                         </BarLink>
                     </BarItem>
@@ -36,26 +36,26 @@
                             </BarLink>
                         </BarItem>
                         <BarItem>
-                              <BarDropdown>
-                                 <BarDropdownToggle @bind-Visible="uiElementsVisible">Links</BarDropdownToggle>
-                                 <BarDropdownMenu>
-                                     <BarDropdownItem Clicked=@(() => Process.Start("explorer", "http://heroesprofile.com/"))>
-                                       <BarIcon IconName=@("fas fa-chart-bar") /> Heroes Profile
+                            <BarDropdown>
+                                <BarDropdownToggle>Links</BarDropdownToggle>
+                                <BarDropdownMenu>
+                                    <BarDropdownItem Clicked=@(() => Process.Start("explorer", "http://heroesprofile.com/"))>
+                                        <BarIcon IconName=@("fas fa-chart-bar") /> Heroes Profile
                                     </BarDropdownItem>
                                     <BarDropdownItem Clicked=@(() => Process.Start("explorer", "http://api.heroesprofile.com/"))>
-                                       <BarIcon IconName=@("fas fa-code") /> API
+                                        <BarIcon IconName=@("fas fa-code") /> API
                                     </BarDropdownItem>
                                     <BarDropdownItem Clicked=@(() => Process.Start("explorer", "https://www.patreon.com/heroesprofile"))>
-                                       <BarIcon IconName=@("fab fa-patreon") /> Patreon
+                                        <BarIcon IconName=@("fab fa-patreon") /> Patreon
                                     </BarDropdownItem>
                                     <BarDropdownItem Clicked=@(() => Process.Start("explorer", "https://www.github.com/heroes-profile/"))>
-                                         <BarIcon IconName=@("fab fa-github") /> Github
+                                        <BarIcon IconName=@("fab fa-github") /> Github
                                     </BarDropdownItem>
-                                     <BarDropdownItem Clicked=@(() => Process.Start("explorer", "https://www.twitch.tv/heroesprofile"))>
-                                         <BarIcon IconName=@("fab fa-twitch") /> Twitch
+                                    <BarDropdownItem Clicked=@(() => Process.Start("explorer", "https://www.twitch.tv/heroesprofile"))>
+                                        <BarIcon IconName=@("fab fa-twitch") /> Twitch
                                     </BarDropdownItem>
                                 </BarDropdownMenu>
-                             </BarDropdown>
+                            </BarDropdown>
                         </BarItem>
                     </BarStart>
                     <BarEnd>
@@ -73,15 +73,13 @@
 
 @code {
 
-    [Inject] 
+    [Inject]
     protected ITextLocalizerService LocalizationService { get; set; }
-
-    private bool uiElementsVisible = true;
 
     [CascadingParameter]
     protected Theme Theme { get; set; }
 
-    public RenderFragment customIcon = @<img src='https://www.heroesprofile.com/includes/images/logo/heroesprofilelogo.png' style='width:32px; height: 32px' />;
+    public RenderFragment Logo = @<img src='/images/logo.svg' style='width: 32px; height: 32px' />;
 
     protected override async Task OnInitializedAsync()
     {

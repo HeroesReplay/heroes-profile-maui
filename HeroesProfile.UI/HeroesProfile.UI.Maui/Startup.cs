@@ -1,4 +1,6 @@
-﻿using Blazorise;
+﻿using System;
+
+using Blazorise;
 using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
 
@@ -22,6 +24,10 @@ namespace HeroesProfile.UI.Maui
                 .RegisterBlazorMauiWebView(typeof(Startup).Assembly)
                 .UseMicrosoftExtensionsServiceProviderFactory()
                 .UseMauiApp<App>()
+                .ConfigureImageSources(images =>
+                {
+
+                })
                 .ConfigureFonts(fonts =>
                 {
 
@@ -35,15 +41,55 @@ namespace HeroesProfile.UI.Maui
                 {
 #if WINDOWS
                     lifecycle
-                        .AddWindows(window => window.OnClosed((app, args) =>
+                        .AddWindows(configure =>
                         {
-                            Initializer.Stop();
-                        }))
-                        .AddWindows(window => window.OnLaunched((app, args) =>
-                        {
-                            Initializer.Start();
-                            Platforms.Windows.WindowExtensions.SetIcon(MauiWinUIApplication.Current.MainWindow, "Platforms/Windows/icon.ico");
-                        }));
+                            configure.OnLaunched((app, args) =>
+                            {
+                                Platforms.Windows.WindowExtensions.SetIcon(MauiWinUIApplication.Current.MainWindow, "Platforms/Windows/icon.ico");
+
+                                MauiWinUIApplication.Current.MainWindow.SizeChanged += (sender, e) =>
+                                {
+                                    App.Current.MainPage.WidthRequest = e.Size.Width;
+                                    App.Current.MainPage.HeightRequest = e.Size.Height;
+                                };
+
+                                Initializer.Start();
+                            });
+
+                            configure.OnVisibilityChanged((window, args) =>
+                            {
+                                if (!args.Visible)
+                                {
+                                    Platforms.Windows.WindowExtensions.MinimizeToTray(window);
+                                }
+                            });
+
+                            configure.OnClosed((window, args) =>
+                            {
+                                Initializer.Stop();
+
+                                //if (window == MauiWinUIApplication.Current.MainWindow)
+                                //{
+                                //    args.Handled = true;
+                                //}
+                                //else
+                                //{
+                                    
+                                //}
+
+                            });
+
+                            configure.OnLaunching((app, args) =>
+                            {
+
+                            });
+
+                            configure.OnActivated((window, args) =>
+                            {
+                                // System.Windows.MessageBox.Show("Launched :-)");
+                            });
+
+                        });
 #endif
                 })
                 .ConfigureServices((appBuilder, services) =>
@@ -54,9 +100,10 @@ namespace HeroesProfile.UI.Maui
                         .AddBlazorise(options =>
                         {
                             options.ChangeTextOnKeyPress = false;
-                            // options.DelayTextOnKeyPressInterval
-                            // options.DelayTextOnKeyPress
+                            options.DelayTextOnKeyPressInterval = 500;
+                            options.DelayTextOnKeyPress = true;
                         })
+                        .AddBootstrapComponents()
                         .AddBootstrapProviders()
                         .AddFontAwesomeIcons();
 #if WINDOWS

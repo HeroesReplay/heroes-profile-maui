@@ -23,7 +23,7 @@
         <Compile Include="..\HeroesProfile.UI.Maui\**\*.cs" Exclude="..\HeroesProfile.UI.Maui\bin\**;..\HeroesProfile.UI.Maui\obj\**;..\HeroesProfile.UI.Maui\Platforms\**" Link="%(RecursiveDir)%(Filename)%(Extension)" />
         <MauiXaml Include="..\HeroesProfile.UI.Maui\**\*.xaml" Exclude="..\HeroesProfile.UI.Maui\bin\**;..\HeroesProfile.UI.Maui\obj\**" Link="%(RecursiveDir)%(FileName)%(Extension)" />
         <_ThisProjectStaticWebAsset Include="..\HeroesProfile.UI.Maui\wwwroot\**" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" RelativePath="%(RecursiveDir)%(Filename)%(Extension)" />
-        <None Include="@(_ThisProjectStaticWebAsset)" />
+        <Content Include="@(_ThisProjectStaticWebAsset)" />
         <RazorComponent Include="..\HeroesProfile.UI.Maui\**\*.razor" Exclude="..\HeroesProfile.UI.Maui\bin\**;..\HeroesProfile.UI.Maui\obj\**" Link="%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
@@ -52,6 +52,7 @@
         <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.*" />
         <PackageReference Include="Blazorise.Sidebar" Version="0.9.*" />
         <PackageReference Include="Blazorise.Snackbar" Version="0.9.*" />
+        <PackageReference Include="Blazorise.SpinKit" Version="0.9.4" />
         <PackageReference Include="CommunityToolkit.WinUI.Notifications" Version="7.0.3" />
     </ItemGroup>
 
@@ -75,6 +76,9 @@
         <PackageReference Include="Microsoft.ProjectReunion.InteractiveExperiences" Version="0.8.1" NoWarn="NU1701" />
     </ItemGroup>
     <ItemGroup>
+      <Content Update="..\HeroesProfile.UI.Maui\wwwroot\images\logo.svg">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
       <None Update="Platforms\Windows\icon.ico">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>

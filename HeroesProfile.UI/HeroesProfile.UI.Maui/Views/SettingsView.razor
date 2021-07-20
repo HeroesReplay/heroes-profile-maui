@@ -7,14 +7,12 @@
 @page "/settings"
 @inherits ReactiveComponentBase<SettingsViewModel>
 
-<PageProgress Visible=@(ViewModel == null) />
-
 @if (ViewModel.Form != null)
 {
     <Validations @ref="@ViewModel.Validator" Mode=ValidationMode.Manual ValidateOnLoad=false>
 
         <Row>
-            <Column ColumnSize="ColumnSize.Is4">
+            <Column ColumnSize="ColumnSize.Is6">
                 <Card Margin="Margin.Is4.OnY">
                     <CardHeader>
                         <CardTitle>Twitch Authentication</CardTitle>
@@ -62,7 +60,7 @@
                     </CardBody>
                 </Card>
             </Column>
-            <Column ColumnSize="ColumnSize.Is4">
+            <Column ColumnSize="ColumnSize.Is6">
                 <Card Margin="Margin.Is4.OnY">
                     <CardHeader>
                         <CardTitle>Heroes Profile Authentication</CardTitle>
@@ -95,11 +93,7 @@
                          <Field Horizontal="true">
                                 <FieldLabel ColumnSize="ColumnSize.Is4">UserId</FieldLabel>
                                 <FieldBody ColumnSize="ColumnSize.Is8">
-                                    <TextEdit Placeholder="" @bind-Text=@ViewModel.Form.HeroesProfileUserId ReadOnly=true>
-                                        <Feedback>
-                                            <ValidationNone>Retrieved on Validation</ValidationNone>
-                                        </Feedback>
-                                    </TextEdit>
+                                     <TextEdit Placeholder="Retrieved on authentication." @bind-Text=@ViewModel.Form.HeroesProfileUserId ReadOnly=true />
                                 </FieldBody>
                             </Field>
                     </CardBody>
@@ -108,7 +102,7 @@
         </Row>
 
         <Row>
-            <Column ColumnSize=ColumnSize.Is8>
+            <Column ColumnSize=ColumnSize.Is12>
                 <Card Margin="Margin.Is4.OnY">
                     <CardHeader>
                         <CardTitle>Enable or Disable features</CardTitle>
@@ -156,8 +150,8 @@
                         </Validation>
 
                         <Field Horizontal="true">
-                            <FieldLabel ColumnSize="ColumnSize.IsFull.OnTablet.Is4.OnDesktop">Post match analysis</FieldLabel>
-                            <FieldBody ColumnSize="ColumnSize.IsFull.OnTablet.Is6.OnDesktop">
+                            <FieldLabel ColumnSize="ColumnSize.Is4">Post match analysis</FieldLabel>
+                            <FieldBody ColumnSize="ColumnSize.Is6">
                                 <Switch TValue="bool" @bind-Checked=@ViewModel.Form.EnablePostMatch />
                             </FieldBody>
                         </Field>

@@ -7,6 +7,9 @@
             <p>Sorry, there's nothing at this address.</p>
         </NotFound>
     </Router>
+    <MessageAlert />
+    <NotificationAlert />
+    <PageProgressAlert />
 </Blazorise.ThemeProvider>
 
 @code {
@@ -52,6 +55,10 @@
         //BreadcrumbOptions = new ThemeBreadcrumbOptions { },
         //BadgeOptions = new ThemeBadgeOptions { },
         //PaginationOptions = new ThemePaginationOptions { },
+        SnackbarOptions = new ThemeSnackbarOptions
+        {
+            
+        },
         //TooltipOptions = new ThemeTooltipOptions
         //{
         //    BackgroundColor = "#22c8ce",

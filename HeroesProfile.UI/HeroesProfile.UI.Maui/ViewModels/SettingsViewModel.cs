@@ -18,6 +18,7 @@ namespace HeroesProfile.UI.Maui.ViewModels
     {
         private readonly IMediator mediator;
         private readonly TalentsClient talentsClient;
+        private readonly Blazorise.INotificationService notifications;
         private UserSettingsForm form;
 
         public UserSettingsForm Form
@@ -33,10 +34,11 @@ namespace HeroesProfile.UI.Maui.ViewModels
         public Validations Validator { get; set; }
 
 
-        public SettingsViewModel(IMediator mediator, TalentsClient talentsClient)
+        public SettingsViewModel(IMediator mediator, TalentsClient talentsClient, Blazorise.INotificationService notifications)
         {
             this.mediator = mediator;
             this.talentsClient = talentsClient;
+            this.notifications = notifications;
         }
 
         public async Task LoadAsync()
@@ -84,6 +86,12 @@ namespace HeroesProfile.UI.Maui.ViewModels
                     TwitchAccessToken = Form.TwitchAccessToken,
                     HeroesProfileUserId = Form.HeroesProfileUserId
                 }));
+
+                await notifications.Success("Settings saved");
+            }
+            else
+            {
+                await notifications.Error("Validation errors.");
             }
         }
 

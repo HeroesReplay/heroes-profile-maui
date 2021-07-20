@@ -47,17 +47,17 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Platforms\MacCatalyst\trayicon.png">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="Resources\logo.png">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
+        <None Update="Platforms\MacCatalyst\trayicon.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Resources\logo.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Resources\Fonts\" />
-      <Folder Include="Resources\Images\" />
+        <Folder Include="Resources\Fonts\" />
+        <Folder Include="Resources\Images\" />
     </ItemGroup>
 
 </Project>

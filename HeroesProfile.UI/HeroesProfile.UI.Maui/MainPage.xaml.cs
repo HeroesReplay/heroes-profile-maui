@@ -1,4 +1,6 @@
-﻿using Microsoft.Maui;
+﻿using System;
+
+using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Xaml;
 
@@ -19,6 +21,14 @@ namespace HeroesProfile.UI.Maui
 
                 SetupTrayIcon();
             }
+
+            SizeChanged += MainPage_SizeChanged;
+        }
+
+        private void MainPage_SizeChanged(object sender, System.EventArgs e)
+        {
+            BlazorWebView.HeightRequest = this.Height;
+            BlazorWebView.WidthRequest = this.Width;
         }
 
         private void SetupTrayIcon()
