@@ -4,7 +4,7 @@ using System;
 
 namespace HeroesProfile.UI.Maui.Platforms.Windows
 {
-    public class NotificationService : INotificationService
+    public class NotificationService : IOSNotificationService
     {
         public void ShowNotification(string title, string body)
         {

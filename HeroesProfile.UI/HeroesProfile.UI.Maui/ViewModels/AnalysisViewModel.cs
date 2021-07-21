@@ -22,19 +22,34 @@ namespace HeroesProfile.UI.Maui.ViewModels
 
 
         private SessionData session;
+        private UserSettings settings;
 
         public SessionData Session
         {
-            get
-            {
-                return session;
-            }
+            get => session;
             set
             {
                 session = value;
                 this.RaisePropertyChanged();
             }
         }
+
+        public UserSettings UserSettings
+        {
+            get => settings;
+            set
+            {
+                settings = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        public bool IsTwitchTalentsEnabled => UserSettings != null && UserSettings.EnableTwitchExtension;
+        public bool IsTwitchPredictionsEnabled => UserSettings != null && UserSettings.EnablePredictions;
+
+        public bool IsPostMatchEnabled => UserSettings != null && UserSettings.EnablePostMatch;
+        public bool IsPreMatchEnabled => UserSettings != null && UserSettings.EnablePreMatch;
+
 
         public void OpenInBrowser(string uri)
         {
@@ -60,9 +75,11 @@ namespace HeroesProfile.UI.Maui.ViewModels
 
         public async Task LoadAsync()
         {
-            GetSession.Response response = await this.mediator.Send(new GetSession.Query());
+            GetSession.Response sessionResponse = await this.mediator.Send(new GetSession.Query());
+            GetUserSettings.Response settingsResponse = await this.mediator.Send(new GetUserSettings.Query());
 
-            Session = response.Session;
+            Session = sessionResponse.Session;
+            UserSettings = settingsResponse.UserSettings;            
         }
     }
 }

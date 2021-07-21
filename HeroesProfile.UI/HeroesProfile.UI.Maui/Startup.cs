@@ -74,7 +74,7 @@ namespace HeroesProfile.UI.Maui
                                 //}
                                 //else
                                 //{
-                                    
+
                                 //}
 
                             });
@@ -106,14 +106,23 @@ namespace HeroesProfile.UI.Maui
                         .AddBootstrapComponents()
                         .AddBootstrapProviders()
                         .AddFontAwesomeIcons();
+
+                    services.Remove(ServiceDescriptor.Scoped(typeof(INotificationService), Type.GetType("Blazorise.NotificationService, Blazorise")));
+                    services.Remove(ServiceDescriptor.Scoped(typeof(IMessageService), Type.GetType("Blazorise.MessageService, Blazorise")));
+                    services.Remove(ServiceDescriptor.Scoped(typeof(IPageProgressService), Type.GetType("Blazorise.PageProgressService, Blazorise")));
+
+                    services.Add(ServiceDescriptor.Singleton(typeof(INotificationService), Type.GetType("Blazorise.NotificationService, Blazorise")));
+                    services.Add(ServiceDescriptor.Singleton(typeof(IMessageService), Type.GetType("Blazorise.MessageService, Blazorise")));
+                    services.Add(ServiceDescriptor.Singleton(typeof(IPageProgressService), Type.GetType("Blazorise.PageProgressService, Blazorise")));
+
 #if WINDOWS
                     services
                         .AddSingleton<ITrayService, Platforms.Windows.TrayService>()
-                        .AddSingleton<INotificationService, Platforms.Windows.NotificationService>();
+                        .AddSingleton<IOSNotificationService, Platforms.Windows.NotificationService>();
 #elif MACCATALYST
                     services
                         .AddSingleton<ITrayService, MacCatalyst.TrayService>()
-                        .AddSingleton<INotificationService, MacCatalyst.NotificationService>();
+                        .AddSingleton<IOSNotificationService, MacCatalyst.NotificationService>();
 #endif
 
                     services

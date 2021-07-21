@@ -5,7 +5,7 @@
 @using ReactiveUI.Blazor
 
 @page "/settings"
-@inherits ReactiveComponentBase<SettingsViewModel>
+@inherits ReactiveInjectableComponentBase<SettingsViewModel>
 
 @if (ViewModel.Form != null)
 {
@@ -179,13 +179,6 @@
 }
 
 @code {
-
-    [Inject]
-    public SettingsViewModel SettingsViewModel
-    {
-        get => ViewModel;
-        set => ViewModel = value;
-    }
 
     protected override async Task OnInitializedAsync()
     {

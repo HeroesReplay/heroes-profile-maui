@@ -54,7 +54,7 @@ namespace HeroesProfile.Core.BackgroundServices
             bool processOld = true;
             bool complete = false;
 
-            while (!stoppingToken.IsCancellationRequested || !complete)
+            while (!stoppingToken.IsCancellationRequested)
             {
                 var userSettings = await userSettingsRepository.LoadAsync(stoppingToken);
 
@@ -101,14 +101,16 @@ namespace HeroesProfile.Core.BackgroundServices
                     // TODO:
                     // Keep track of how many cycles where we still have ProcessStatus Error
                     // If we cycle a few times and we still have ProcessStatus Error (Maybe a Service is down, so we should just complete anyway)
-                    if (!replaysResponse.Replays.Any())
+                    if (replaysResponse.Replays.Any())
                     {
-                        complete = true;
+                        foreach (StoredReplay storedReplay in replaysResponse.Replays.OrderByDescending(replay => replay.Created).Reverse())
+                        {
+                            await mediator.Send(new UploadAndUpdateReplay.Command(storedReplay), stoppingToken);
+                        }
                     }
-
-                    foreach (StoredReplay storedReplay in replaysResponse.Replays.OrderByDescending(replay => replay.Created).Reverse())
+                    else
                     {
-                        await mediator.Send(new UploadAndUpdateReplay.Command(storedReplay), stoppingToken);
+                        return;
                     }
                 }
             }

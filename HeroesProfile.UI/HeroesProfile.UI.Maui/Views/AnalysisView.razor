@@ -2,7 +2,7 @@
 @using ReactiveUI.Blazor
 @using System.Reactive.Threading.Tasks
 @using System.Text.Json
-@inherits ReactiveComponentBase<AnalysisViewModel>
+@inherits ReactiveInjectableComponentBase<AnalysisViewModel>
 
 <Row>
     <Column ColumnSize=ColumnSize.Is6>
@@ -10,18 +10,6 @@
             <CardHeader>
                 <CardTitle>File Detection</CardTitle>
             </CardHeader>
-            @*
-                @if (ViewModel.FeatureDisabled)
-                {
-                <CardBody>
-                <Alert Color=Color.Info>This feature is toggled off in the settings</Alert>
-                </CardBody>
-                }
-                else
-                {
-
-                }*@
-
             <CardBody>
                 <Field Horizontal="true">
                     <FieldLabel ColumnSize="ColumnSize.Is4">BattleLobby</FieldLabel>
@@ -70,33 +58,48 @@
             <CardHeader>
                 <CardTitle>Heroes Profile Analysis</CardTitle>
             </CardHeader>
-            @*   <CardBody>
-                <!-- TODO: Notice Alert if feature disabled -->
-                </CardBody>*@
             <CardBody>
                 <Field Horizontal="true">
                     <FieldLabel ColumnSize="ColumnSize.Is4">Pre Match</FieldLabel>
                     <FieldBody ColumnSize="ColumnSize.Is8">
-                        @if (ViewModel.HasPreMatch)
+                        @if (ViewModel.IsPreMatchEnabled)
                         {
-                            <Button Color=Color.Primary Size=Size.Small @onclick=@((e) => ViewModel.OpenInBrowser(ViewModel.Session.PreMatchUri.ToString()))>Open Pre match data Web Link</Button>
+                            @if (ViewModel.HasPreMatch)
+                            {
+                                <Button Color=Color.Primary Size=Size.Small @onclick=@((e) => ViewModel.OpenInBrowser(ViewModel.Session.PreMatchUri.ToString()))>Open Pre match data Web Link</Button>
+                            }
+                            else
+                            {
+                                <TextEdit Text="No data available." ReadOnly=true />
+                            }
                         }
                         else
                         {
-                            <TextEdit Text="No data available." ReadOnly=true />
+                            <Alert Color=Color.Info Dismisable=false Visible=true>
+                                <AlertDescription>This feature can be enabled in the Settings</AlertDescription>
+                            </Alert>
                         }
                     </FieldBody>
                 </Field>
                 <Field Horizontal="true">
                     <FieldLabel ColumnSize="ColumnSize.Is4">Post Match</FieldLabel>
                     <FieldBody ColumnSize="ColumnSize.Is8">
-                        @if (ViewModel.HasPostMatch)
+                        @if (ViewModel.IsPostMatchEnabled)
                         {
-                            <Button Color=Color.Primary Size=Size.Small @onclick=@((e) => ViewModel.OpenInBrowser(ViewModel.Session.PostMatchUri.ToString()))>Open Post match data Web Link</Button>
+                            @if (ViewModel.HasPostMatch)
+                            {
+                                <Button Color=Color.Primary Size=Size.Small @onclick=@((e) => ViewModel.OpenInBrowser(ViewModel.Session.PostMatchUri.ToString()))>Open Post match data Web Link</Button>
+                            }
+                            else
+                            {
+                                <TextEdit Text="No data available." ReadOnly=true />
+                            }
                         }
                         else
                         {
-                            <TextEdit Text="No data available." ReadOnly=true />
+                            <Alert Color=Color.Info Dismisable=false Visible=true>
+                                <AlertDescription>This feature can be enabled in the Settings</AlertDescription>
+                            </Alert>
                         }
                     </FieldBody>
                 </Field>
@@ -111,36 +114,47 @@
             <CardHeader>
                 <CardTitle>Twitch Talents Extension</CardTitle>
             </CardHeader>
-            @*  <CardBody>
-                <!-- TODO: Notice Alert if feature disabled -->
-                </CardBody>*@
-            <CardBody>
-                <Field Horizontal="true">
-                    <FieldLabel ColumnSize="ColumnSize.Is4">Session ID</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is8">
-                        @if (ViewModel.Session.TalentsExtension.SessionId != null)
-                        {
-                            <TextEdit Text=@ViewModel.Session.TalentsExtension.SessionId ReadOnly=true />
-                        }
-                        else
-                        {
-                            <TextEdit Placeholder="None" ReadOnly=true />
-                        }
-                    </FieldBody>
-                </Field>
-                <Field Horizontal="true">
-                    <FieldLabel ColumnSize="ColumnSize.Is4">Tracker Event Index</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is8">
-                        <TextEdit Text=@ViewModel.Session.TalentsExtension.TrackerEventIndex.ToString() ReadOnly=true />
-                    </FieldBody>
-                </Field>
-                <Field Horizontal="true">
-                    <FieldLabel ColumnSize="ColumnSize.Is4">Talents Detected</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is8">
-                        <TextEdit Text=@ViewModel.Session.TalentsExtension.PlayerFoundTalents.Count().ToString() ReadOnly=true />
-                    </FieldBody>
-                </Field>
-            </CardBody>
+
+            @if (ViewModel.IsTwitchTalentsEnabled)
+            {
+                <CardBody>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">Session ID</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            @if (ViewModel.Session.TalentsExtension.SessionId != null)
+                            {
+                                <TextEdit Text=@ViewModel.Session.TalentsExtension.SessionId ReadOnly=true />
+                            }
+                            else
+                            {
+                                <TextEdit Placeholder="None" ReadOnly=true />
+                            }
+                        </FieldBody>
+                    </Field>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">Tracker Event Index</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            <TextEdit Text=@ViewModel.Session.TalentsExtension.TrackerEventIndex.ToString() ReadOnly=true />
+                        </FieldBody>
+                    </Field>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">Talents Detected</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            <TextEdit Text=@ViewModel.Session.TalentsExtension.PlayerFoundTalents.Count().ToString() ReadOnly=true />
+                        </FieldBody>
+                    </Field>
+                </CardBody>
+            }
+            else
+            {
+                <CardBody>
+                    <Alert Color=Color.Info Dismisable=false Visible=true>
+                        <AlertDescription>This feature can be enabled in the Settings</AlertDescription>
+                    </Alert>
+                </CardBody>
+            }
+
+
         </Card>
     </Column>
     <Column ColumnSize=ColumnSize.Is6>
@@ -148,62 +162,66 @@
             <CardHeader>
                 <CardTitle>Twitch Auto Predictions</CardTitle>
             </CardHeader>
-            <CardBody>
-                <Field Horizontal="true">
-                    <FieldLabel ColumnSize="ColumnSize.Is4">ID</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is8">
-                        @if (ViewModel.Session.Prediction.PredictionId != null)
-                        {
-                            <TextEdit Text=@ViewModel.Session.Prediction.PredictionId ReadOnly=true />
-                        }
-                        else
-                        {
-                            <TextEdit Placeholder="None" ReadOnly=true />
-                        }
-                    </FieldBody>
-                </Field>
-                <Field Horizontal="true">
-                    <FieldLabel ColumnSize="ColumnSize.Is4">Winning Id</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is8">
-                        @if (ViewModel.Session.Prediction.WinningOutcomeId != null)
-                        {
-                            <TextEdit Text=@ViewModel.Session.Prediction.WinningOutcomeId ReadOnly=true />
-                        }
-                        else
-                        {
-                            <TextEdit Placeholder="None" ReadOnly=true />
-                        }
-                    </FieldBody>
-                </Field>
-                <Field Horizontal="true">
-                    <FieldLabel ColumnSize="ColumnSize.Is4">Other Id</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is8">
-                        @if (ViewModel.Session.Prediction.OtherOutcomeId != null)
-                        {
-                            <TextEdit Text=@ViewModel.Session.Prediction.OtherOutcomeId ReadOnly=true />
-                        }
-                        else
-                        {
-                            <TextEdit Placeholder="None" ReadOnly=true />
-                        }
-                    </FieldBody>
-                </Field>
-            </CardBody>
+            @if (ViewModel.IsTwitchPredictionsEnabled)
+            {
+                <CardBody>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">ID</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            @if (ViewModel.Session.Prediction.PredictionId != null)
+                            {
+                                <TextEdit Text=@ViewModel.Session.Prediction.PredictionId ReadOnly=true />
+                            }
+                            else
+                            {
+                                <TextEdit Placeholder="None" ReadOnly=true />
+                            }
+                        </FieldBody>
+                    </Field>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">Winning Id</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            @if (ViewModel.Session.Prediction.WinningOutcomeId != null)
+                            {
+                                <TextEdit Text=@ViewModel.Session.Prediction.WinningOutcomeId ReadOnly=true />
+                            }
+                            else
+                            {
+                                <TextEdit Placeholder="None" ReadOnly=true />
+                            }
+                        </FieldBody>
+                    </Field>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">Other Id</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            @if (ViewModel.Session.Prediction.OtherOutcomeId != null)
+                            {
+                                <TextEdit Text=@ViewModel.Session.Prediction.OtherOutcomeId ReadOnly=true />
+                            }
+                            else
+                            {
+                                <TextEdit Placeholder="None" ReadOnly=true />
+                            }
+                        </FieldBody>
+                    </Field>
+                </CardBody>
+            }
+            else
+            {
+                <CardBody>
+                    <Alert Color=Color.Info Dismisable=false Visible=true>
+                        <AlertDescription>This feature can be enabled in the Settings</AlertDescription>
+                    </Alert>
+                </CardBody>
+            }
         </Card>
     </Column>
 </Row>
 
 @code {
 
-    [Inject]
-    public AnalysisViewModel AnalysisViewModel
-    {
-        get => ViewModel;
-        set => ViewModel = value;
-    }
-
     protected async override Task OnInitializedAsync()
     {
-        await AnalysisViewModel.LoadAsync();
+        await ViewModel.LoadAsync();
     }
 }

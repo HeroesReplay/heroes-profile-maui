@@ -3,7 +3,7 @@ using UserNotifications;
 
 namespace HeroesProfile.UI.Maui.MacCatalyst
 {
-    public class NotificationService : INotificationService
+    public class NotificationService : IOSNotificationService
     {
         public void ShowNotification(string title, string body)
         {

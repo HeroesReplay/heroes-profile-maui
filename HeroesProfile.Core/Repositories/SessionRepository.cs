@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Heroes.ReplayParser;
+
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Parsers;
 
@@ -76,7 +78,19 @@ namespace HeroesProfile.Core.Repositories
 
         public async Task UpdateAsync(string sessionFile, CancellationToken cancellationToken)
         {
-            ReplayParseData parseData = await replayParser.ParseAsync(new FileInfo(sessionFile), cancellationToken);
+            var options = new ParseOptions
+            {
+                ShouldParseMessageEvents = false,
+                ShouldParseMouseEvents = false,
+                ShouldParseUnits = false,
+                AllowPTR = false,
+                IgnoreErrors = true,
+                ShouldParseDetailedBattleLobby = true,
+                ShouldParseStatistics = false,
+                ShouldParseEvents = true
+            };
+
+            ReplayParseData parseData = await replayParser.ParseAsync(new FileInfo(sessionFile), options, cancellationToken);
 
             switch (parseData.ParseType)
             {

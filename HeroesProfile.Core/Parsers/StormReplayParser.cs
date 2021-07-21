@@ -5,7 +5,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Heroes.ReplayParser;
+
 using HeroesProfile.Core.Models;
 
 namespace HeroesProfile.Core.Parsers
@@ -34,12 +36,12 @@ namespace HeroesProfile.Core.Parsers
             }
         }
 
-        public async Task<ReplayParseData> ParseAsync(FileInfo file, CancellationToken token)
+        public async Task<ReplayParseData> ParseAsync(FileInfo file, ParseOptions? options = null, CancellationToken token = default)
         {
             try
             {
                 byte[] bytes = await File.ReadAllBytesAsync(file.FullName, token);
-                var (status, replay) = DataParser.ParseReplay(bytes, ParseOptions.MediumParsing);
+                var (status, replay) = DataParser.ParseReplay(bytes, options ?? ParseOptions.DefaultParsing);
 
                 if (status == DataParser.ReplayParseResult.Success)
                 {

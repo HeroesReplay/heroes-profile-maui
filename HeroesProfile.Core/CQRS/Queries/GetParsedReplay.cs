@@ -1,8 +1,12 @@
 ﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Heroes.ReplayParser;
+
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Parsers;
+
 using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Queries
@@ -11,7 +15,7 @@ namespace HeroesProfile.Core.CQRS.Queries
     {
         public record Response(ReplayParseData Data);
 
-        public record Query(FileInfo File) : IRequest<Response>;
+        public record Query(FileInfo File, ParseOptions? options) : IRequest<Response>;
 
         public class Handler : IRequestHandler<Query, Response>
         {
@@ -24,8 +28,26 @@ namespace HeroesProfile.Core.CQRS.Queries
 
             public async Task<Response> Handle(Query request, CancellationToken cancellationToken)
             {
-                ReplayParseData result = await replayParser.ParseAsync(request.File, cancellationToken);
-                return new Response(result);
+                var options = request.options ?? new ParseOptions
+                {
+                    /* 
+                     * We do care?
+                     */
+                    ShouldParseDetailedBattleLobby = true,
+                    ShouldParseEvents = true,                    
+
+                    /* 
+                     * We dont care?
+                     */
+                    ShouldParseUnits = false,
+                    ShouldParseMessageEvents = false,
+                    ShouldParseMouseEvents = false,
+                    ShouldParseStatistics = false,
+                    AllowPTR = false,
+                    IgnoreErrors = false,
+                };
+
+                return new Response(await replayParser.ParseAsync(request.File, options, cancellationToken));
             }
         }
     }

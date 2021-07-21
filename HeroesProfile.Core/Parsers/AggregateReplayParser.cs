@@ -4,6 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Heroes.ReplayParser;
+
 using HeroesProfile.Core.Models;
 
 namespace HeroesProfile.Core.Parsers
@@ -17,11 +20,11 @@ namespace HeroesProfile.Core.Parsers
             this.parsers = parsers;
         }
 
-        public async Task<ReplayParseData> ParseAsync(FileInfo file, CancellationToken cancellationToken)
+        public async Task<ReplayParseData> ParseAsync(FileInfo file, ParseOptions? options = null, CancellationToken cancellationToken = default)
         {
             IReplayParser parser = parsers.Single(p => p.FileExtension.Equals(file.Extension, StringComparison.InvariantCultureIgnoreCase));
 
-            return await parser.ParseAsync(file, cancellationToken);
+            return await parser.ParseAsync(file, options, cancellationToken);
         }
     }
 }

@@ -21,6 +21,7 @@ namespace HeroesProfile.UI.Maui.ViewModels
         private readonly Blazorise.INotificationService notifications;
         private UserSettingsForm form;
 
+
         public UserSettingsForm Form
         {
             get => form;
@@ -87,7 +88,7 @@ namespace HeroesProfile.UI.Maui.ViewModels
                     HeroesProfileUserId = Form.HeroesProfileUserId
                 }));
 
-                await notifications.Success("Settings saved");
+                await notifications.Success("Settings saved.");
             }
             else
             {
@@ -252,7 +253,6 @@ namespace HeroesProfile.UI.Maui.ViewModels
                 }
             }
         }
-
 
         public class UserSettingsForm
         {

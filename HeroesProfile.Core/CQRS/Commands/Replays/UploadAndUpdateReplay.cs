@@ -39,7 +39,7 @@ namespace HeroesProfile.Core.CQRS.Commands
             public async Task<Response> Handle(Command command, CancellationToken cancellationToken)
             {
                 // Load the Replay for Upload (bytes to send)
-                GetParsedReplay.Response response = await mediator.Send(new GetParsedReplay.Query(new FileInfo(command.StoredReplay.Path)), cancellationToken);
+                GetParsedReplay.Response response = await mediator.Send(new GetParsedReplay.Query(new FileInfo(command.StoredReplay.Path), options: null), cancellationToken);
 
                 if (response.Data.Bytes == null || string.IsNullOrEmpty(response.Data.Fingerprint))
                     return new(false, null, UploadStatus.UploadError);

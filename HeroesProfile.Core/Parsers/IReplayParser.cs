@@ -1,6 +1,9 @@
 ﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Heroes.ReplayParser;
+
 using HeroesProfile.Core.Models;
 
 namespace HeroesProfile.Core.Parsers
@@ -11,6 +14,6 @@ namespace HeroesProfile.Core.Parsers
 
         public string FileExtension { get; }
 
-        Task<ReplayParseData> ParseAsync(FileInfo file, CancellationToken token);
+        Task<ReplayParseData> ParseAsync(FileInfo file, ParseOptions? options = null, CancellationToken token = default);
     }
 }

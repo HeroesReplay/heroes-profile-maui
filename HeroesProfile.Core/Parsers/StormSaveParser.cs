@@ -20,7 +20,7 @@ namespace HeroesProfile.Core.Parsers
 
         public string FileExtension => ".StormSave";
 
-        public async Task<ReplayParseData> ParseAsync(FileInfo file, CancellationToken token)
+        public async Task<ReplayParseData> ParseAsync(FileInfo file, ParseOptions? options = null, CancellationToken token = default)
         {
             try
             {

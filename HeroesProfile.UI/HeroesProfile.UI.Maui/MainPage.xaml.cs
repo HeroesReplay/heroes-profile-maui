@@ -40,7 +40,7 @@ namespace HeroesProfile.UI.Maui
                 trayService.Initialize();
                 trayService.ClickHandler = () =>
                 {
-                    var notificationService = ServiceProvider.GetService<INotificationService>();
+                    var notificationService = ServiceProvider.GetService<IOSNotificationService>();
 
                     notificationService?.ShowNotification("Heroes Profile Desktop", "Test Notification");
                 };

@@ -46,7 +46,7 @@ namespace HeroesProfile.Core.CQRS.Commands
                 foreach (FileInfo[] batch in replays.Chunk(batchSize).ToList())
                 {
                     // Parse batch in parallel
-                    GetParsedReplay.Response[] parsedResponses = await Task.WhenAll(batch.AsParallel().WithCancellation(cancellationToken).Select(info => mediator.Send(new GetParsedReplay.Query(info), cancellationToken)).ToArray());
+                    GetParsedReplay.Response[] parsedResponses = await Task.WhenAll(batch.AsParallel().WithCancellation(cancellationToken).Select(info => mediator.Send(new GetParsedReplay.Query(info, null), cancellationToken)).ToArray());
 
                     // Save batch in one operation (1 read / 1 write)
                     SaveReplays.Response saveResponse = await mediator.Send(new SaveReplays.Command(parsedResponses.Select(x => x.Data).ToArray()), cancellationToken);

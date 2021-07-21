@@ -14,7 +14,7 @@ namespace HeroesProfile.Core.Parsers
         public ParseType ParseType => ParseType.BattleLobby;
         public string FileExtension => ".battlelobby";
 
-        public async Task<ReplayParseData> ParseAsync(FileInfo file, CancellationToken token)
+        public async Task<ReplayParseData> ParseAsync(FileInfo file, ParseOptions? options = null, CancellationToken token = default)
         {
             try
             {

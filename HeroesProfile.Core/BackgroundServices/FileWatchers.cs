@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Heroes.ReplayParser;
+
 using HeroesProfile.Core.CQRS.Commands;
 using HeroesProfile.Core.CQRS.Notifications;
 using HeroesProfile.Core.CQRS.Queries;
@@ -70,7 +72,7 @@ namespace HeroesProfile.Core.BackgroundServices
 
                     string fullName = Path.IsPathFullyQualified(waitForChangedResult.Name) ? waitForChangedResult.Name : Directory.GetFiles(watcher.Path, waitForChangedResult.Name, SearchOption.AllDirectories).First();
 
-                    GetParsedReplay.Response response = await mediator.Send(new GetParsedReplay.Query(new FileInfo(fullName)), stoppingToken);
+                    GetParsedReplay.Response response = await mediator.Send(new GetParsedReplay.Query(new FileInfo(fullName), ParseOptions.DefaultParsing), stoppingToken);
 
                     if (response.Data.ParseResult == ParseResult.Success)
                     {
@@ -119,7 +121,7 @@ namespace HeroesProfile.Core.BackgroundServices
                         if (waitForChangedResult.Name.EndsWith(".StormReplay"))
                         {
                             // PARSE
-                            GetParsedReplay.Response response = await mediator.Send(new GetParsedReplay.Query(new FileInfo(fullName)), stoppingToken);
+                            GetParsedReplay.Response response = await mediator.Send(new GetParsedReplay.Query(new FileInfo(fullName), ParseOptions.MinimalParsing), stoppingToken);
 
                             if (response.Data.ParseResult == ParseResult.Success)
                             {
