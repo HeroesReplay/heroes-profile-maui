@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using HeroesProfile.Core.Clients;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
+
 using MediatR;
+
 using TwitchLib.Api.Core.Enums;
 using TwitchLib.Api.Helix.Models.Predictions;
 using TwitchLib.Api.Helix.Models.Predictions.CreatePrediction;
@@ -22,14 +24,14 @@ namespace HeroesProfile.Core.CQRS.Commands
 
         public class Handler : IRequestHandler<Command, Response>
         {
-            private readonly ITwitchApiClient twitchWrapper;
+            private readonly PredictionsClient predictionClient;
             private readonly AppSettings appSettings;
             private readonly SessionRepository sessionRepository;
             private readonly UserSettingsRepository settingsRepository;
 
-            public Handler(ITwitchApiClient twitchWrapper, AppSettings appSettings, SessionRepository sessionRepository, UserSettingsRepository settingsRepository)
+            public Handler(PredictionsClient predictionsClient, AppSettings appSettings, SessionRepository sessionRepository, UserSettingsRepository settingsRepository)
             {
-                this.twitchWrapper = twitchWrapper;
+                this.predictionClient = predictionsClient;
                 this.appSettings = appSettings;
                 this.sessionRepository = sessionRepository;
                 this.settingsRepository = settingsRepository;
@@ -43,7 +45,7 @@ namespace HeroesProfile.Core.CQRS.Commands
 
                 if (!string.IsNullOrWhiteSpace(session.Prediction?.PredictionId))
                 {
-                    EndPredictionResponse endPredictionResponse = await twitchWrapper.EndPrediction(userSettings.BroadcasterId, session.Prediction.PredictionId, PredictionStatusEnum.CANCELED);
+                    EndPredictionResponse endPredictionResponse = await predictionClient.EndPrediction(userSettings.Identity, session.Prediction.PredictionId, PredictionStatusEnum.CANCELED, null, cancellationToken);
                 }
 
                 CreatePredictionRequest createPredictionRequest = new()
@@ -54,7 +56,7 @@ namespace HeroesProfile.Core.CQRS.Commands
                     Outcomes = new TwitchLib.Api.Helix.Models.Predictions.CreatePrediction.Outcome[] { new() { Title = "Win" }, new() { Title = "Loss" } }
                 };
 
-                CreatePredictionResponse createPredictionResponse = await twitchWrapper.CreatePrediction(createPredictionRequest, userSettings.TwitchAccessToken);
+                CreatePredictionResponse createPredictionResponse = await predictionClient.CreatePrediction(userSettings.Identity, createPredictionRequest, cancellationToken);
 
                 if (createPredictionResponse.Data != null && createPredictionResponse.Data.Length == 1)
                 {

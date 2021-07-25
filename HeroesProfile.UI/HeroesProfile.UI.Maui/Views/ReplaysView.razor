@@ -1,37 +1,28 @@
 ﻿@page "/"
-
-@using HeroesProfile.UI.Maui.ViewModels
-@using ReactiveUI
-@using ReactiveUI.Blazor
-@using System.Reactive.Threading.Tasks
-@using System.Threading
-
 @inherits ReactiveInjectableComponentBase<ReplaysViewModel>
-
 
 @if (ViewModel.StoredReplays != null)
 {
     <Row>
         <Column>
 
-            <DataGrid 
-                TItem=ReplaysViewModel.GridItem 
-                Data=@ViewModel.StoredReplays 
-                Filterable=true 
-                PageSize=20 
-                ShowPager=true 
-                Virtualize=false 
-                Responsive=true 
-                Editable=false 
-                Narrow=true 
-                FilterMethod=DataGridFilterMethod.Contains>
+            <DataGrid TItem=ReplaysViewModel.GridItem
+                  Data=@ViewModel.StoredReplays
+                  Filterable=true
+                  PageSize=20
+                  ShowPager=true
+                  Virtualize=false
+                  Responsive=true
+                  Editable=false
+                  Narrow=true
+                  FilterMethod=DataGridFilterMethod.Contains>
 
                 @*<DataGridCommandColumn TItem="ReplaysViewModel.GridItem" />*@
                 <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Path)" Caption="Path" />
 
-                @* 
-                     - We do not care about Created Column - its part of the Replay File Name
-                     - We do not care about the Finger print - users wont gain any value from it
+                @*
+                    - We do not care about Created Column - its part of the Replay File Name
+                    - We do not care about the Finger print - users wont gain any value from it
                     <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Created)" Caption="Created" />
                     <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Fingerprint)" Caption="Fingerprint" />
                 *@
@@ -39,24 +30,24 @@
                 <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Updated)" Caption="Updated" />
 
                 @*
-                
+
                     No value because the Final Process Status will tell the user if it was successful
                     Maybe these columns can be useful in Debug/Developer mode
 
                     <DataGridColumn Filterable=false TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.ParseResult)" Caption="Parse">
-                        <DisplayTemplate>
-                            <Badge Color=context.ParseResultColor>@context.ParseResult</Badge>
-                        </DisplayTemplate>
+                    <DisplayTemplate>
+                    <Badge Color=context.ParseResultColor>@context.ParseResult</Badge>
+                    </DisplayTemplate>
                     </DataGridColumn>
-                           
+
                     No value because the Final Process Status will tell the user if it was successful
 
                     <DataGridColumn Filterable=false TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.UploadStatus)" Caption="Upload">
-                        <DisplayTemplate>
-                            <Badge Color=context.UploadStatusColor>@context.UploadStatus</Badge>
-                        </DisplayTemplate>
+                    <DisplayTemplate>
+                    <Badge Color=context.UploadStatusColor>@context.UploadStatus</Badge>
+                    </DisplayTemplate>
                     </DataGridColumn>
-               *@
+                *@
 
 
                 <DataGridColumn Filterable=false TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.ProcessStatus)" Caption="Status">

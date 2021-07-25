@@ -5,6 +5,7 @@ using MediatR;
 
 using ReactiveUI;
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -23,6 +24,17 @@ namespace HeroesProfile.UI.Maui.ViewModels
 
         private SessionData session;
         private UserSettings settings;
+        private IEnumerable<int> battlenetIds;
+
+        public IEnumerable<int> BattlenetIds
+        {
+            get => battlenetIds;
+            set
+            {
+                battlenetIds = value;
+                this.RaisePropertyChanged();
+            }
+        }
 
         public SessionData Session
         {
@@ -44,7 +56,7 @@ namespace HeroesProfile.UI.Maui.ViewModels
             }
         }
 
-        public bool IsTwitchTalentsEnabled => UserSettings != null && UserSettings.EnableTwitchExtension;
+        public bool IsTwitchTalentsEnabled => UserSettings != null && UserSettings.EnableTalentsExtension;
         public bool IsTwitchPredictionsEnabled => UserSettings != null && UserSettings.EnablePredictions;
 
         public bool IsPostMatchEnabled => UserSettings != null && UserSettings.EnablePostMatch;
@@ -77,9 +89,11 @@ namespace HeroesProfile.UI.Maui.ViewModels
         {
             GetSession.Response sessionResponse = await this.mediator.Send(new GetSession.Query());
             GetUserSettings.Response settingsResponse = await this.mediator.Send(new GetUserSettings.Query());
+            GetKnownBattleNetIds.Response battleNetResponse = await this.mediator.Send(new GetKnownBattleNetIds.Query());
 
             Session = sessionResponse.Session;
-            UserSettings = settingsResponse.UserSettings;            
+            UserSettings = settingsResponse.UserSettings;
+            BattlenetIds = battleNetResponse.BattleNetIds;
         }
     }
 }

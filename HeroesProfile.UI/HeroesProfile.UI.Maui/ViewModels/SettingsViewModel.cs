@@ -18,7 +18,7 @@ namespace HeroesProfile.UI.Maui.ViewModels
     {
         private readonly IMediator mediator;
         private readonly TalentsClient talentsClient;
-        private readonly Blazorise.INotificationService notifications;
+        private readonly INotificationService notifications;
         private UserSettingsForm form;
 
 
@@ -35,7 +35,7 @@ namespace HeroesProfile.UI.Maui.ViewModels
         public Validations Validator { get; set; }
 
 
-        public SettingsViewModel(IMediator mediator, TalentsClient talentsClient, Blazorise.INotificationService notifications)
+        public SettingsViewModel(IMediator mediator, TalentsClient talentsClient, INotificationService notifications)
         {
             this.mediator = mediator;
             this.talentsClient = talentsClient;
@@ -48,24 +48,16 @@ namespace HeroesProfile.UI.Maui.ViewModels
 
             Form = new UserSettingsForm()
             {
-                BattleTags = string.Join(Environment.NewLine, response.UserSettings.BattleTags),
-
                 EnablePostMatch = response.UserSettings.EnablePostMatch,
                 EnablePredictions = response.UserSettings.EnablePredictions,
                 EnablePreMatch = response.UserSettings.EnablePreMatch,
-                EnableTwitchExtension = response.UserSettings.EnableTwitchExtension,
+                EnableTwitchExtension = response.UserSettings.EnableTalentsExtension,
 
-                // used in both Predictions and Extension (BroadcasterId = Twitch Username)
+                // Needed for twitch features
                 BroadcasterId = response.UserSettings.BroadcasterId,
-
-                // Needed for Extension
                 HeroesProfileApiEmail = response.UserSettings.HeroesProfileApiEmail,
                 HeroesProfileTwitchKey = response.UserSettings.HeroesProfileTwitchKey,
-                HeroesProfileUserId = response.UserSettings.HeroesProfileUserId,
-
-                // Needed for Predictions
-                TwitchClientId = response.UserSettings.TwitchClientId,
-                TwitchAccessToken = response.UserSettings.TwitchAccessToken,
+                HeroesProfileUserId = response.UserSettings.HeroesProfileUserId
             };
         }
 
@@ -75,16 +67,13 @@ namespace HeroesProfile.UI.Maui.ViewModels
             {
                 await mediator.Send(new Core.CQRS.Commands.UpdateUserSettings.Command(new Core.Models.UserSettings()
                 {
-                    BattleTags = ParseEntries(Form.BattleTags).ToList(),
                     BroadcasterId = Form.BroadcasterId,
                     EnablePostMatch = Form.EnablePostMatch,
                     EnablePredictions = Form.EnablePredictions,
                     EnablePreMatch = Form.EnablePreMatch,
-                    EnableTwitchExtension = Form.EnableTwitchExtension,
+                    EnableTalentsExtension = Form.EnableTwitchExtension,
                     HeroesProfileApiEmail = Form.HeroesProfileApiEmail,
                     HeroesProfileTwitchKey = Form.HeroesProfileTwitchKey,
-                    TwitchClientId = Form.TwitchClientId,
-                    TwitchAccessToken = Form.TwitchAccessToken,
                     HeroesProfileUserId = Form.HeroesProfileUserId
                 }));
 
@@ -96,53 +85,53 @@ namespace HeroesProfile.UI.Maui.ViewModels
             }
         }
 
-        private string[] ParseEntries(string input)
-        {
-            try
-            {
-                return input.Split(new[] { " ", Environment.NewLine, "," }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            }
-            catch
-            {
-                return Array.Empty<string>();
-            }
-        }
+        //private string[] ParseEntries(string input)
+        //{
+        //    try
+        //    {
+        //        return input.Split(new[] { " ", Environment.NewLine, "," }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        //    }
+        //    catch
+        //    {
+        //        return Array.Empty<string>();
+        //    }
+        //}
 
-        public void ValidateBattleTags(ValidatorEventArgs e)
-        {
-            var input = Convert.ToString(e.Value);
+        //public void ValidateBattleTags(ValidatorEventArgs e)
+        //{
+        //    var input = Convert.ToString(e.Value);
 
-            if (Form.EnablePredictions && string.IsNullOrWhiteSpace(input))
-            {
-                e.Status = ValidationStatus.Error;
-                e.ErrorText = "Provide your battletag account(s) for auto predictions.";
-            }
-            else if (!string.IsNullOrWhiteSpace(input))
-            {
-                try
-                {
-                    var parsed = ParseEntries(input).All(x => int.TryParse(x.Split('#')[1], out var tag) && !char.IsDigit(x.Split('#')[0][0]));
+        //    if (Form.EnablePredictions && string.IsNullOrWhiteSpace(input))
+        //    {
+        //        e.Status = ValidationStatus.Error;
+        //        e.ErrorText = "Provide your battletag account(s) for auto predictions.";
+        //    }
+        //    else if (!string.IsNullOrWhiteSpace(input))
+        //    {
+        //        try
+        //        {
+        //            var parsed = ParseEntries(input).All(x => int.TryParse(x.Split('#')[1], out var tag) && !char.IsDigit(x.Split('#')[0][0]));
 
-                    if (parsed)
-                    {
-                        e.Status = ValidationStatus.Success;
-                    }
-                    else
-                    {
-                        e.Status = ValidationStatus.Error;
-                        e.ErrorText = "Entries should be seperated by a comma (,) or new line";
-                    }
-                }
-                catch
-                {
-                    e.Status = ValidationStatus.Error;
-                }
-            }
-            else
-            {
-                e.Status = ValidationStatus.Success;
-            }
-        }
+        //            if (parsed)
+        //            {
+        //                e.Status = ValidationStatus.Success;
+        //            }
+        //            else
+        //            {
+        //                e.Status = ValidationStatus.Error;
+        //                e.ErrorText = "Entries should be seperated by a comma (,) or new line";
+        //            }
+        //        }
+        //        catch
+        //        {
+        //            e.Status = ValidationStatus.Error;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        e.Status = ValidationStatus.Success;
+        //    }
+        //}
 
         public void ValidateHeroesEmail(ValidatorEventArgs e)
         {
@@ -191,36 +180,36 @@ namespace HeroesProfile.UI.Maui.ViewModels
             }
         }
 
-        public void ValidateTwitchAccessToken(ValidatorEventArgs e)
-        {
-            var input = Convert.ToString(e.Value);
+        //public void ValidateTwitchAccessToken(ValidatorEventArgs e)
+        //{
+        //    var input = Convert.ToString(e.Value);
 
-            if (!Form.EnablePredictions)
-            {
-                e.Status = ValidationStatus.None;
-            }
-            else
-            {
-                e.Status = string.IsNullOrWhiteSpace(input) ? ValidationStatus.Error : ValidationStatus.Success;
-                e.ErrorText = "Required for Twitch Predictions";
-            }
+        //    if (!Form.EnablePredictions)
+        //    {
+        //        e.Status = ValidationStatus.None;
+        //    }
+        //    else
+        //    {
+        //        e.Status = string.IsNullOrWhiteSpace(input) ? ValidationStatus.Error : ValidationStatus.Success;
+        //        e.ErrorText = "Required for Twitch Predictions";
+        //    }
 
-        }
+        //}
 
-        public void ValidateTwitchClientId(ValidatorEventArgs e)
-        {
-            var input = Convert.ToString(e.Value);
+        //public void ValidateTwitchClientId(ValidatorEventArgs e)
+        //{
+        //    var input = Convert.ToString(e.Value);
 
-            if (!Form.EnablePredictions)
-            {
-                e.Status = ValidationStatus.None;
-            }
-            else
-            {
-                e.Status = string.IsNullOrWhiteSpace(input) ? ValidationStatus.Error : ValidationStatus.Success;
-                e.ErrorText = "Required for Twitch Predictions";
-            }
-        }
+        //    if (!Form.EnablePredictions)
+        //    {
+        //        e.Status = ValidationStatus.None;
+        //    }
+        //    else
+        //    {
+        //        e.Status = string.IsNullOrWhiteSpace(input) ? ValidationStatus.Error : ValidationStatus.Success;
+        //        e.ErrorText = "Required for Twitch Predictions";
+        //    }
+        //}
 
         public void ValidateBroadcasterId(ValidatorEventArgs e)
         {
@@ -231,7 +220,7 @@ namespace HeroesProfile.UI.Maui.ViewModels
                 if (string.IsNullOrWhiteSpace(input))
                 {
                     e.Status = ValidationStatus.Error;
-                    e.ErrorText = "Required for Twitch Talents & Predictions";
+                    e.ErrorText = "Required for Twitch features";
                 }
                 else
                 {
@@ -240,16 +229,19 @@ namespace HeroesProfile.UI.Maui.ViewModels
             }
         }
 
-        public void ValidateEnablePredictions(ValidatorEventArgs e)
-        {
-            var input = Convert.ToBoolean(e.Value);
 
-            if (input)
+        public void ValidateEnableTwitch(ValidatorEventArgs e)
+        {
+            var @checked = Convert.ToBoolean(e.Value);
+
+            if (@checked)
             {
-                if (string.IsNullOrWhiteSpace(Form.TwitchAccessToken))
+                if (string.IsNullOrWhiteSpace(Form.BroadcasterId) ||
+                    string.IsNullOrWhiteSpace(Form.HeroesProfileUserId) ||
+                    string.IsNullOrWhiteSpace(Form.HeroesProfileTwitchKey))
                 {
                     e.Status = ValidationStatus.Error;
-                    e.ErrorText = "Required for Twitch Predictions";
+                    e.ErrorText = "Authentication required";
                 }
             }
         }
@@ -264,9 +256,6 @@ namespace HeroesProfile.UI.Maui.ViewModels
             public string HeroesProfileApiEmail { get; set; }
             public string BroadcasterId { get; set; }
             public string HeroesProfileUserId { get; set; }
-            public string TwitchAccessToken { get; set; }
-            public string TwitchClientId { get; set; }
-            public string BattleTags { get; set; }
         }
     }
 }

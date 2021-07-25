@@ -120,9 +120,9 @@ namespace HeroesProfile.Core
              */
             services
                 .AddSingleton<IUploadClient, UploadClient>()
-                .AddSingleton<TalentsClient, TalentsClient>()
+                .AddSingleton<TalentsClient>()
                 .AddSingleton<PreMatchClient>()
-                .AddSingleton(typeof(ITwitchApiClient), appSettings.EnableFakeTwitch ? typeof(FakeTwitchApiClient) : typeof(TwitchApiClient));
+                .AddSingleton<PredictionsClient>();
 
             var talentsClientBuilder = services
                     .AddHttpClient<TalentsClient>()
@@ -142,6 +142,12 @@ namespace HeroesProfile.Core
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
                 .AddPolicyHandler((provider, ctx) => PollyPolicies.GetHeroesProfileRetryPolicy(provider.GetRequiredService<ILogger<UploadClient>>()));
 
+            var predictionClientBuilder = services
+               .AddHttpClient<PredictionsClient>()
+               .ConfigureHttpClient(client => client.BaseAddress = appSettings.HeroesProfileApiUri)
+               .SetHandlerLifetime(TimeSpan.FromMinutes(5))
+               .AddPolicyHandler((provider, ctx) => PollyPolicies.GetHeroesProfileRetryPolicy(provider.GetRequiredService<ILogger<PredictionsClient>>()));
+
             /*
              * This allows us to fake HTTP responses for HttpClients, for an easier experience in testing and development without needing the real service.
              */
@@ -152,6 +158,7 @@ namespace HeroesProfile.Core
                 preMatchClientBuilder.ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<FakeHeroesProfileDelegatingHandler>());
                 talentsClientBuilder.ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<FakeHeroesProfileDelegatingHandler>());
                 uploadClientBuilder.ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<FakeHeroesProfileDelegatingHandler>());
+                predictionClientBuilder.ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<FakeHeroesProfileDelegatingHandler>());
             }
 
             /*

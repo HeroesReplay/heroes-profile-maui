@@ -41,11 +41,11 @@ namespace HeroesProfile.Core.CQRS.Commands
                 }
                 else if (request.ParseType == ParseType.StormSave)
                 {
-                    await UpdateTwitchTalents(userSettings.TalentsIdentity, cancellationToken);
+                    await UpdateTwitchTalents(userSettings.Identity, cancellationToken);
                 }
                 else if (request.ParseType == ParseType.StormReplay)
                 {
-                    await UpdateFinalTwitchTalents(userSettings.TalentsIdentity, cancellationToken);
+                    await UpdateFinalTwitchTalents(userSettings.Identity, cancellationToken);
                 }
 
                 return new Response(sessionRepository.SessionData);

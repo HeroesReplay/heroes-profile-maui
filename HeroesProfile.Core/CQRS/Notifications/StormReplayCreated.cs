@@ -1,9 +1,7 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 using HeroesProfile.Core.CQRS.Commands;
-using HeroesProfile.Core.CQRS.Queries;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
 
@@ -30,7 +28,7 @@ namespace HeroesProfile.Core.CQRS.Notifications
             {
                 UserSettings settings = await userSettingsRepository.LoadAsync(cancellationToken);
 
-                if (settings.EnableTwitchExtension && notification.ReplayParseData.ParseResult == ParseResult.Success)
+                if (settings.EnableTalentsExtension && notification.ReplayParseData.ParseResult == ParseResult.Success)
                 {
                     await mediator.Send(new UpdateTalents.Command(notification.ReplayParseData.Replay, notification.ReplayParseData.ParseType), cancellationToken);
                 }

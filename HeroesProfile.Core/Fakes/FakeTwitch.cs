@@ -5,6 +5,7 @@ using HeroesProfile.Core.Repositories;
 using MediatR;
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -70,11 +71,11 @@ namespace HeroesProfile.Core.Fakes
         }
     }
 
-    public class FakeTwitchApiClient : ITwitchApiClient
+    public class FakePreditionsClient
     {
         TwitchPredictionData data;
 
-        public FakeTwitchApiClient()
+        public FakePreditionsClient()
         {
             data = new TwitchPredictionData()
             {
@@ -84,14 +85,16 @@ namespace HeroesProfile.Core.Fakes
             };
         }
 
-        public Task<CreatePredictionResponse> CreatePrediction(CreatePredictionRequest request, string? accessToken = null)
+
+        public Task<CreatePredictionResponse> CreatePrediction(Dictionary<string, string> identity, CreatePredictionRequest request, CancellationToken cancellationToken)
         {
             var response = new FakeCreatePredictionResponse(data);
 
             return Task.FromResult<CreatePredictionResponse>(response);
         }
 
-        public Task<EndPredictionResponse> EndPrediction(string broadcasterId, string predictionId, PredictionStatusEnum status, string? outcomeId = null, string? accessToken = null)
+
+        public Task<EndPredictionResponse> EndPrediction(Dictionary<string, string> identity, string predictionId, PredictionStatusEnum status, string? outcomeId, CancellationToken cancellationToken)
         {
             var response = new FakeEndPredictionResponse(data);
             return Task.FromResult<EndPredictionResponse>(response);

@@ -18,6 +18,7 @@ namespace HeroesProfile.UI.Maui
         {
             OnLaunchReplayProcessor processor = ServiceProvider.GetService<OnLaunchReplayProcessor>();
             FileWatchers watchers = ServiceProvider.GetService<FileWatchers>();
+                      
 
             IMediator mediator = ServiceProvider.GetService<IMediator>();
 

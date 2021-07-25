@@ -8,6 +8,7 @@ using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Queries
 {
+
     public static class GetUserSettings
     {
         public record Query : IRequest<Response>;

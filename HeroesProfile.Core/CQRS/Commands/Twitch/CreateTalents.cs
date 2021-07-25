@@ -34,13 +34,13 @@ namespace HeroesProfile.Core.CQRS.Commands
             {
                 UserSettings userSettings = await userSettingsRepository.LoadAsync(cancellationToken);
 
-                var sessionId = await talentsClient.CreateSession(userSettings.TalentsIdentity, cancellationToken);
+                var sessionId = await talentsClient.CreateSession(userSettings.Identity, cancellationToken);
 
                 if (!string.IsNullOrWhiteSpace(sessionId))
                 {
                     sessionRepository.SessionData.TalentsExtension.SessionId = sessionId;
-                    await talentsClient.SavePlayerData(userSettings.TalentsIdentity, sessionRepository.SessionData, cancellationToken);
-                    await talentsClient.NotifyTwitchTalentChange(userSettings.TalentsIdentity, cancellationToken);
+                    await talentsClient.SavePlayerData(userSettings.Identity, sessionRepository.SessionData, cancellationToken);
+                    await talentsClient.NotifyTwitchTalentChange(userSettings.Identity, cancellationToken);
 
                     await mediator.Publish(new Notifications.SessionUpdated.Notification(sessionRepository.SessionData), cancellationToken);
                 }

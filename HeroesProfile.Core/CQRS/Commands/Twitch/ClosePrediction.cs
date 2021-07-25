@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using HeroesProfile.Core.Clients;
+using HeroesProfile.Core.CQRS.Queries;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
 
@@ -23,18 +24,20 @@ namespace HeroesProfile.Core.CQRS.Commands
         public class Handler : IRequestHandler<Command, Response>
         {
             private readonly SessionRepository sessionRepository;
+            private readonly IMediator mediator;
             private readonly UserSettingsRepository settingsRepository;
             private readonly AppSettings appSettings;
-            private readonly ITwitchApiClient twitchWrapper;
+            private readonly PredictionsClient predictionClient;
 
             private SessionData session => sessionRepository.SessionData;
 
-            public Handler(UserSettingsRepository settingsRepository, SessionRepository sessionRepository, AppSettings appSettings, ITwitchApiClient twitchWrapper)
+            public Handler(IMediator mediator, UserSettingsRepository settingsRepository, SessionRepository sessionRepository, AppSettings appSettings, PredictionsClient predictionsClient)
             {
+                this.mediator = mediator;
                 this.settingsRepository = settingsRepository;
                 this.sessionRepository = sessionRepository;
                 this.appSettings = appSettings;
-                this.twitchWrapper = twitchWrapper;
+                this.predictionClient = predictionsClient;
             }
 
             public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
@@ -43,10 +46,13 @@ namespace HeroesProfile.Core.CQRS.Commands
 
                 if (session.StormReplay != null && session.Prediction != null)
                 {
-                    bool isWon = appSettings.EnableFakeTwitch ? (DateTime.Now.Millisecond > 499) : session.StormReplay.Players.Any(p => userSettings.BattleTags.Any(storedBattleTag => $"{p.Name}#{p.BattleTag}" == storedBattleTag && p.IsWinner));
+                    GetKnownBattleNetIds.Response? knownBattleNetIds = await mediator.Send(new GetKnownBattleNetIds.Query());
+
+                    bool isWon = session.StormReplay.Players.Any(p => knownBattleNetIds.BattleNetIds.Any(battleNetId => p.IsWinner && p.BattleNetId == battleNetId));
+
                     string outcomeId = isWon ? session.Prediction.WinningOutcomeId : session.Prediction.OtherOutcomeId;
 
-                    EndPredictionResponse response = await twitchWrapper.EndPrediction(userSettings.BroadcasterId, session.Prediction.PredictionId, PredictionStatusEnum.RESOLVED, outcomeId, accessToken: userSettings.TwitchAccessToken);
+                    EndPredictionResponse response = await predictionClient.EndPrediction(userSettings.Identity, session.Prediction.PredictionId, PredictionStatusEnum.RESOLVED, outcomeId, cancellationToken);
 
                     return new Response(isWon, outcomeId);
                 }

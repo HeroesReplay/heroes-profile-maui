@@ -20,15 +20,15 @@ namespace HeroesProfile.UI.Maui
                 isSetup = true;
 
                 SetupTrayIcon();
-            }
 
-            SizeChanged += MainPage_SizeChanged;
+                SizeChanged += MainPage_SizeChanged;
+            }
         }
 
-        private void MainPage_SizeChanged(object sender, System.EventArgs e)
+        private void MainPage_SizeChanged(object sender, EventArgs e)
         {
-            BlazorWebView.HeightRequest = this.Height;
-            BlazorWebView.WidthRequest = this.Width;
+            BlazorWebView.HeightRequest = Height;
+            BlazorWebView.WidthRequest = Width;
         }
 
         private void SetupTrayIcon()

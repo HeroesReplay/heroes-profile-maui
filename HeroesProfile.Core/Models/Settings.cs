@@ -13,18 +13,16 @@ namespace HeroesProfile.Core.Models
         public bool EnablePostMatch { get; set; }
         public bool EnablePreMatch { get; set; }
         public bool EnablePredictions { get; set; }
-        public bool EnableTwitchExtension { get; set; }
+        public bool EnableTalentsExtension { get; set; }
+
+        public string? BroadcasterId { get; set; }
         public string? HeroesProfileTwitchKey { get; set; }
         public string? HeroesProfileApiEmail { get; set; }
-        public string? BroadcasterId { get; set; }
         public string? HeroesProfileUserId { get; set; }
-        public string? TwitchAccessToken { get; set; }
-        public string? TwitchClientId { get; set; }
-        public List<string> BattleTags { get; set; }
 
 
         [JsonIgnore]
-        public Dictionary<string, string> TalentsIdentity => new()
+        public Dictionary<string, string> Identity => new()
         {
             { "hp_twitch_key", HeroesProfileTwitchKey ?? "UNSET" },
             { "email", HeroesProfileApiEmail ?? "UNSET" },
@@ -61,7 +59,6 @@ namespace HeroesProfile.Core.Models
         public bool EnableRecord { get; set; }
         public bool EnableReplayProcessing { get; set; }
         public bool EnableFileSimulator { get; set; }
-        public bool EnableFakeTwitch { get; set; }
         public bool EnableFakeHttp { get; set; }
         public bool DefaultUserSettingsOnStart { get; set; }
         public bool ClearStoredReplaysOnStart { get; set; }

@@ -1,7 +1,4 @@
 ﻿@page "/analysis"
-@using ReactiveUI.Blazor
-@using System.Reactive.Threading.Tasks
-@using System.Text.Json
 @inherits ReactiveInjectableComponentBase<AnalysisViewModel>
 
 <Row>
@@ -165,6 +162,15 @@
             @if (ViewModel.IsTwitchPredictionsEnabled)
             {
                 <CardBody>
+                    <Paragraph>BattleNet Ids are used during the Prediction analysis.</Paragraph> 
+                    <ListGroup>
+                        @foreach (var item in ViewModel.BattlenetIds)
+                        {
+                            <ListGroupItem>@item</ListGroupItem>
+                        }
+                    </ListGroup>
+                </CardBody>
+                <CardBody>
                     <Field Horizontal="true">
                         <FieldLabel ColumnSize="ColumnSize.Is4">ID</FieldLabel>
                         <FieldBody ColumnSize="ColumnSize.Is8">
@@ -219,9 +225,5 @@
 </Row>
 
 @code {
-
-    protected async override Task OnInitializedAsync()
-    {
-        await ViewModel.LoadAsync();
-    }
+    protected async override Task OnInitializedAsync() => await ViewModel.LoadAsync();
 }
