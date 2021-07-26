@@ -54,6 +54,8 @@ namespace HeroesProfile.Core.CQRS.Commands
 
                     EndPredictionResponse response = await predictionClient.EndPrediction(userSettings.Identity, session.Prediction.PredictionId, PredictionStatusEnum.RESOLVED, outcomeId, cancellationToken);
 
+                    await mediator.Publish(new Notifications.TwitchPredictionUpdated.Notification(sessionRepository.SessionData), cancellationToken);
+
                     return new Response(isWon, outcomeId);
                 }
 

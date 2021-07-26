@@ -6,6 +6,6 @@ namespace HeroesProfile.Core.CQRS.Notifications
 {
     public static class SessionUpdated
     {
-        public record Notification(SessionData Session): INotification;
+        public record Notification(SessionData SessionData): INotification;
     }
 }

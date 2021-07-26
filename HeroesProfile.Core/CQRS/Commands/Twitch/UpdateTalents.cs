@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,12 +21,14 @@ namespace HeroesProfile.Core.CQRS.Commands
 
         public class Handler : IRequestHandler<Command, Response>
         {
+            private readonly IMediator mediator;
             private readonly SessionRepository sessionRepository;
             private readonly TalentsClient client;
             private readonly UserSettingsRepository userSettingsRepository;
 
-            public Handler(SessionRepository sessionRepository, TalentsClient client, UserSettingsRepository userSettingsRepository)
+            public Handler(IMediator mediator, SessionRepository sessionRepository, TalentsClient client, UserSettingsRepository userSettingsRepository)
             {
+                this.mediator = mediator;
                 this.sessionRepository = sessionRepository;
                 this.client = client;
                 this.userSettingsRepository = userSettingsRepository;
@@ -35,6 +38,7 @@ namespace HeroesProfile.Core.CQRS.Commands
             {
                 UserSettings userSettings = await userSettingsRepository.LoadAsync(cancellationToken);
 
+
                 if (request.ParseType == ParseType.BattleLobby)
                 {
                     // BattleLobby is only used for session creation
@@ -42,10 +46,15 @@ namespace HeroesProfile.Core.CQRS.Commands
                 else if (request.ParseType == ParseType.StormSave)
                 {
                     await UpdateTwitchTalents(userSettings.Identity, cancellationToken);
+                    sessionRepository.SessionData.TalentsExtension.LastUpdate = DateTime.Now;
+                    await mediator.Publish(new Notifications.TwitchTalentsUpdated.Notification(sessionRepository.SessionData), cancellationToken);
+
                 }
                 else if (request.ParseType == ParseType.StormReplay)
                 {
                     await UpdateFinalTwitchTalents(userSettings.Identity, cancellationToken);
+                    sessionRepository.SessionData.TalentsExtension.LastUpdate = DateTime.Now;
+                    await mediator.Publish(new Notifications.TwitchTalentsUpdated.Notification(sessionRepository.SessionData), cancellationToken);
                 }
 
                 return new Response(sessionRepository.SessionData);

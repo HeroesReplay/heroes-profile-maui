@@ -115,6 +115,19 @@
             @if (ViewModel.IsTwitchTalentsEnabled)
             {
                 <CardBody>
+                     <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">Last Update</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            @if (ViewModel.Session.TalentsExtension.LastUpdate != null)
+                            {
+                                <TextEdit Text=@ViewModel.Session.TalentsExtension.LastUpdate.ToString() ReadOnly=true />
+                            }
+                            else
+                            {
+                                <TextEdit Placeholder="None" ReadOnly=true />
+                            }
+                        </FieldBody>
+                    </Field>
                     <Field Horizontal="true">
                         <FieldLabel ColumnSize="ColumnSize.Is4">Session ID</FieldLabel>
                         <FieldBody ColumnSize="ColumnSize.Is8">
@@ -141,17 +154,18 @@
                         </FieldBody>
                     </Field>
                 </CardBody>
-            }
+            } 
             else
             {
                 <CardBody>
                     <Alert Color=Color.Info Dismisable=false Visible=true>
-                        <AlertDescription>This feature can be enabled in the Settings</AlertDescription>
+                         <AlertMessage>Feature disabled.</AlertMessage>
+                        <AlertDescription>
+                            This feature can be enabled in the Settings. To find out more information about the Talents extension please visit <a href="https://api.heroesprofile.com/docs/1.0/Twitch/Extension/Usage">The Extension Documentation.</a>
+                        </AlertDescription>
                     </Alert>
                 </CardBody>
             }
-
-
         </Card>
     </Column>
     <Column ColumnSize=ColumnSize.Is6>
@@ -171,6 +185,19 @@
                     </ListGroup>
                 </CardBody>
                 <CardBody>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">Last Update</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            @if (ViewModel.Session.Prediction.LastUpdate != null)
+                            {
+                                <TextEdit Text=@ViewModel.Session.Prediction.LastUpdate.ToString() ReadOnly=true />
+                            }
+                            else
+                            {
+                                <TextEdit Placeholder="None" ReadOnly=true />
+                            }
+                        </FieldBody>
+                    </Field>
                     <Field Horizontal="true">
                         <FieldLabel ColumnSize="ColumnSize.Is4">ID</FieldLabel>
                         <FieldBody ColumnSize="ColumnSize.Is8">
@@ -214,9 +241,12 @@
             }
             else
             {
-                <CardBody>
+               <CardBody>
                     <Alert Color=Color.Info Dismisable=false Visible=true>
-                        <AlertDescription>This feature can be enabled in the Settings</AlertDescription>
+                         <AlertMessage>Feature disabled.</AlertMessage>
+                        <AlertDescription>
+                            This feature can be enabled in the Settings. To find out more information about the Predictions feature please visit <a href="https://api.heroesprofile.com/docs/1.0/Twitch/Extension/Usage">The Predictions Documentation.</a>
+                        </AlertDescription>
                     </Alert>
                 </CardBody>
             }

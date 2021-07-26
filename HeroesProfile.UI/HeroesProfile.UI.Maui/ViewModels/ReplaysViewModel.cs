@@ -148,8 +148,10 @@ namespace HeroesProfile.UI.Maui.ViewModels
                             proc.Start();
                         }
                     }
-
-                    // TODO: Mac Catalyst
+                    else if (OperatingSystem.IsMacOS())
+                    {
+                        Process.Start("open", WebLink.ToString());
+                    }
                 }
             }
 
@@ -166,8 +168,10 @@ namespace HeroesProfile.UI.Maui.ViewModels
                             proc.Start();
                         }
                     }
-
-                    // TODO: Mac Catalyst
+                    else if (OperatingSystem.IsMacOS())
+                    {
+                        Process.Start("open", WebLink.ToString());
+                    }
                 }
             }
 

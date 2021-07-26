@@ -1,7 +1,12 @@
-﻿using HeroesProfile.Core.CQRS.Queries;
+﻿using Blazorise.Localization;
+using Blazorise;
+
+using HeroesProfile.Core.CQRS.Queries;
 using HeroesProfile.Core.Models;
 
 using MediatR;
+
+using Microsoft.AspNetCore.Components;
 
 using ReactiveUI;
 
@@ -11,6 +16,7 @@ using System.Threading.Tasks;
 
 namespace HeroesProfile.UI.Maui.ViewModels
 {
+
     public class AnalysisViewModel : ReactiveObject
     {
         private readonly IMediator mediator;
@@ -76,7 +82,7 @@ namespace HeroesProfile.UI.Maui.ViewModels
             }
             else if (System.OperatingSystem.IsMacCatalyst())
             {
-
+                Process.Start(uri);
             }
         }
 

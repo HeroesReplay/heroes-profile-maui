@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using HeroesProfile.Core.Clients;
@@ -39,10 +40,11 @@ namespace HeroesProfile.Core.CQRS.Commands
                 if (!string.IsNullOrWhiteSpace(sessionId))
                 {
                     sessionRepository.SessionData.TalentsExtension.SessionId = sessionId;
+                    sessionRepository.SessionData.TalentsExtension.LastUpdate = DateTime.Now;
+
                     await talentsClient.SavePlayerData(userSettings.Identity, sessionRepository.SessionData, cancellationToken);
                     await talentsClient.NotifyTwitchTalentChange(userSettings.Identity, cancellationToken);
-
-                    await mediator.Publish(new Notifications.SessionUpdated.Notification(sessionRepository.SessionData), cancellationToken);
+                    await mediator.Publish(new Notifications.TwitchTalentsUpdated.Notification(sessionRepository.SessionData), cancellationToken);
                 }
 
 

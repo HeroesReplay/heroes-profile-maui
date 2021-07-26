@@ -24,7 +24,7 @@ namespace HeroesProfile.Core.Models
 
         public Uri? PostMatchUri { get; set; }
 
-        public Uri? PreMatchUri { get; set;  }
+        public Uri? PreMatchUri { get; set; }
 
 
         public ReplayFilesData Files { get; set; }
@@ -55,6 +55,7 @@ namespace HeroesProfile.Core.Models
         public string? PredictionId { get; set; }
         public string? WinningOutcomeId { get; set; }
         public string? OtherOutcomeId { get; set; }
+        public DateTime? LastUpdate { get; set; }
 
         public TwitchPredictionData()
         {
@@ -69,6 +70,7 @@ namespace HeroesProfile.Core.Models
         public bool TalentsUpdated { get; set; }
         public bool GameModeUpdated { get; set; }
         public List<string> PlayerFoundTalents { get; set; }
+        public DateTime? LastUpdate { get; set; }
 
         public TwitchTalentsData()
         {

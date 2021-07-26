@@ -11,7 +11,6 @@ using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Notifications
 {
-
     public static class StormSaveCreated
     {
         public record Notification(ReplayParseData Data) : INotification;

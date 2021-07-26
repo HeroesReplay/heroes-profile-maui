@@ -24,13 +24,15 @@ namespace HeroesProfile.Core.CQRS.Commands
 
         public class Handler : IRequestHandler<Command, Response>
         {
+            private readonly IMediator mediator;
             private readonly PredictionsClient predictionClient;
             private readonly AppSettings appSettings;
             private readonly SessionRepository sessionRepository;
             private readonly UserSettingsRepository settingsRepository;
 
-            public Handler(PredictionsClient predictionsClient, AppSettings appSettings, SessionRepository sessionRepository, UserSettingsRepository settingsRepository)
+            public Handler(IMediator mediator, PredictionsClient predictionsClient, AppSettings appSettings, SessionRepository sessionRepository, UserSettingsRepository settingsRepository)
             {
+                this.mediator = mediator;
                 this.predictionClient = predictionsClient;
                 this.appSettings = appSettings;
                 this.sessionRepository = sessionRepository;
@@ -63,6 +65,9 @@ namespace HeroesProfile.Core.CQRS.Commands
                     session.Prediction.PredictionId = createPredictionResponse.Data[0].Id;
                     session.Prediction.WinningOutcomeId = createPredictionResponse.Data[0].WinningOutcomeId;
                     session.Prediction.OtherOutcomeId = createPredictionResponse.Data[1].Outcomes[1].Id;
+                    session.Prediction.LastUpdate = DateTime.Now;
+
+                    await mediator.Publish(new Notifications.TwitchPredictionUpdated.Notification(sessionRepository.SessionData), cancellationToken);
                 }
 
                 return new Response(createPredictionResponse.Data);
