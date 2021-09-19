@@ -17,8 +17,6 @@ namespace HeroesProfile.Console
                 IMediator mediator = host.Services.GetRequiredService<IMediator>();
                 await mediator.Send(new InitializeApp.Command());
                 await host.RunAsync();
-
-                
             }
         }
 

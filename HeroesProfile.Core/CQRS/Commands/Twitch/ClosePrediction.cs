@@ -50,7 +50,7 @@ namespace HeroesProfile.Core.CQRS.Commands
 
                     bool isWon = session.StormReplay.Players.Any(p => knownBattleNetIds.BattleNetIds.Any(battleNetId => p.IsWinner && p.BattleNetId == battleNetId));
 
-                    string outcomeId = isWon ? session.Prediction.WinningOutcomeId : session.Prediction.OtherOutcomeId;
+                    string? outcomeId = isWon ? session.Prediction.WinningOutcomeId : session.Prediction.OtherOutcomeId;
 
                     EndPredictionResponse response = await predictionClient.EndPrediction(userSettings.Identity, session.Prediction.PredictionId, PredictionStatusEnum.RESOLVED, outcomeId, cancellationToken);
 
