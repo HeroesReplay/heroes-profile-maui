@@ -1,0 +1,26 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "6ab66a6b-fc4b-47ef-ab23-d72c43796235": {
+      "ProjectGuid": "6ab66a6b-fc4b-47ef-ab23-d72c43796235",
+      "DisplayName": "HeroesProfile",
+      "ColorIndex": 0
+    },
+    "a2fe74e1-b743-11d0-ae1a-00a0c90fffc3": {
+      "ProjectGuid": "a2fe74e1-b743-11d0-ae1a-00a0c90fffc3",
+      "DisplayName": "Miscellaneous Files",
+      "ColorIndex": -1
+    },
+    "7c9716a2-1116-412a-8f32-af072fe2deff": {
+      "ProjectGuid": "7c9716a2-1116-412a-8f32-af072fe2deff",
+      "DisplayName": "HeroesProfile.Core",
+      "ColorIndex": 1
+    },
+    "8469c614-510e-49da-8a61-566421154d28": {
+      "ProjectGuid": "8469c614-510e-49da-8a61-566421154d28",
+      "DisplayName": "HeroesProfile.Discord",
+      "ColorIndex": 2
+    }
+  },
+  "NextColorIndex": 3
+}

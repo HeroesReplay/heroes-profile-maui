@@ -1,0 +1,4 @@
+{
+    "DOTNET_ENVIRONMENT": "Development",
+    "DOTNET_APPLICATIONNAME": "HeroesProfile.UI"
+}

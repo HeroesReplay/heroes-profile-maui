@@ -1,0 +1,45 @@
+﻿<Blazorise.ThemeProvider Theme="@theme">
+    <Router AppAssembly="typeof(MauiApp2.App).Assembly">
+        <Found Context="routeData">
+            <RouteView RouteData="routeData" DefaultLayout="typeof(Blazor.Layouts.MainLayout)" />
+        </Found>
+        <NotFound>
+            <p>Sorry, there's nothing at this address.</p>
+        </NotFound>
+    </Router>
+    <MessageAlert />
+    <NotificationAlert />
+    <PageProgressAlert />
+</Blazorise.ThemeProvider>
+
+@code {
+
+    private Theme theme = new Theme
+    {
+        BarOptions = new ThemeBarOptions
+        {
+            HorizontalHeight = "64px"
+        },
+        BreakpointOptions = new ThemeBreakpointOptions
+        {
+        },
+        ColorOptions = new ThemeColorOptions
+        {
+            Primary = "#0288D1"
+        },
+        BackgroundOptions = new ThemeBackgroundOptions
+        {
+            Primary = "#0288D1",
+        },
+        TextColorOptions = new ThemeTextColorOptions
+        {
+        },
+        InputOptions = new ThemeInputOptions
+        {
+            CheckColor = "#0288D1",
+        },
+        SnackbarOptions = new ThemeSnackbarOptions
+        {
+        }
+    };
+}

@@ -1,0 +1,88 @@
+﻿@layout RootLayout
+@inherits LayoutComponentBase
+
+@using System.Globalization
+@using Blazorise.Localization
+@using System.Diagnostics
+
+<Layout Sider="true">
+    <LayoutSider>
+        <LayoutSiderContent>
+            <Bar Breakpoint="Breakpoint.Desktop" NavigationBreakpoint="Breakpoint.Tablet" ThemeContrast="ThemeContrast.Dark" Mode="BarMode.VerticalInline" CollapseMode="BarCollapseMode.Small">
+                <BarToggler />
+                <BarBrand>
+                    <BarItem>
+                        <BarLink To="">
+                            <BarIcon IconName="@Logo" />
+                            Heroes Profile
+                        </BarLink>
+                    </BarItem>
+                </BarBrand>
+                <BarMenu>
+                    <BarStart>
+                        <BarItem>
+                            <BarLink To="/">
+                                <BarIcon IconName=@("fas fa-file-upload") /> Replays
+                            </BarLink>
+                        </BarItem>
+                        <BarItem>
+                            <BarLink To="/analysis">
+                                <BarIcon IconName=@("fas fa-cog") /> Analysis
+                            </BarLink>
+                        </BarItem>
+                        <BarItem>
+                            <BarLink To="/settings">
+                                <BarIcon IconName=@("fas fa-user-cog") /> Settings
+                            </BarLink>
+                        </BarItem>
+                        <BarItem>
+                            <BarDropdown>
+                                <BarDropdownToggle>Links</BarDropdownToggle>
+                                <BarDropdownMenu>
+                                    <BarDropdownItem Clicked=@(() => ViewModel.OpenInBrowser("https://heroesprofile.com/"))>
+                                        <BarIcon IconName=@("fas fa-chart-bar") /> Heroes Profile
+                                    </BarDropdownItem>
+                                    <BarDropdownItem Clicked=@(() => ViewModel.OpenInBrowser("http://api.heroesprofile.com/"))>
+                                        <BarIcon IconName=@("fas fa-code") /> API
+                                    </BarDropdownItem>
+                                    <BarDropdownItem Clicked=@(() => ViewModel.OpenInBrowser("https://www.patreon.com/heroesprofile"))>
+                                        <BarIcon IconName=@("fab fa-patreon") /> Patreon
+                                    </BarDropdownItem>
+                                    <BarDropdownItem Clicked=@(() => ViewModel.OpenInBrowser("https://www.github.com/heroes-profile/"))>
+                                        <BarIcon IconName=@("fab fa-github") /> Github
+                                    </BarDropdownItem>
+                                    <BarDropdownItem Clicked=@(() => ViewModel.OpenInBrowser("https://www.twitch.tv/heroesprofile"))>
+                                        <BarIcon IconName=@("fab fa-twitch") /> Twitch
+                                    </BarDropdownItem>
+                                </BarDropdownMenu>
+                            </BarDropdown>
+                        </BarItem>
+                    </BarStart>
+                    <BarEnd>
+                    </BarEnd>
+                </BarMenu>
+            </Bar>
+        </LayoutSiderContent>
+    </LayoutSider>
+    <Layout>
+        <LayoutContent Padding="Padding.Is4.OnX">
+            @Body
+        </LayoutContent>
+    </Layout>
+</Layout>
+
+@code {
+
+    public RenderFragment Logo = @<img src='/images/logo.svg' style='width: 32px; height: 32px' />;
+
+    [Inject]
+    public MainLayoutViewModel ViewModel { get; set; }
+
+    [CascadingParameter]
+    protected Theme Theme { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+}

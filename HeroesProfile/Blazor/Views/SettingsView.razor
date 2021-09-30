@@ -1,0 +1,145 @@
+﻿@page "/settings"
+
+@inherits ReactiveInjectableComponentBase<SettingsViewModel>
+
+@if (ViewModel.Form != null)
+{
+    <Validations @ref="@ViewModel.Validator" Mode=ValidationMode.Manual ValidateOnLoad=false>
+
+        <Row>
+            <Column ColumnSize="ColumnSize.Is12">
+                <Card Margin="Margin.Is4.OnY">
+                    <CardHeader>
+                        <CardTitle>Heroes Profile Authentication</CardTitle>
+                    </CardHeader>
+                    <CardBody>
+                        <Validation Validator=@ViewModel.ValidateHeroesEmail>
+                            <Field Horizontal="true">
+                                <FieldLabel ColumnSize="ColumnSize.Is4">Email</FieldLabel>
+                                <FieldBody ColumnSize="ColumnSize.Is8">
+                                    <TextEdit Placeholder="" @bind-Text=@ViewModel.Form.HeroesProfileApiEmail>
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </TextEdit>
+                                </FieldBody>
+                            </Field>
+                        </Validation>
+                         <Validation Validator=@ViewModel.ValidateBroadcasterId>
+                            <Field Horizontal="true">
+                                <FieldLabel ColumnSize="ColumnSize.Is4">BroadcasterId</FieldLabel>
+                                <FieldBody ColumnSize="ColumnSize.Is8">
+                                    <TextEdit Placeholder="" @bind-Text=@ViewModel.Form.BroadcasterId>
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </TextEdit>
+                                </FieldBody>
+                            </Field>
+                        </Validation>
+                        <Validation AsyncValidator=@ViewModel.ValidateHeroesTwitchKey>
+                            <Field Horizontal="true">
+                                <FieldLabel ColumnSize="ColumnSize.Is4">Twitch Key</FieldLabel>
+                                <FieldBody ColumnSize="ColumnSize.Is8">
+                                    <TextEdit @bind-Text=@ViewModel.Form.HeroesProfileTwitchKey>
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </TextEdit>
+                                </FieldBody>
+                            </Field>
+                        </Validation>
+                        <Field Horizontal="true">
+                            <FieldLabel ColumnSize="ColumnSize.Is4">UserId</FieldLabel>
+                            <FieldBody ColumnSize="ColumnSize.Is8">
+                                <TextEdit Placeholder="Retrieved on authentication." @bind-Text=@ViewModel.Form.HeroesProfileUserId ReadOnly=true />
+                            </FieldBody>
+                        </Field>
+                    </CardBody>
+                </Card>
+            </Column>
+        </Row>
+
+        <Row>
+            <Column ColumnSize=ColumnSize.Is12>
+                <Card Margin="Margin.Is4.OnY">
+                    <CardHeader>
+                        <CardTitle>Enable or Disable features</CardTitle>
+                    </CardHeader>
+                    <CardBody>
+                        <Validation Validator=@ViewModel.ValidateEnableTwitch>
+                               <Field Horizontal="true">
+                            <FieldLabel ColumnSize="ColumnSize.Is4">Twitch Talents Extension</FieldLabel>
+                            <FieldBody ColumnSize="ColumnSize.Is6">
+                                <Switch TValue="bool" @bind-Checked=@ViewModel.Form.EnableTwitchExtension>
+                                    <Feedback>
+                                        <ValidationError>BroadcasterId & Heroes Profile Auth is required.</ValidationError>
+                                        <ValidationSuccess />
+                                    </Feedback>
+                                </Switch>
+                            </FieldBody>
+                        </Field>
+                        </Validation>
+
+                        <Validation Validator=@ViewModel.ValidateEnableTwitch>
+                            <Field Horizontal="true">
+                                <FieldLabel ColumnSize="ColumnSize.Is4">Twitch Auto Predictions</FieldLabel>
+                                <FieldBody ColumnSize="ColumnSize.Is6">
+                                    <Switch TValue="bool" @bind-Checked=@ViewModel.Form.EnablePredictions>
+                                        <Feedback>
+                                            <ValidationError>Twitch Auth is required.</ValidationError>
+                                            <ValidationSuccess />
+                                        </Feedback>
+                                    </Switch>
+                                </FieldBody>
+                            </Field>
+                        </Validation>
+                   
+                        <Field Horizontal="true">
+                            <FieldLabel ColumnSize="ColumnSize.Is4">Post match analysis</FieldLabel>
+                            <FieldBody ColumnSize="ColumnSize.Is6">
+                                <Switch TValue="bool" @bind-Checked=@ViewModel.Form.EnablePostMatch />
+                            </FieldBody>
+                        </Field>
+
+                        <Field Horizontal="true">
+                            <FieldLabel ColumnSize="ColumnSize.Is4">Pre match analysis</FieldLabel>
+                            <FieldBody ColumnSize="ColumnSize.Is6">
+                                <Switch TValue="bool" @bind-Checked=@ViewModel.Form.EnablePreMatch />
+                            </FieldBody>
+                        </Field>
+
+                        <Field Horizontal="true">
+                            <FieldLabel ColumnSize="ColumnSize.Is4">Enable Discord Enhancements</FieldLabel>
+                            <FieldBody ColumnSize="ColumnSize.Is6">
+                                <Switch TValue="bool" @bind-Checked=@ViewModel.Form.EnableDiscordEnhancement />
+                            </FieldBody>
+                        </Field>
+                        
+                        <Field Horizontal="true">
+                            <FieldLabel ColumnSize="ColumnSize.Is4">Add PreMatch Button to Discord</FieldLabel>
+                            <FieldBody ColumnSize="ColumnSize.Is6">
+                                <Switch TValue="bool" @bind-Checked=@ViewModel.Form.EnableDiscordPreMatch />
+                            </FieldBody>
+                        </Field>
+                    </CardBody>
+                </Card>
+            </Column>
+        </Row>
+
+        <Row>
+            <Column>
+                <Field>
+                    <Button Color="Color.Primary" Type="ButtonType.Button" PreventDefaultOnSubmit="true" Clicked=@ViewModel.SaveAsync>Save Changes</Button>
+                </Field>
+            </Column>
+        </Row>
+
+    </Validations>
+}
+
+@code {
+
+    protected override async Task OnInitializedAsync() => await ViewModel.LoadAsync();
+
+}
