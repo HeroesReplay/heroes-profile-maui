@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Heroes.ReplayParser;
 
@@ -7,6 +8,12 @@ namespace MauiApp2.Core.Models
 {
     public class SessionData
     {
+        public Player[] Players => StormReplay?.Players ?? StormSave?.Players ?? BattleLobby?.Players ?? Array.Empty<Player>();
+        public string Map => StormReplay?.Map ?? StormSave?.Map ?? BattleLobby?.Map ?? "UNKNOWN";
+        public DateTime StartTime => (StormReplay?.Timestamp ?? StormSave?.Timestamp ?? BattleLobby?.Timestamp) ?? DateTime.UtcNow;
+        public GameMode GameMode => StormReplay?.GameMode ?? StormSave?.GameMode ?? BattleLobby?.GameMode ?? GameMode.Unknown;
+
+
         public SessionState State
         {
             get
@@ -25,7 +32,6 @@ namespace MauiApp2.Core.Models
         public Uri PostMatchUri { get; set; }
 
         public Uri PreMatchUri { get; set; }
-
 
         public ReplayFilesData Files { get; set; }
 

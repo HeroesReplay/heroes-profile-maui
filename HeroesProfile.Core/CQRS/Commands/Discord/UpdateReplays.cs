@@ -30,8 +30,9 @@ namespace MauiApp2.Core.CQRS.Commands.Discord
             {
                 Queries.GetKnownBattleNetIds.Response? knownBattleNetIdsResponse = await this.mediator.Send(new Queries.GetKnownBattleNetIds.Query(), cancellationToken);
                 Queries.GetSession.Response? sessionResponse = await this.mediator.Send(new Queries.GetSession.Query(), cancellationToken);
+                Queries.GetUserSettings.Response? userSettingsResponse = await this.mediator.Send(new Queries.GetUserSettings.Query(), cancellationToken);
 
-                discordClient.UpdatePresence(sessionResponse.Session, knownBattleNetIdsResponse.BattleNetIds);
+                discordClient.UpdatePresence(sessionResponse.Session, userSettingsResponse.UserSettings, knownBattleNetIdsResponse.BattleNetIds);
 
                 return Unit.Value;
             }

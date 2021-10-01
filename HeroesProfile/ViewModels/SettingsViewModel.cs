@@ -53,6 +53,8 @@ namespace MauiApp2.ViewModels
                 EnablePredictions = response.UserSettings.EnablePredictions,
                 EnablePreMatch = response.UserSettings.EnablePreMatch,
                 EnableTwitchExtension = response.UserSettings.EnableTalentsExtension,
+                EnableDiscordEnhancement = response.UserSettings.EnableDiscordEnhancement,
+                EnableDiscordPreMatch = response.UserSettings.EnableDiscordPreMatch,
 
                 // Needed for twitch features
                 BroadcasterId = response.UserSettings.BroadcasterId,

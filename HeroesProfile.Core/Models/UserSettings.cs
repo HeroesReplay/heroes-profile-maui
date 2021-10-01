@@ -12,10 +12,8 @@ namespace MauiApp2.Core.Models
         public bool EnablePreMatch { get; set; }
         public bool EnablePredictions { get; set; }
         public bool EnableTalentsExtension { get; set; }
-
         public bool EnableDiscordEnhancement { get; set; }
         public bool EnableDiscordPreMatch { get; set; }
-
         public string BroadcasterId { get; set; }
         public string HeroesProfileTwitchKey { get; set; }
         public string HeroesProfileApiEmail { get; set; }

@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using MauiApp2.Core.CQRS.Queries;
 using MauiApp2.Core.Models;
+using System.Linq;
 
 namespace MauiApp2.ViewModels
 {
@@ -33,7 +34,7 @@ namespace MauiApp2.ViewModels
 
         public IEnumerable<int> BattlenetIds
         {
-            get => battlenetIds;
+            get => battlenetIds ?? Enumerable.Empty<int>();
             set
             {
                 battlenetIds = value;
