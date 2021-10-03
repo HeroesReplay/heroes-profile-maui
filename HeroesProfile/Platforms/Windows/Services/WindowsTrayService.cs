@@ -12,7 +12,7 @@ namespace MauiApp2.Platforms.Windows
 
         public void Initialize()
         {
-            tray = new WindowsTrayIcon("Platforms/Windows/icon.ico")
+            tray = new WindowsTrayIcon("Platforms/Windows/Images/logo.ico")
             {
                 LeftClick = () =>
                 {

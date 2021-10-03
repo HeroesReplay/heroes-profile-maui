@@ -18,7 +18,6 @@
 
     <ItemGroup>
         <MauiImage Include="Resources\appicon.svg" ForegroundFile="Resources\appiconfg.svg" IsAppIcon="true" Color="#512BD4" />
-        <MauiSplashScreen Include="Resources\appiconfg.svg" Color="#512BD4" />
         <MauiImage Include="Resources\Images\*" />
         <MauiFont Include="Resources\Fonts\*" />
     </ItemGroup>
@@ -80,6 +79,18 @@
       <Content Update="wwwroot\index.html">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Platforms\Windows\Images\logo.ico">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Platforms\Windows\Images\logo.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Platforms\Windows\Images\logo.svg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

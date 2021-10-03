@@ -16,10 +16,7 @@ namespace MauiApp2.Platforms.Windows
         public static void SetIcon(this Window window, string iconFilename)
         {
             var hwnd = window.GetNativeWindowHandle();
-
-            var hIcon = PInvoke.User32.LoadImage(IntPtr.Zero, iconFilename,
-               PInvoke.User32.ImageType.IMAGE_ICON, 16, 16, PInvoke.User32.LoadImageFlags.LR_LOADFROMFILE);
-
+            var hIcon = PInvoke.User32.LoadImage(IntPtr.Zero, iconFilename, PInvoke.User32.ImageType.IMAGE_ICON, 16, 16, PInvoke.User32.LoadImageFlags.LR_LOADFROMFILE);
             PInvoke.User32.SendMessage(hwnd, PInvoke.User32.WindowMessage.WM_SETICON, (IntPtr)0, hIcon);
         }
 

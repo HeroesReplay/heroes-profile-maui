@@ -6,6 +6,7 @@ using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
 
 using MauiApp2.Core;
+using MauiApp2.Platforms.Windows;
 using MauiApp2.Services;
 using MauiApp2.ViewModels;
 
@@ -39,8 +40,7 @@ namespace MauiApp2
                         {
                             configure.OnLaunched((app, args) =>
                             {
-                                Platforms.Windows.WindowExtensions.SetIcon(MauiWinUIApplication.Current.MainWindow, "Platforms/Windows/icon.ico");
-
+                                MauiWinUIApplication.Current.MainWindow.SetIcon("Platforms/Windows/Images/logo.ico");
                                 Initializer.Start();
                             });
 
@@ -48,7 +48,7 @@ namespace MauiApp2
                             {
                                 if (!args.Visible)
                                 {
-                                    Platforms.Windows.WindowExtensions.MinimizeToTray(window);
+                                    window.MinimizeToTray();
                                 }
                             });
 
