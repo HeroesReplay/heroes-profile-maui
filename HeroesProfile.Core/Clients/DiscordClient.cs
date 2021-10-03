@@ -43,7 +43,7 @@ namespace MauiApp2.Core.Clients
 
                     if (player is not null)
                     {
-                        int partySize = sessionData.Players.Count(x => x.PartyValue == player.PartyValue);
+                        int partySize = sessionData.Players.Count(x => x.PartyValue == player.PartyValue && x.Team == player.Team);
                         int partyMax = 5; // All modes are 5 or extract from battlelobby?
 
                         var presence = new RichPresence
@@ -60,7 +60,7 @@ namespace MauiApp2.Core.Clients
                             },
                             Timestamps = new Timestamps
                             {
-                                Start = sessionData.StartTime
+                                Start = sessionData.Files?.BattleLobby?.Created
                             },
                             Party = new Party
                             {

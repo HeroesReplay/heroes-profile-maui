@@ -10,7 +10,9 @@ namespace MauiApp2.Core.Models
     {
         public Player[] Players => StormReplay?.Players ?? StormSave?.Players ?? BattleLobby?.Players ?? Array.Empty<Player>();
         public string Map => StormReplay?.Map ?? StormSave?.Map ?? BattleLobby?.Map ?? "UNKNOWN";
-        public DateTime StartTime => (StormReplay?.Timestamp ?? StormSave?.Timestamp ?? BattleLobby?.Timestamp) ?? DateTime.UtcNow;
+        public DateTime StartTime => (BattleLobby?.Timestamp ?? StormSave?.Timestamp ?? StormReplay?.Timestamp) ?? DateTime.UtcNow;
+        public DateTime? EndTime => StormReplay?.ReplayLength != null ? StartTime.Add(StormReplay.ReplayLength) : null;
+
         public GameMode GameMode => StormReplay?.GameMode ?? StormSave?.GameMode ?? BattleLobby?.GameMode ?? GameMode.Unknown;
 
 

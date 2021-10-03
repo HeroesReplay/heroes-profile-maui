@@ -31,7 +31,8 @@ namespace MauiApp2.Core.CQRS.Queries
                 IEnumerable<int> battleNetIds = new DirectoryInfo(appSettings.GameDocumentsDirectory)
                         .EnumerateDirectories("*-*", SearchOption.AllDirectories)
                         .Where(directory => int.TryParse(directory.Parent.Name, out var accountId))
-                        .Select(directory => int.Parse(directory.Name.Split("-").Last()));
+                        .Select(directory => int.Parse(directory.Name.Split("-").Last()))
+                        .Distinct();
 
                 return Task.FromResult(new Response(battleNetIds.ToList()));
             }
