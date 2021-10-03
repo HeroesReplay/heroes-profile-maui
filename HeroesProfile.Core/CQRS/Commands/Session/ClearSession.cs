@@ -31,7 +31,6 @@ namespace MauiApp2.Core.CQRS.Commands.Session
             public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
             {
                 await sessionRepository.ClearAsync(cancellationToken);
-
                 await mediator.Publish(new SessionUpdated.Notification(sessionRepository.SessionData));
 
                 return new Response();

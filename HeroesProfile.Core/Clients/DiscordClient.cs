@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 using Heroes.ReplayParser;
 
 using MauiApp2.Core.Models;
+
+using Microsoft.Extensions.Logging;
 
 using NetDiscordRpc;
 using NetDiscordRpc.RPC;
@@ -17,78 +20,113 @@ namespace MauiApp2.Core.Clients
     public class DiscordClient : IDisposable
     {
         private readonly AppSettings appSettings;
+        private readonly ILogger<DiscordClient> logger;
         private readonly DiscordRPC discord;
 
-        public DiscordClient(AppSettings appSettings)
+        public DiscordClient(AppSettings appSettings, ILogger<DiscordClient> logger)
         {
             this.appSettings = appSettings;
+            this.logger = logger;
             this.discord = new DiscordRPC(appSettings.DiscordApplicationId, pipe: -1, autoEvents: true, client: null);
+
+        }
+
+        private void TryInit()
+        {
+            if (!this.discord.IsInitialized)
+                this.discord.Initialize();
+        }
+
+        public void ClearActivity()
+        {
+            try
+            {
+                TryInit();
+                discord.ClearPresence();
+                discord.Invoke();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, ex.Message);
+            }
         }
 
         public void UpdatePresence(SessionData sessionData, UserSettings settings, IEnumerable<int> battleNetIds)
         {
             try
             {
-                if (!discord.IsInitialized)
+                TryInit();
+
+                if (sessionData.State == SessionState.BattleLobby)
                 {
-                    discord.Initialize();
+                    BattleLobby(sessionData, settings, battleNetIds);
                 }
-
-                // Only update with new presence if state contains battlelobby or stormsave
-                discord.ClearPresence();
-
-                if (sessionData.State == SessionState.BattleLobby || sessionData.State == SessionState.StormSave)
+                else if (sessionData.State == SessionState.StormSave)
                 {
-                    Player? player = sessionData.Players.FirstOrDefault(p => battleNetIds.Contains(p.BattleNetId));
-
-                    if (player is not null)
-                    {
-                        int partySize = sessionData.Players.Count(x => x.PartyValue == player.PartyValue && x.Team == player.Team);
-                        int partyMax = 5; // All modes are 5 or extract from battlelobby?
-
-                        var presence = new RichPresence
-                        {
-                            Details = $"{sessionData.Map} ({sessionData.GameMode})",
-                            State = $"Playing {player.HeroId}",
-                            Assets = new Assets
-                            {
-                                LargeImageKey = "game",
-                                LargeImageText = "Heroes of the Storm",
-                                // https://discord.com/developers/applications/892930415738900491/rich-presence/assets
-                                SmallImageKey = "abathur", // the keys are the file names updated to the Discord Developer Applications art assets
-                                SmallImageText = player.HeroAttributeId
-                            },
-                            Timestamps = new Timestamps
-                            {
-                                Start = sessionData.Files?.BattleLobby?.Created
-                            },
-                            Party = new Party
-                            {
-                                Size = partySize,
-                                Max = partyMax,
-                                Privacy = PartyPrivacySettings.Public
-                            }
-                        };
-
-                        if (settings.EnableDiscordPreMatch && sessionData.PreMatchUri != null)
-                        {
-                            presence.Buttons = new Button[]
-                            {
-                                new Button { Label = "Pre Match Details", Url = sessionData.PreMatchUri?.ToString() }
-                            };
-                        }
-
-                        discord.SetPresence(presence);
-                    }
+                    StormSave(sessionData, settings, battleNetIds);
                 }
 
                 discord.Invoke();
             }
             catch (Exception e)
             {
-
+                logger.LogError(e, e.Message);
             }
         }
+
+        private void BattleLobby(SessionData sessionData, UserSettings settings, IEnumerable<int> battleNetIds)
+        {
+            try
+            {
+                var presence = new RichPresence
+                {
+                    State = $"In Lobby",
+                    Assets = new Assets
+                    {
+                        LargeImageKey = "game",
+                        LargeImageText = "Heroes of the Storm"
+                    },
+                    Timestamps = new Timestamps(sessionData.Files.BattleLobby.Created, end: null)
+                };
+
+                discord.SetPresence(presence);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, e.Message);
+            }
+        }
+
+        private void StormSave(SessionData sessionData, UserSettings settings, IEnumerable<int> battleNetIds)
+        {
+            try
+            {
+                Player? player = sessionData.Players.FirstOrDefault(p => battleNetIds.Contains(p.BattleNetId));
+
+                if (player is not null)
+                {
+                    //int partySize = sessionData.Players.Count(x => x.PartyValue == player.PartyValue && x.Team == player.Team);
+                    //int partyMax = 5;
+
+                    discord.UpdateLargeAsset("abathur", player.HeroAttributeId);
+                    discord.UpdateState("In Game");
+                    discord.UpdateDetails($"{sessionData.Map} ({sessionData.GameMode})");
+
+                    if (settings.EnableDiscordPreMatch && sessionData.PreMatchUri != null)
+                    {
+                        discord.UpdateButtons(new Button[]
+                        {
+                            new Button { Label = "Pre Match Details", Url = sessionData.PreMatchUri?.ToString() }
+                        });
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, e.Message);
+            }
+        }
+
 
         public void Dispose()
         {

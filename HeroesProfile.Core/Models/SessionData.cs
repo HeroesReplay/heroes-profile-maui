@@ -51,9 +51,9 @@ namespace MauiApp2.Core.Models
 
     public class ReplayFilesData
     {
-        public SessionFile BattleLobby { get; set; }
-        public SessionFile StormSave { get; set; }
-        public SessionFile StormReplay { get; set; }
+        public SessionFile? BattleLobby { get; set; }
+        public SessionFile? StormSave { get; set; }
+        public SessionFile? StormReplay { get; set; }
     }
 
     public record SessionFile(Replay Replay, ParseType ParseType, DateTime Created);

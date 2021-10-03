@@ -11,7 +11,8 @@ using MediatR;
 
 namespace MauiApp2.Core.CQRS.Commands.Discord
 {
-    public static class UpdatePresence
+
+    public static class SetActivity
     {
         public record Command() : IRequest;
 

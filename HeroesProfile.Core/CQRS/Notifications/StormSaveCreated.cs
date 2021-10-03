@@ -34,6 +34,11 @@ namespace MauiApp2.Core.CQRS.Notifications
                 {
                     await mediator.Send(new UpdateTalents.Command(notification.Data.Replay, notification.Data.ParseType), cancellationToken);
                 }
+
+                if (settings.EnableDiscordEnhancement)
+                {
+                    await mediator.Send(new Commands.Discord.SetActivity.Command(), cancellationToken);
+                }
             }
         }
     }

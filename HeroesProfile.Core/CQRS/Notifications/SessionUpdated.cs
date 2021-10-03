@@ -24,12 +24,9 @@ namespace MauiApp2.Core.CQRS.Notifications
 
             public async Task Handle(Notification notification, CancellationToken cancellationToken)
             {
-                var userSettingsResponse = await mediator.Send(new Queries.GetUserSettings.Query(), cancellationToken);
+                
 
-                if (userSettingsResponse.UserSettings.EnableDiscordEnhancement)
-                {
-                    await mediator.Send(new Commands.Discord.UpdatePresence.Command(), cancellationToken);
-                }
+                
             }
         }
     }
