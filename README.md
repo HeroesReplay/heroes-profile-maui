@@ -1,8 +1,5 @@
 
-
-- [Visual Studio 2022 Preview MSIX Extension](https://marketplace.visualstudio.com/items?itemName=ProjectReunion.MicrosoftSingleProjectMSIXPackagingToolsDev17)
-
-- [.NET SDK 6.0.0 RC1](https://dotnet.microsoft.com/download/)
+- [.NET 7 SDK](https://dotnet.microsoft.com/download/)
 
 - Maui Check tool
 
