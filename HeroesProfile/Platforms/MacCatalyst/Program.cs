@@ -1,6 +1,6 @@
 ﻿using UIKit;
 
-namespace MauiApp2
+namespace HeroesProfile.UI
 {
     public class Program
     {

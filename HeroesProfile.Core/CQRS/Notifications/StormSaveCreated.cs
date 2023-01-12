@@ -2,43 +2,43 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using MauiApp2.Core.CQRS.Queries;
-using MauiApp2.Core.CQRS.Commands.Twitch;
-using MauiApp2.Core.Models;
-using MauiApp2.Core.Repositories;
+using HeroesProfile.Core.CQRS.Queries;
 
 using MediatR;
+using HeroesProfile.Core.CQRS.Commands.Discord;
+using HeroesProfile.Core.CQRS.Commands.Twitch;
+using HeroesProfile.Core.Models;
+using HeroesProfile.Core.Repositories;
 
-namespace MauiApp2.Core.CQRS.Notifications
+namespace HeroesProfile.Core.CQRS.Notifications;
+
+public static class StormSaveCreated
 {
-    public static class StormSaveCreated
+    public record Notification(ReplayParseData Data) : INotification;
+
+    public class Handler : INotificationHandler<Notification>
     {
-        public record Notification(ReplayParseData Data) : INotification;
+        private readonly IMediator mediator;
+        private readonly UserSettingsRepository userSettingsRepository;
 
-        public class Handler : INotificationHandler<Notification>
+        public Handler(IMediator mediator, UserSettingsRepository userSettingsRepository)
         {
-            private readonly IMediator mediator;
-            private readonly UserSettingsRepository userSettingsRepository;
+            this.mediator = mediator;
+            this.userSettingsRepository = userSettingsRepository;
+        }
 
-            public Handler(IMediator mediator, UserSettingsRepository userSettingsRepository)
+        public async Task Handle(Notification notification, CancellationToken cancellationToken)
+        {
+            var settings = await userSettingsRepository.LoadAsync(cancellationToken);
+
+            if (settings.EnableTalentsExtension)
             {
-                this.mediator = mediator;
-                this.userSettingsRepository = userSettingsRepository;
+                await mediator.Send(new UpdateTalents.Command(notification.Data.Replay, notification.Data.ParseType), cancellationToken);
             }
 
-            public async Task Handle(Notification notification, CancellationToken cancellationToken)
+            if (settings.EnableDiscordEnhancement)
             {
-                var settings = await userSettingsRepository.LoadAsync(cancellationToken);
-
-                if (settings.EnableTalentsExtension)
-                {
-                    await mediator.Send(new UpdateTalents.Command(notification.Data.Replay, notification.Data.ParseType), cancellationToken);
-                }
-
-                if (settings.EnableDiscordEnhancement)
-                {
-                    await mediator.Send(new Commands.Discord.SetActivity.Command(), cancellationToken);
-                }
+                await mediator.Send(new SetActivity.Command(), cancellationToken);
             }
         }
     }

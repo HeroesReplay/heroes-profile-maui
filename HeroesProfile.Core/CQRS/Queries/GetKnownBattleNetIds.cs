@@ -3,39 +3,36 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
-using MauiApp2.Core.Models;
-
+using HeroesProfile.Core.Models;
 using MediatR;
 
-namespace MauiApp2.Core.CQRS.Queries
+namespace HeroesProfile.Core.CQRS.Queries;
+
+public static class GetKnownBattleNetIds
 {
-    public static class GetKnownBattleNetIds
+    public record Query : IRequest<Response>;
+
+    public record Response(IEnumerable<int> BattleNetIds);
+
+
+    public class Handler : IRequestHandler<Query, Response>
     {
-        public record Query : IRequest<Response>;
+        private readonly AppSettings appSettings;
 
-        public record Response(IEnumerable<int> BattleNetIds);
-
-
-        public class Handler : IRequestHandler<Query, Response>
+        public Handler(AppSettings appSettings)
         {
-            private readonly AppSettings appSettings;
+            this.appSettings = appSettings;
+        }
 
-            public Handler(AppSettings appSettings)
-            {
-                this.appSettings = appSettings;
-            }
+        public Task<Response> Handle(Query request, CancellationToken cancellationToken)
+        {
+            IEnumerable<int> battleNetIds = new DirectoryInfo(appSettings.GameDocumentsDirectory)
+                    .EnumerateDirectories("*-*", SearchOption.AllDirectories)
+                    .Where(directory => int.TryParse(directory.Parent.Name, out var accountId))
+                    .Select(directory => int.Parse(directory.Name.Split("-").Last()))
+                    .Distinct();
 
-            public Task<Response> Handle(Query request, CancellationToken cancellationToken)
-            {
-                IEnumerable<int> battleNetIds = new DirectoryInfo(appSettings.GameDocumentsDirectory)
-                        .EnumerateDirectories("*-*", SearchOption.AllDirectories)
-                        .Where(directory => int.TryParse(directory.Parent.Name, out var accountId))
-                        .Select(directory => int.Parse(directory.Name.Split("-").Last()))
-                        .Distinct();
-
-                return Task.FromResult(new Response(battleNetIds.ToList()));
-            }
+            return Task.FromResult(new Response(battleNetIds.ToList()));
         }
     }
 }

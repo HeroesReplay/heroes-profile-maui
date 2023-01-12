@@ -2,13 +2,12 @@
 
 using Microsoft.Maui.Controls;
 
-namespace MauiApp2
+namespace HeroesProfile.UI;
+
+public partial class MainPage : ContentPage
 {
-    public partial class MainPage : ContentPage
+    public MainPage()
     {
-        public MainPage()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

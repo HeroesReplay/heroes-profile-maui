@@ -1,32 +1,29 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-
-using MauiApp2.Core.Repositories;
-
+using HeroesProfile.Core.Repositories;
 using MediatR;
 
-namespace MauiApp2.Core.CQRS.Commands.UserSettings
+namespace HeroesProfile.Core.CQRS.Commands.UserSettings;
+
+public static class UpdateUserSettings
 {
-    public static class UpdateUserSettings
+    public record Command(Models.UserSettings Settings) : IRequest<Response>;
+
+    public record Response(Models.UserSettings Settings);
+
+    public class Handler : IRequestHandler<Command, Response>
     {
-        public record Command(Models.UserSettings Settings) : IRequest<Response>;
+        private readonly UserSettingsRepository repository;
 
-        public record Response(Models.UserSettings Settings);
-
-        public class Handler : IRequestHandler<Command, Response>
+        public Handler(UserSettingsRepository repository)
         {
-            private readonly UserSettingsRepository repository;
+            this.repository = repository;
+        }
 
-            public Handler(UserSettingsRepository repository)
-            {
-                this.repository = repository;
-            }
-
-            public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
-            {
-                await repository.SaveAsync(request.Settings, cancellationToken);
-                return new Response(request.Settings);
-            }
+        public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
+        {
+            await repository.SaveAsync(request.Settings, cancellationToken);
+            return new Response(request.Settings);
         }
     }
 }

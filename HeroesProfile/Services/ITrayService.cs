@@ -1,11 +1,8 @@
-﻿using System;
+﻿namespace HeroesProfile.UI.Services;
 
-namespace MauiApp2.Services
+public interface ITrayService
 {
-    public interface ITrayService
-    {
-        void Initialize();
+    void Initialize();
 
-        Action ClickHandler { get; set; }
-    }
+    Action ClickHandler { get; set; }
 }

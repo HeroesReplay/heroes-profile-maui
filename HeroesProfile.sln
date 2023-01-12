@@ -5,7 +5,9 @@ VisualStudioVersion = 17.0.31717.71
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HeroesProfile", "HeroesProfile\HeroesProfile.csproj", "{6AB66A6B-FC4B-47EF-AB23-D72C43796235}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeroesProfile.Core", "HeroesProfile.Core\HeroesProfile.Core.csproj", "{7C9716A2-1116-412A-8F32-AF072FE2DEFF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HeroesProfile.Core", "HeroesProfile.Core\HeroesProfile.Core.csproj", "{7C9716A2-1116-412A-8F32-AF072FE2DEFF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HeroesProfile.Blazor", "HeroesProfile.Blazor\HeroesProfile.Blazor.csproj", "{32302334-9F51-49A1-B696-2DD4E279DD8A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,6 +25,10 @@ Global
 		{7C9716A2-1116-412A-8F32-AF072FE2DEFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C9716A2-1116-412A-8F32-AF072FE2DEFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C9716A2-1116-412A-8F32-AF072FE2DEFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32302334-9F51-49A1-B696-2DD4E279DD8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32302334-9F51-49A1-B696-2DD4E279DD8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32302334-9F51-49A1-B696-2DD4E279DD8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32302334-9F51-49A1-B696-2DD4E279DD8A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

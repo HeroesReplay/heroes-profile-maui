@@ -1,7 +1,6 @@
-﻿namespace MauiApp2.Services
+﻿namespace HeroesProfile.UI.Services;
+
+public interface INotificationService
 {
-    public interface INotificationService
-    {
-        void ShowNotification(string title, string subtitle, string body);
-    }
+    void ShowNotification(string title, string subtitle, string body);
 }

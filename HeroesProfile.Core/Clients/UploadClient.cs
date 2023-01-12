@@ -5,74 +5,72 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using HeroesProfile.Core.Models;
 
-using MauiApp2.Core.Models;
+namespace HeroesProfile.Core.Clients;
 
-namespace MauiApp2.Core.Clients
+
+public interface IUploadClient
 {
+    Task<List<string>> CheckDuplicatesAsync(List<string> Fingerprints, CancellationToken cancellationToken);
+    Task<UploadResponse> UploadToHeroesProfileAsync(byte[] data, string fingerprint, CancellationToken cancellationToken);
+    Task<UploadResponse> UploadToHotsApiAsync(byte[] data, string fingerprint, CancellationToken cancellationToken); // We don't care other than a HTTP 200
+    Task<UploadResponse> UploadToHotsLogsAsync(byte[] data, string fingerprint, CancellationToken cancellationToken); // We don't care other than a HTTP 200
+}
 
-    public interface IUploadClient
+
+public record UploadResponse(bool Success, UploadStatus Status, int? ReplayId = null);
+
+public class UploadClient : IUploadClient
+{
+    private readonly AppSettings appSettings;
+    private readonly HttpClient httpClient;
+
+    public UploadClient(AppSettings appSettings, HttpClient httpClient)
     {
-        Task<List<string>> CheckDuplicatesAsync(List<string> Fingerprints, CancellationToken cancellationToken);
-        Task<UploadResponse> UploadToHeroesProfileAsync(byte[] data, string fingerprint, CancellationToken cancellationToken);
-        Task<UploadResponse> UploadToHotsApiAsync(byte[] data, string fingerprint, CancellationToken cancellationToken); // We don't care other than a HTTP 200
-        Task<UploadResponse> UploadToHotsLogsAsync(byte[] data, string fingerprint, CancellationToken cancellationToken); // We don't care other than a HTTP 200
+        this.appSettings = appSettings;
+        this.httpClient = httpClient;
     }
 
-
-    public record UploadResponse(bool Success, UploadStatus Status, int? ReplayId = null);
-
-    public class UploadClient : IUploadClient
+    public async Task<List<string>> CheckDuplicatesAsync(List<string> Fingerprints, CancellationToken cancellationToken)
     {
-        private readonly AppSettings appSettings;
-        private readonly HttpClient httpClient;
+        throw new NotImplementedException();
+    }
 
-        public UploadClient(AppSettings appSettings, HttpClient httpClient)
+    public async Task<UploadResponse> UploadToHeroesProfileAsync(byte[] data, string fingerprint, CancellationToken cancellationToken)
+    {
+        using (ByteArrayContent fileContent = new ByteArrayContent(data))
         {
-            this.appSettings = appSettings;
-            this.httpClient = httpClient;
-        }
+            fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/octet-stream");
 
-        public async Task<List<string>> CheckDuplicatesAsync(List<string> Fingerprints, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<UploadResponse> UploadToHeroesProfileAsync(byte[] data, string fingerprint, CancellationToken cancellationToken)
-        {
-            using (ByteArrayContent fileContent = new ByteArrayContent(data))
+            using (HttpResponseMessage response = await httpClient.PostAsync(new Uri($"upload?fingerprint={fingerprint}", UriKind.Relative), fileContent, cancellationToken))
             {
-                fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/octet-stream");
-
-                using (HttpResponseMessage response = await httpClient.PostAsync(new Uri($"upload?fingerprint={fingerprint}", UriKind.Relative), fileContent, cancellationToken))
+                if (response.IsSuccessStatusCode)
                 {
-                    if (response.IsSuccessStatusCode)
+                    var json = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                    using (var document = JsonDocument.Parse(json))
                     {
-                        var json = await response.Content.ReadAsStringAsync(cancellationToken);
+                        int replayId = document.RootElement.GetProperty("replayID").GetInt32();
+                        bool success = document.RootElement.GetProperty("success").GetBoolean();
+                        UploadStatus status = Enum.Parse<UploadStatus>(document.RootElement.GetProperty("status").GetString(), ignoreCase: true);
 
-                        using (var document = JsonDocument.Parse(json))
-                        {
-                            int replayId = document.RootElement.GetProperty("replayID").GetInt32();
-                            bool success = document.RootElement.GetProperty("success").GetBoolean();
-                            UploadStatus status = Enum.Parse<UploadStatus>(document.RootElement.GetProperty("status").GetString(), ignoreCase: true);
-
-                            return new UploadResponse(Success: success, Status: status, ReplayId: replayId);
-                        }
+                        return new UploadResponse(Success: success, Status: status, ReplayId: replayId);
                     }
                 }
             }
-
-            return new UploadResponse(Success: false, Status: UploadStatus.UploadError, ReplayId: null);
         }
 
-        public async Task<UploadResponse> UploadToHotsApiAsync(byte[] data, string fingerprint, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
+        return new UploadResponse(Success: false, Status: UploadStatus.UploadError, ReplayId: null);
+    }
 
-        public async Task<UploadResponse> UploadToHotsLogsAsync(byte[] data, string fingerprint, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
+    public async Task<UploadResponse> UploadToHotsApiAsync(byte[] data, string fingerprint, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<UploadResponse> UploadToHotsLogsAsync(byte[] data, string fingerprint, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 }

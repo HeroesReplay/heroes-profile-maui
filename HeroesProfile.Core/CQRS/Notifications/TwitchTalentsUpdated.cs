@@ -1,12 +1,9 @@
-﻿
-using MauiApp2.Core.Models;
-
+﻿using HeroesProfile.Core.Models;
 using MediatR;
 
-namespace MauiApp2.Core.CQRS.Notifications
+namespace HeroesProfile.Core.CQRS.Notifications;
+
+public static class TwitchTalentsUpdated
 {
-    public static class TwitchTalentsUpdated
-    {
-        public record Notification(SessionData SessionData) : INotification;
-    }
+    public record Notification(SessionData SessionData) : INotification;
 }

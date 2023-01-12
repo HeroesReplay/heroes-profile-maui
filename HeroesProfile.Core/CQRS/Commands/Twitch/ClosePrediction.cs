@@ -1,67 +1,64 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
-using MauiApp2.Core.Clients;
-using MauiApp2.Core.CQRS.Notifications;
-using MauiApp2.Core.CQRS.Queries;
-using MauiApp2.Core.Models;
-using MauiApp2.Core.Repositories;
+using HeroesProfile.Core.Clients;
+using HeroesProfile.Core.CQRS.Notifications;
+using HeroesProfile.Core.CQRS.Queries;
+using HeroesProfile.Core.Models;
+using HeroesProfile.Core.Repositories;
 
 using MediatR;
 
 using TwitchLib.Api.Core.Enums;
 using TwitchLib.Api.Helix.Models.Predictions.EndPrediction;
 
-namespace MauiApp2.Core.CQRS.Commands.Twitch
+namespace HeroesProfile.Core.CQRS.Commands.Twitch;
+
+public static class ClosePrediction
 {
-    public static class ClosePrediction
+    public record Command : IRequest<Response>;
+
+    public record Response(bool Won, string OutcomeId);
+
+    public class Handler : IRequestHandler<Command, Response>
     {
-        public record Command : IRequest<Response>;
+        private readonly SessionRepository sessionRepository;
+        private readonly IMediator mediator;
+        private readonly UserSettingsRepository settingsRepository;
+        private readonly AppSettings appSettings;
+        private readonly PredictionsClient predictionClient;
 
-        public record Response(bool Won, string OutcomeId);
+        private SessionData session => sessionRepository.SessionData;
 
-        public class Handler : IRequestHandler<Command, Response>
+        public Handler(IMediator mediator, UserSettingsRepository settingsRepository, SessionRepository sessionRepository, AppSettings appSettings, PredictionsClient predictionsClient)
         {
-            private readonly SessionRepository sessionRepository;
-            private readonly IMediator mediator;
-            private readonly UserSettingsRepository settingsRepository;
-            private readonly AppSettings appSettings;
-            private readonly PredictionsClient predictionClient;
+            this.mediator = mediator;
+            this.settingsRepository = settingsRepository;
+            this.sessionRepository = sessionRepository;
+            this.appSettings = appSettings;
+            predictionClient = predictionsClient;
+        }
 
-            private SessionData session => sessionRepository.SessionData;
+        public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
+        {
+            var userSettings = await settingsRepository.LoadAsync(cancellationToken);
 
-            public Handler(IMediator mediator, UserSettingsRepository settingsRepository, SessionRepository sessionRepository, AppSettings appSettings, PredictionsClient predictionsClient)
+            if (session.StormReplay != null && session.Prediction != null)
             {
-                this.mediator = mediator;
-                this.settingsRepository = settingsRepository;
-                this.sessionRepository = sessionRepository;
-                this.appSettings = appSettings;
-                predictionClient = predictionsClient;
+                GetKnownBattleNetIds.Response knownBattleNetIds = await mediator.Send(new GetKnownBattleNetIds.Query());
+
+                bool isWon = session.StormReplay.Players.Any(p => knownBattleNetIds.BattleNetIds.Any(battleNetId => p.IsWinner && p.BattleNetId == battleNetId));
+
+                string outcomeId = isWon ? session.Prediction.WinningOutcomeId : session.Prediction.OtherOutcomeId;
+
+                EndPredictionResponse response = await predictionClient.EndPrediction(userSettings.Identity, session.Prediction.PredictionId, PredictionEndStatus.RESOLVED, outcomeId, cancellationToken);
+
+                await mediator.Publish(new TwitchPredictionUpdated.Notification(sessionRepository.SessionData), cancellationToken);
+
+                return new Response(isWon, outcomeId);
             }
 
-            public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
-            {
-                Models.UserSettings userSettings = await settingsRepository.LoadAsync(cancellationToken);
-
-                if (session.StormReplay != null && session.Prediction != null)
-                {
-                    GetKnownBattleNetIds.Response knownBattleNetIds = await mediator.Send(new GetKnownBattleNetIds.Query());
-
-                    bool isWon = session.StormReplay.Players.Any(p => knownBattleNetIds.BattleNetIds.Any(battleNetId => p.IsWinner && p.BattleNetId == battleNetId));
-
-                    string outcomeId = isWon ? session.Prediction.WinningOutcomeId : session.Prediction.OtherOutcomeId;
-
-                    EndPredictionResponse response = await predictionClient.EndPrediction(userSettings.Identity, session.Prediction.PredictionId, PredictionStatusEnum.RESOLVED, outcomeId, cancellationToken);
-
-                    await mediator.Publish(new TwitchPredictionUpdated.Notification(sessionRepository.SessionData), cancellationToken);
-
-                    return new Response(isWon, outcomeId);
-                }
-
-                return new Response(false, string.Empty);
-            }
+            return new Response(false, string.Empty);
         }
     }
 }

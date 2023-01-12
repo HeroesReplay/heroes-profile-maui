@@ -1,25 +1,27 @@
-﻿using System;
+﻿using HeroesProfile.UI.Services;
 
-using MauiApp2.Services;
+namespace HeroesProfile.UI.Platforms.Windows;
 
-namespace MauiApp2.Platforms.Windows
+public class WindowsTrayService : ITrayService
 {
-    public class WindowsTrayService : ITrayService
+    private WindowsTrayIcon tray;
+
+    public WindowsTrayService()
     {
-        private WindowsTrayIcon tray;
+        
+    }
 
-        public Action ClickHandler { get; set; }
+    public Action ClickHandler { get; set; }
 
-        public void Initialize()
+    public void Initialize()
+    {
+        tray = new WindowsTrayIcon("Platforms/Windows/Images/logo.ico")
         {
-            tray = new WindowsTrayIcon("Platforms/Windows/Images/logo.ico")
+            LeftClick = () =>
             {
-                LeftClick = () =>
-                {
-                    Microsoft.Maui.MauiWinUIApplication.Current.MainWindow.Activate();
-                    ClickHandler?.Invoke();
-                }
-            };
-        }
+                // Microsoft.Maui.MauiWinUIApplication.Current.Application.Windows[0].Activate();
+                ClickHandler?.Invoke();
+            }
+        };
     }
 }

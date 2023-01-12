@@ -6,25 +6,23 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Heroes.ReplayParser;
+using HeroesProfile.Core.Models;
 
-using MauiApp2.Core.Models;
+namespace HeroesProfile.Core.Parsers;
 
-namespace MauiApp2.Core.Parsers
+public class AggregateReplayParser
 {
-    public class AggregateReplayParser
+    private readonly IEnumerable<IReplayParser> parsers;
+
+    public AggregateReplayParser(IEnumerable<IReplayParser> parsers)
     {
-        private readonly IEnumerable<IReplayParser> parsers;
+        this.parsers = parsers;
+    }
 
-        public AggregateReplayParser(IEnumerable<IReplayParser> parsers)
-        {
-            this.parsers = parsers;
-        }
+    public async Task<ReplayParseData> ParseAsync(FileInfo file, ParseOptions options = null, CancellationToken cancellationToken = default)
+    {
+        IReplayParser parser = parsers.Single(p => p.FileExtension.Equals(file.Extension, StringComparison.InvariantCultureIgnoreCase));
 
-        public async Task<ReplayParseData> ParseAsync(FileInfo file, ParseOptions options = null, CancellationToken cancellationToken = default)
-        {
-            IReplayParser parser = parsers.Single(p => p.FileExtension.Equals(file.Extension, StringComparison.InvariantCultureIgnoreCase));
-
-            return await parser.ParseAsync(file, options, cancellationToken);
-        }
+        return await parser.ParseAsync(file, options, cancellationToken);
     }
 }

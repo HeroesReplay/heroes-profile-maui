@@ -1,42 +1,41 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-
-using MauiApp2.Core.Clients;
-using MauiApp2.Core.CQRS.Notifications;
-using MauiApp2.Core.Models;
-using MauiApp2.Core.Repositories;
+using HeroesProfile.Core.Clients;
+using HeroesProfile.Core.CQRS.Queries;
+using HeroesProfile.Core.CQRS.Notifications;
+using HeroesProfile.Core.Models;
+using HeroesProfile.Core.Repositories;
 
 using MediatR;
 
-namespace MauiApp2.Core.CQRS.Commands.Discord
+namespace HeroesProfile.Core.CQRS.Commands.Discord;
+
+
+public static class SetActivity
 {
+    public record Command() : IRequest;
 
-    public static class SetActivity
+    public class Handler : IRequestHandler<Command>
     {
-        public record Command() : IRequest;
+        private readonly IMediator mediator;
+        private readonly DiscordClient discordClient;
 
-        public class Handler : IRequestHandler<Command>
+        public Handler(IMediator mediator, DiscordClient discordClient)
         {
-            private readonly IMediator mediator;
-            private readonly DiscordClient discordClient;
+            this.mediator = mediator;
+            this.discordClient = discordClient;
+        }
 
-            public Handler(IMediator mediator, DiscordClient discordClient)
-            {
-                this.mediator = mediator;
-                this.discordClient = discordClient;
-            }
+        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+        {
+            GetKnownBattleNetIds.Response? knownBattleNetIdsResponse = await mediator.Send(new GetKnownBattleNetIds.Query(), cancellationToken);
+            GetSession.Response? sessionResponse = await mediator.Send(new GetSession.Query(), cancellationToken);
+            GetUserSettings.Response? userSettingsResponse = await mediator.Send(new GetUserSettings.Query(), cancellationToken);
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
-            {
-                Queries.GetKnownBattleNetIds.Response? knownBattleNetIdsResponse = await this.mediator.Send(new Queries.GetKnownBattleNetIds.Query(), cancellationToken);
-                Queries.GetSession.Response? sessionResponse = await this.mediator.Send(new Queries.GetSession.Query(), cancellationToken);
-                Queries.GetUserSettings.Response? userSettingsResponse = await this.mediator.Send(new Queries.GetUserSettings.Query(), cancellationToken);
+            discordClient.UpdatePresence(sessionResponse.Session, userSettingsResponse.UserSettings, knownBattleNetIdsResponse.BattleNetIds);
 
-                discordClient.UpdatePresence(sessionResponse.Session, userSettingsResponse.UserSettings, knownBattleNetIdsResponse.BattleNetIds);
-
-                return Unit.Value;
-            }
+            return Unit.Value;
         }
     }
 }

@@ -1,0 +1,53 @@
+﻿@*
+    The Router component displays whichever component has a @page
+    directive matching the current URI.
+*@
+<Blazorise.ThemeProvider Theme="@theme">
+    <Router AppAssembly="typeof(Main).Assembly">
+        
+        <Found Context="routeData">
+            <RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)" />
+        </Found>
+
+        <NotFound>
+            <p>Sorry, there's nothing at this address.</p>
+        </NotFound>
+    </Router>
+     <MessageProvider />
+    <NotificationProvider />
+    <PageProgressProvider />
+    <ModalProvider UseModalStructure Animated Size="ModalSize.ExtraLarge" />
+    <ApplicationLoadingIndicator />
+</Blazorise.ThemeProvider>
+
+@code {
+
+private Theme theme = new Theme
+{
+    BarOptions = new ThemeBarOptions
+    {
+        HorizontalHeight = "64px"
+    },
+    BreakpointOptions = new ThemeBreakpointOptions
+    {
+    },
+    ColorOptions = new ThemeColorOptions
+    {
+        Primary = "#0288D1"
+    },
+    BackgroundOptions = new ThemeBackgroundOptions
+    {
+        Primary = "#0288D1",
+    },
+    TextColorOptions = new ThemeTextColorOptions
+    {
+    },
+    InputOptions = new ThemeInputOptions
+    {
+        CheckColor = "#0288D1",
+    },
+    SnackbarOptions = new ThemeSnackbarOptions
+    {
+    }
+};
+}

@@ -3,52 +3,50 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Heroes.ReplayParser;
-
-using MauiApp2.Core.Models;
-using MauiApp2.Core.Parsers;
+using HeroesProfile.Core.Models;
+using HeroesProfile.Core.Parsers;
 
 using MediatR;
 
-namespace MauiApp2.Core.CQRS.Queries
+namespace HeroesProfile.Core.CQRS.Queries;
+
+public static class GetParsedReplay
 {
-    public static class GetParsedReplay
+    public record Response(ReplayParseData Data);
+
+    public record Query(FileInfo File, ParseOptions options) : IRequest<Response>;
+
+    public class Handler : IRequestHandler<Query, Response>
     {
-        public record Response(ReplayParseData Data);
+        private readonly AggregateReplayParser replayParser;
 
-        public record Query(FileInfo File, ParseOptions options) : IRequest<Response>;
-
-        public class Handler : IRequestHandler<Query, Response>
+        public Handler(AggregateReplayParser replayParser)
         {
-            private readonly AggregateReplayParser replayParser;
+            this.replayParser = replayParser;
+        }
 
-            public Handler(AggregateReplayParser replayParser)
+        public async Task<Response> Handle(Query request, CancellationToken cancellationToken)
+        {
+            var options = request.options ?? new ParseOptions
             {
-                this.replayParser = replayParser;
-            }
+                /* 
+                 * We do care?
+                 */
+                ShouldParseDetailedBattleLobby = true,
+                ShouldParseEvents = true,
 
-            public async Task<Response> Handle(Query request, CancellationToken cancellationToken)
-            {
-                var options = request.options ?? new ParseOptions
-                {
-                    /* 
-                     * We do care?
-                     */
-                    ShouldParseDetailedBattleLobby = true,
-                    ShouldParseEvents = true,
+                /* 
+                 * We dont care?
+                 */
+                ShouldParseUnits = false,
+                ShouldParseMessageEvents = false,
+                ShouldParseMouseEvents = false,
+                ShouldParseStatistics = false,
+                AllowPTR = false,
+                IgnoreErrors = false,
+            };
 
-                    /* 
-                     * We dont care?
-                     */
-                    ShouldParseUnits = false,
-                    ShouldParseMessageEvents = false,
-                    ShouldParseMouseEvents = false,
-                    ShouldParseStatistics = false,
-                    AllowPTR = false,
-                    IgnoreErrors = false,
-                };
-
-                return new Response(await replayParser.ParseAsync(request.File, options, cancellationToken));
-            }
+            return new Response(await replayParser.ParseAsync(request.File, options, cancellationToken));
         }
     }
 }

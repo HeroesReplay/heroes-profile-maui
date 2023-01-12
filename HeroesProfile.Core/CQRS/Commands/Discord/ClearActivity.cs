@@ -1,30 +1,28 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-
-using MauiApp2.Core.Clients;
+using HeroesProfile.Core.Clients;
 
 using MediatR;
 
-namespace MauiApp2.Core.CQRS.Commands.Discord
+namespace HeroesProfile.Core.CQRS.Commands.Discord;
+
+public static class ClearActivity
 {
-    public static class ClearActivity
+    public record Command() : IRequest;
+
+    public class Handler : IRequestHandler<Command>
     {
-        public record Command() : IRequest;
+        private readonly DiscordClient discordClient;
 
-        public class Handler : IRequestHandler<Command>
+        public Handler(DiscordClient discordClient)
         {
-            private readonly DiscordClient discordClient;
+            this.discordClient = discordClient;
+        }
 
-            public Handler(DiscordClient discordClient)
-            {
-                this.discordClient = discordClient;
-            }
-
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
-            {
-                discordClient.ClearActivity();
-                return Unit.Value;
-            }
+        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+        {
+            discordClient.ClearActivity();
+            return Unit.Value;
         }
     }
 }

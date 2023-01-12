@@ -6,121 +6,176 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Heroes.ReplayParser;
+using HeroesProfile.Core.Models;
 
-using MauiApp2.Core.Models;
+namespace HeroesProfile.Core.Clients;
 
-namespace MauiApp2.Core.Clients
+public class TalentsClient
 {
-    public class TalentsClient
+    private readonly AppSettings appSettings;
+    private readonly HttpClient httpClient;
+
+    public static readonly Uri ValidateUri = new("twitch/validate/heroesprofile/token", UriKind.Relative);
+    public static readonly Uri SaveReplayUri = new("twitch/extension/save/replay", UriKind.Relative);
+    public static readonly Uri UpdateReplayDataUri = new("twitch/extension/update/replay/", UriKind.Relative);
+    public static readonly Uri SavePlayersUri = new("twitch/extension/save/player", UriKind.Relative);
+    public static readonly Uri UpdatePlayerDataUri = new("twitch/extension/update/player", UriKind.Relative);
+    public static readonly Uri SaveTalentsUri = new("twitch/extension/save/talent", UriKind.Relative);
+    public static readonly Uri NotifyUri = new("twitch/extension/notify/uploader", UriKind.Relative);
+
+    public TalentsClient(AppSettings appSettings, HttpClient httpClient)
     {
-        private readonly AppSettings appSettings;
-        private readonly HttpClient httpClient;
+        this.appSettings = appSettings;
+        this.httpClient = httpClient;
+    }
 
-        public static readonly Uri ValidateUri = new("twitch/validate/heroesprofile/token", UriKind.Relative);
-        public static readonly Uri SaveReplayUri = new("twitch/extension/save/replay", UriKind.Relative);
-        public static readonly Uri UpdateReplayDataUri = new("twitch/extension/update/replay/", UriKind.Relative);
-        public static readonly Uri SavePlayersUri = new("twitch/extension/save/player", UriKind.Relative);
-        public static readonly Uri UpdatePlayerDataUri = new("twitch/extension/update/player", UriKind.Relative);
-        public static readonly Uri SaveTalentsUri = new("twitch/extension/save/talent", UriKind.Relative);
-        public static readonly Uri NotifyUri = new("twitch/extension/notify/uploader", UriKind.Relative);
+    public async Task<(string Error, string UserId)> GetUserIdByAuth(string email, string twitchBroadcasterId, string twitchKey, CancellationToken cancellationToken)
+    {
+        var authParameters = new Uri($"?email={email}&twitch_nickname={twitchBroadcasterId}&hp_twitch_key={twitchKey}", UriKind.Relative);
+        HttpResponseMessage response = await httpClient.GetAsync(new Uri(new Uri(httpClient.BaseAddress, ValidateUri), authParameters), cancellationToken);
 
-        public TalentsClient(AppSettings appSettings, HttpClient httpClient)
+        if (response.IsSuccessStatusCode)
         {
-            this.appSettings = appSettings;
-            this.httpClient = httpClient;
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (int.TryParse(content, out int userId))
+            {
+                return (null, $"{userId}");
+            }
+            else
+            {
+                return (content, null);
+            }
         }
 
-        public async Task<(string Error, string UserId)> GetUserIdByAuth(string email, string twitchBroadcasterId, string twitchKey, CancellationToken cancellationToken)
+        return ($"HTTP ERROR: {response.StatusCode}", null);
+    }
+
+    public async Task<string> CreateSession(Dictionary<string, string> identity, CancellationToken cancellationToken)
+    {
+        var values = new Dictionary<string, string>(identity)
         {
-            var authParameters = new Uri($"?email={email}&twitch_nickname={twitchBroadcasterId}&hp_twitch_key={twitchKey}", UriKind.Relative);
-            HttpResponseMessage response = await httpClient.GetAsync(new Uri(new Uri(httpClient.BaseAddress, ValidateUri), authParameters), cancellationToken);
+            { "game_date", DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss") },
+        };
+
+        using (var content = new FormUrlEncodedContent(values))
+        {
+            HttpResponseMessage response = await httpClient.PostAsync(SaveReplayUri, content, cancellationToken);
 
             if (response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadAsStringAsync();
-
-                if (int.TryParse(content, out int userId))
+                if (int.TryParse(await response.Content.ReadAsStringAsync(cancellationToken), out int value))
                 {
-                    return (null, $"{userId}");
-                }
-                else
-                {
-                    return (content, null);
+                    return value.ToString();
                 }
             }
-
-            return ($"HTTP ERROR: {response.StatusCode}", null);
         }
 
-        public async Task<string> CreateSession(Dictionary<string, string> identity, CancellationToken cancellationToken)
+        throw new Exception($"Could not create session at {SaveReplayUri}");
+    }
+
+    public async Task UpdateReplayData(Dictionary<string, string> identity, SessionData session, CancellationToken cancellationToken)
+    {
+        if (session.StormSave != null && session.TalentsExtension.SessionId != null)
         {
-            var values = new Dictionary<string, string>(identity)
+            Dictionary<string, string> values = new(identity)
             {
-                { "game_date", DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss") },
+                { "replayID", session.TalentsExtension.SessionId },
+                { "game_type", $"{session.StormSave.GameMode}" },
+                { "game_map", session.StormSave.Map },
+                { "game_version", session.StormSave.ReplayVersion },
+                { "region", $"{session.StormSave.Players[0].BattleNetRegionId}" },
             };
 
             using (var content = new FormUrlEncodedContent(values))
             {
-                HttpResponseMessage response = await httpClient.PostAsync(SaveReplayUri, content, cancellationToken);
+                HttpResponseMessage response = await httpClient.PostAsync(UpdateReplayDataUri, content, cancellationToken);
 
-                if (response.IsSuccessStatusCode)
+                if (!response.IsSuccessStatusCode)
                 {
-                    if (int.TryParse(await response.Content.ReadAsStringAsync(cancellationToken), out int value))
-                    {
-                        return value.ToString();
-                    }
+                    // Log error
                 }
             }
-
-            throw new Exception($"Could not create session at {SaveReplayUri}");
         }
-
-        public async Task UpdateReplayData(Dictionary<string, string> identity, SessionData session, CancellationToken cancellationToken)
+        else
         {
-            if (session.StormSave != null && session.TalentsExtension.SessionId != null)
+            // Could not update
+        }
+    }
+
+    public async Task SaveTalentData(Dictionary<string, string> identity, SessionData session, Player player, Talent talent, CancellationToken cancellationToken)
+    {
+        var values = new Dictionary<string, string>(identity)
+        {
+            { "replayID", session.TalentsExtension.SessionId },
+            { "blizz_id", player.BattleNetId.ToString() },
+            { "battletag", player.Name + "#" + player.BattleTag },
+            { "region", player.BattleNetRegionId.ToString() },
+            { "talent", talent.TalentName },
+            { "hero", player.Character },
+            { "hero_id", player.HeroId },
+            { "hero_attribute_id", player.HeroAttributeId },
+        };
+
+        using (var content = new FormUrlEncodedContent(values))
+        {
+            using (var response = await httpClient.PostAsync(SaveTalentsUri, content, cancellationToken))
             {
-                Dictionary<string, string> values = new(identity)
+                if (!response.IsSuccessStatusCode)
                 {
-                    { "replayID", session.TalentsExtension.SessionId },
-                    { "game_type", $"{session.StormSave.GameMode}" },
-                    { "game_map", session.StormSave.Map },
-                    { "game_version", session.StormSave.ReplayVersion },
-                    { "region", $"{session.StormSave.Players[0].BattleNetRegionId}" },
-                };
+                    // Log error
+                }
+            }
+        }
+    }
 
-                using (var content = new FormUrlEncodedContent(values))
+    public async Task SavePlayerData(Dictionary<string, string> identity, SessionData session, CancellationToken cancellationToken)
+    {
+        // TODO: Serialize and POST as ARRAY of data
+        foreach (Player player in session.BattleLobby.Players)
+        {
+            var values = new Dictionary<string, string>(identity)
+            {
+                { "replayID", session.TalentsExtension.SessionId },
+                { "battletag", player.Name + "#" +  player.BattleTag },
+                { "team", player.Team.ToString() },
+            };
+
+            using (var content = new FormUrlEncodedContent(values))
+            {
+                using (HttpResponseMessage response = await httpClient.PostAsync(SavePlayersUri, content, cancellationToken))
                 {
-                    HttpResponseMessage response = await httpClient.PostAsync(UpdateReplayDataUri, content, cancellationToken);
-
                     if (!response.IsSuccessStatusCode)
                     {
                         // Log error
                     }
                 }
             }
-            else
-            {
-                // Could not update
-            }
-        }
 
-        public async Task SaveTalentData(Dictionary<string, string> identity, SessionData session, Player player, Talent talent, CancellationToken cancellationToken)
+            await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
+        }
+    }
+
+    public async Task UpdatePlayerData(Dictionary<string, string> identity, SessionData session, CancellationToken cancellationToken)
+    {
+        // TODO: Serialize and POST as ARRAY of data
+        foreach (Player player in session.StormSave.Players)
         {
             var values = new Dictionary<string, string>(identity)
             {
                 { "replayID", session.TalentsExtension.SessionId },
                 { "blizz_id", player.BattleNetId.ToString() },
-                { "battletag", player.Name + "#" + player.BattleTag },
-                { "region", player.BattleNetRegionId.ToString() },
-                { "talent", talent.TalentName },
+                { "battletag", player.Name + "#" + player.BattleTag},
                 { "hero", player.Character },
                 { "hero_id", player.HeroId },
                 { "hero_attribute_id", player.HeroAttributeId },
+                { "team", player.Team.ToString() },
+                { "region", player.BattleNetRegionId.ToString() },
             };
 
             using (var content = new FormUrlEncodedContent(values))
             {
-                using (var response = await httpClient.PostAsync(SaveTalentsUri, content, cancellationToken))
+                using (var response = await httpClient.PostAsync(UpdatePlayerDataUri, content, cancellationToken))
                 {
                     if (!response.IsSuccessStatusCode)
                     {
@@ -129,106 +184,49 @@ namespace MauiApp2.Core.Clients
                 }
             }
         }
+    }
 
-        public async Task SavePlayerData(Dictionary<string, string> identity, SessionData session, CancellationToken cancellationToken)
+    public async Task NotifyTwitchTalentChange(Dictionary<string, string> identity, CancellationToken cancellationToken)
+    {
+        using (var content = new FormUrlEncodedContent(new Dictionary<string, string>(identity)))
         {
-            // TODO: Serialize and POST as ARRAY of data
-            foreach (Player player in session.BattleLobby.Players)
+            using (var response = await httpClient.PostAsync(NotifyUri, content, cancellationToken))
             {
-                var values = new Dictionary<string, string>(identity)
+                if (!response.IsSuccessStatusCode)
                 {
-                    { "replayID", session.TalentsExtension.SessionId },
-                    { "battletag", player.Name + "#" +  player.BattleTag },
-                    { "team", player.Team.ToString() },
-                };
-
-                using (var content = new FormUrlEncodedContent(values))
-                {
-                    using (HttpResponseMessage response = await httpClient.PostAsync(SavePlayersUri, content, cancellationToken))
-                    {
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            // Log error
-                        }
-                    }
-                }
-
-                await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
-            }
-        }
-
-        public async Task UpdatePlayerData(Dictionary<string, string> identity, SessionData session, CancellationToken cancellationToken)
-        {
-            // TODO: Serialize and POST as ARRAY of data
-            foreach (Player player in session.StormSave.Players)
-            {
-                var values = new Dictionary<string, string>(identity)
-                {
-                    { "replayID", session.TalentsExtension.SessionId },
-                    { "blizz_id", player.BattleNetId.ToString() },
-                    { "battletag", player.Name + "#" + player.BattleTag},
-                    { "hero", player.Character },
-                    { "hero_id", player.HeroId },
-                    { "hero_attribute_id", player.HeroAttributeId },
-                    { "team", player.Team.ToString() },
-                    { "region", player.BattleNetRegionId.ToString() },
-                };
-
-                using (var content = new FormUrlEncodedContent(values))
-                {
-                    using (var response = await httpClient.PostAsync(UpdatePlayerDataUri, content, cancellationToken))
-                    {
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            // Log error
-                        }
-                    }
+                    // Log error
                 }
             }
         }
+    }
 
-        public async Task NotifyTwitchTalentChange(Dictionary<string, string> identity, CancellationToken cancellationToken)
+    public async Task SaveMissingTalents(Dictionary<string, string> identity, SessionData session, CancellationToken cancellationToken)
+    {
+        if (!string.IsNullOrWhiteSpace(session.TalentsExtension.SessionId))
         {
-            using (var content = new FormUrlEncodedContent(new Dictionary<string, string>(identity)))
-            {
-                using (var response = await httpClient.PostAsync(NotifyUri, content, cancellationToken))
-                {
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        // Log error
-                    }
-                }
-            }
-        }
+            Replay replay = session.StormReplay;
 
-        public async Task SaveMissingTalents(Dictionary<string, string> identity, SessionData session, CancellationToken cancellationToken)
-        {
-            if (!string.IsNullOrWhiteSpace(session.TalentsExtension.SessionId))
+            if (replay != null)
             {
-                Replay replay = session.StormReplay;
-
-                if (replay != null)
+                // TODO: Serialize and POST as ARRAY of data
+                foreach (Player player in replay.Players.OrderByDescending(i => i.IsWinner))
                 {
-                    // TODO: Serialize and POST as ARRAY of data
-                    foreach (Player player in replay.Players.OrderByDescending(i => i.IsWinner))
+                    if (player.Talents != null)
                     {
-                        if (player.Talents != null)
+                        foreach (Talent talent in player.Talents)
                         {
-                            foreach (Talent talent in player.Talents)
+                            var playerTalent = $"{player.Name}:{talent.TalentName}";
+
+                            if (!session.TalentsExtension.PlayerFoundTalents.Contains(playerTalent))
                             {
-                                var playerTalent = $"{player.Name}:{talent.TalentName}";
-
-                                if (!session.TalentsExtension.PlayerFoundTalents.Contains(playerTalent))
-                                {
-                                    await SaveTalentData(identity, session, player, talent, cancellationToken);
-                                    await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
-                                }
+                                await SaveTalentData(identity, session, player, talent, cancellationToken);
+                                await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
                             }
                         }
                     }
-
-                    await NotifyTwitchTalentChange(identity, cancellationToken);
                 }
+
+                await NotifyTwitchTalentChange(identity, cancellationToken);
             }
         }
     }

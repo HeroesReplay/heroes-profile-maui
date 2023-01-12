@@ -1,13 +1,11 @@
 ﻿using System.Collections.Generic;
-
-using MauiApp2.Core.Models;
+using HeroesProfile.Core.Models;
 
 using MediatR;
 
-namespace MauiApp2.Core.CQRS.Notifications
+namespace HeroesProfile.Core.CQRS.Notifications;
+
+public static class StoredReplaysUpdated
 {
-    public static class StoredReplaysUpdated
-    {
-        public record Notification(IEnumerable<StoredReplay> storedReplays) : INotification;
-    }
+    public record Notification(IEnumerable<StoredReplay> storedReplays) : INotification;
 }

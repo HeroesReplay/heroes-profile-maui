@@ -1,33 +1,31 @@
 ﻿
 using System.Threading;
 using System.Threading.Tasks;
-
-using MauiApp2.Core.Models;
-using MauiApp2.Core.Repositories;
+using HeroesProfile.Core.Models;
+using HeroesProfile.Core.Repositories;
 
 using MediatR;
 
-namespace MauiApp2.Core.CQRS.Notifications
+namespace HeroesProfile.Core.CQRS.Notifications;
+
+public static class SessionUpdated
 {
-    public static class SessionUpdated
+    public record Notification(SessionData SessionData) : INotification;
+
+    public class Handler : INotificationHandler<Notification>
     {
-        public record Notification(SessionData SessionData) : INotification;
+        private readonly IMediator mediator;
 
-        public class Handler : INotificationHandler<Notification>
+        public Handler(IMediator mediator)
         {
-            private readonly IMediator mediator;
+            this.mediator = mediator;
+        }
 
-            public Handler(IMediator mediator)
-            {
-                this.mediator = mediator;
-            }
+        public async Task Handle(Notification notification, CancellationToken cancellationToken)
+        {
 
-            public async Task Handle(Notification notification, CancellationToken cancellationToken)
-            {
-                
 
-                
-            }
+
         }
     }
 }

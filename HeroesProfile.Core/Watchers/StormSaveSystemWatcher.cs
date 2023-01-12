@@ -1,16 +1,14 @@
-﻿
-using MauiApp2.Core.Models;
+﻿using HeroesProfile.Core.Models;
 
-namespace MauiApp2.Core.Watchers
+namespace HeroesProfile.Core.Watchers;
+
+public sealed class StormSaveSystemWatcher : AbstractGameFileSystemWatcher
 {
-    public sealed class StormSaveSystemWatcher : AbstractGameFileSystemWatcher
+    public StormSaveSystemWatcher(AppSettings appSettings)
     {
-        public StormSaveSystemWatcher(AppSettings appSettings)
-        {
-            Path = appSettings.GameDocumentsDirectory;
-            Filter = "*.StormSave";
-            EnableRaisingEvents = false;
-            IncludeSubdirectories = true;
-        }
+        Path = appSettings.GameDocumentsDirectory;
+        Filter = "*.StormSave";
+        EnableRaisingEvents = false;
+        IncludeSubdirectories = true;
     }
 }

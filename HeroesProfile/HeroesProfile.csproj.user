@@ -8,7 +8,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0-ios|AnyCPU'">
     <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
   </PropertyGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <AppxManifest Update="Platforms\Windows\Package.appxmanifest">
+      <SubType>Designer</SubType>
+    </AppxManifest>
+  </ItemGroup>
   <ItemGroup>
     <MauiXaml Update="App.xaml">
       <SubType>Designer</SubType>

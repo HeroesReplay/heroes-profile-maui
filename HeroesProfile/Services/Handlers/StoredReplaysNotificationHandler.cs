@@ -1,26 +1,21 @@
-﻿
-using MauiApp2.Core.CQRS.Notifications;
-using MauiApp2.ViewModels;
+﻿using HeroesProfile.Blazor.ViewModels;
 
 using MediatR;
+using HeroesProfile.Core.CQRS.Notifications;
 
-using System.Threading;
-using System.Threading.Tasks;
+namespace HeroesProfile.UI.Services.Handlers;
 
-namespace MauiApp2.Services.Handlers
+public class StoredReplaysNotificationHandler : INotificationHandler<StoredReplaysUpdated.Notification>
 {
-    public class StoredReplaysNotificationHandler : INotificationHandler<StoredReplaysUpdated.Notification>
+    private readonly ReplaysViewModel replaysViewModel;
+
+    public StoredReplaysNotificationHandler(ReplaysViewModel replaysViewModel)
     {
-        private readonly ReplaysViewModel replaysViewModel;
+        this.replaysViewModel = replaysViewModel;
+    }
 
-        public StoredReplaysNotificationHandler(ReplaysViewModel replaysViewModel)
-        {
-            this.replaysViewModel = replaysViewModel;
-        }
-
-        public async Task Handle(StoredReplaysUpdated.Notification notification, CancellationToken cancellationToken)
-        {
-            await replaysViewModel.LoadAsync(cancellationToken);
-        }
+    public Task Handle(StoredReplaysUpdated.Notification notification, CancellationToken cancellationToken)
+    {
+        return replaysViewModel.LoadAsync(cancellationToken);
     }
 }

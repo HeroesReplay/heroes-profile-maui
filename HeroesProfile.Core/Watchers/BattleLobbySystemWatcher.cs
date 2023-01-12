@@ -1,16 +1,14 @@
-﻿
-using MauiApp2.Core.Models;
+﻿using HeroesProfile.Core.Models;
 
-namespace MauiApp2.Core.Watchers
+namespace HeroesProfile.Core.Watchers;
+
+public sealed class BattleLobbySystemWatcher : AbstractGameFileSystemWatcher
 {
-    public sealed class BattleLobbySystemWatcher : AbstractGameFileSystemWatcher
+    public BattleLobbySystemWatcher(AppSettings appSettings)
     {
-        public BattleLobbySystemWatcher(AppSettings appSettings)
-        {
-            Path = appSettings.GameTempDirectory;
-            Filter = "replay.server.battlelobby";
-            EnableRaisingEvents = false;
-            IncludeSubdirectories = true;
-        }
+        Path = appSettings.GameTempDirectory;
+        Filter = "replay.server.battlelobby";
+        EnableRaisingEvents = false;
+        IncludeSubdirectories = true;
     }
 }

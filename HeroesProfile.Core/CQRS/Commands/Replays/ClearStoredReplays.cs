@@ -1,31 +1,51 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-
-using MauiApp2.Core.Repositories;
+using HeroesProfile.Core.Repositories;
 
 using MediatR;
 
-namespace MauiApp2.Core.CQRS.Commands.Replays
+namespace HeroesProfile.Core.CQRS.Commands.Replays;
+
+public static class InitStoredReplays
 {
-    public static class ClearStoredReplays
+    public record Command : IRequest;
+
+    public class Handler : IRequestHandler<Command>
     {
-        public record Command : IRequest;
+        private readonly ReplaysRepository repository;
 
-        public class Handler : IRequestHandler<Command>
+        public Handler(ReplaysRepository repository)
         {
-            private readonly ReplaysRepository repository;
+            this.repository = repository;
+        }
 
-            public Handler(ReplaysRepository repository)
-            {
-                this.repository = repository;
-            }
+        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+        {
+            await repository.ClearAsync(cancellationToken);
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
-            {
-                await repository.ClearAsync(cancellationToken);
+            return Unit.Value;
+        }
+    }
+}
 
-                return Unit.Value;
-            }
+public static class ClearStoredReplays
+{
+    public record Command : IRequest;
+
+    public class Handler : IRequestHandler<Command>
+    {
+        private readonly ReplaysRepository repository;
+
+        public Handler(ReplaysRepository repository)
+        {
+            this.repository = repository;
+        }
+
+        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+        {
+            await repository.ClearAsync(cancellationToken);
+
+            return Unit.Value;
         }
     }
 }

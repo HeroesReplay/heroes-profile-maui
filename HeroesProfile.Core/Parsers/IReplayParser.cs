@@ -3,17 +3,15 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Heroes.ReplayParser;
+using HeroesProfile.Core.Models;
 
-using MauiApp2.Core.Models;
+namespace HeroesProfile.Core.Parsers;
 
-namespace MauiApp2.Core.Parsers
+public interface IReplayParser
 {
-    public interface IReplayParser
-    {
-        public ParseType ParseType { get; }
+    public ParseType ParseType { get; }
 
-        public string FileExtension { get; }
+    public string FileExtension { get; }
 
-        Task<ReplayParseData> ParseAsync(FileInfo file, ParseOptions options = null, CancellationToken token = default);
-    }
+    Task<ReplayParseData> ParseAsync(FileInfo file, ParseOptions options = null, CancellationToken token = default);
 }

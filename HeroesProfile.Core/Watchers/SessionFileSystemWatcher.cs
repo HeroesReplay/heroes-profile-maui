@@ -1,17 +1,15 @@
 ﻿using System.IO;
+using HeroesProfile.Core.Models;
 
-using MauiApp2.Core.Models;
+namespace HeroesProfile.Core.Watchers;
 
-namespace MauiApp2.Core.Watchers
+public sealed class SessionFileSystemWatcher : FileSystemWatcher
 {
-    public sealed class SessionFileSystemWatcher : FileSystemWatcher
+    public SessionFileSystemWatcher(AppSettings appSettings)
     {
-        public SessionFileSystemWatcher(AppSettings appSettings)
-        {
-            Path = appSettings.ApplicationSessionDirectory;
-            Filter = "*.*";
-            EnableRaisingEvents = false;
-            IncludeSubdirectories = false;
-        }
+        Path = appSettings.ApplicationSessionDirectory;
+        Filter = "*.*";
+        EnableRaisingEvents = false;
+        IncludeSubdirectories = false;
     }
 }

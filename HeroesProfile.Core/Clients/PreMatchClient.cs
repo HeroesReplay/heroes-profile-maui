@@ -7,42 +7,41 @@ using System.Threading.Tasks;
 
 using Heroes.ReplayParser;
 
-namespace MauiApp2.Core.Clients
+namespace HeroesProfile.Core.Clients;
+
+
+public class PreMatchClient
 {
+    private readonly HttpClient httpClient;
 
-    public class PreMatchClient
+    public static readonly Uri PreMatchUri = new Uri("PreMatch", UriKind.Relative);
+
+    public PreMatchClient(HttpClient httpClient)
     {
-        private readonly HttpClient httpClient;
+        this.httpClient = httpClient;
+    }
 
-        public static readonly Uri PreMatchUri = new Uri("PreMatch", UriKind.Relative);
+    public async Task<int?> GetPreMatchId(Replay replay)
+    {
+        int? preMatchId = null;
 
-        public PreMatchClient(HttpClient httpClient)
+        var formData = JsonSerializer.Serialize(replay.Players.Select(player => new { player.Team, player.Name, player.BattleTag, player.BattleNetRegionId }));
+
+        using (FormUrlEncodedContent content = new(new Dictionary<string, string>() { { "data", formData } }.AsEnumerable()))
         {
-            this.httpClient = httpClient;
-        }
+            HttpResponseMessage response = await httpClient.PostAsync(PreMatchUri, content);
 
-        public async Task<int?> GetPreMatchId(Replay replay)
-        {
-            int? preMatchId = null;
-
-            var formData = JsonSerializer.Serialize(replay.Players.Select(player => new { player.Team, player.Name, player.BattleTag, player.BattleNetRegionId }));
-
-            using (FormUrlEncodedContent content = new(new Dictionary<string, string>() { { "data", formData } }.AsEnumerable()))
+            if (response.IsSuccessStatusCode)
             {
-                HttpResponseMessage response = await httpClient.PostAsync(PreMatchUri, content);
+                var result = await response.Content.ReadAsStringAsync();
 
-                if (response.IsSuccessStatusCode)
+                if (int.TryParse(result, out var value))
                 {
-                    var result = await response.Content.ReadAsStringAsync();
-
-                    if (int.TryParse(result, out var value))
-                    {
-                        preMatchId = value;
-                    }
+                    preMatchId = value;
                 }
             }
-
-            return preMatchId;
         }
+
+        return preMatchId;
     }
 }

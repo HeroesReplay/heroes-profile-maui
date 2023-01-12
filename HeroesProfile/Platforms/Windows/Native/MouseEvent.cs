@@ -4,57 +4,56 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MauiApp2.Platforms.Windows
+namespace HeroesProfile.UI.Platforms.Windows;
+
+/// <summary>
+/// Event flags for clicked events.
+/// </summary>
+public enum MouseEvent
 {
     /// <summary>
-    /// Event flags for clicked events.
+    /// The mouse was moved withing the
+    /// taskbar icon's area.
     /// </summary>
-    public enum MouseEvent
-    {
-        /// <summary>
-        /// The mouse was moved withing the
-        /// taskbar icon's area.
-        /// </summary>
-        MouseMove,
+    MouseMove,
 
-        /// <summary>
-        /// The right mouse button was clicked.
-        /// </summary>
-        IconRightMouseDown,
+    /// <summary>
+    /// The right mouse button was clicked.
+    /// </summary>
+    IconRightMouseDown,
 
-        /// <summary>
-        /// The left mouse button was clicked.
-        /// </summary>
-        IconLeftMouseDown,
+    /// <summary>
+    /// The left mouse button was clicked.
+    /// </summary>
+    IconLeftMouseDown,
 
-        /// <summary>
-        /// The right mouse button was released.
-        /// </summary>
-        IconRightMouseUp,
+    /// <summary>
+    /// The right mouse button was released.
+    /// </summary>
+    IconRightMouseUp,
 
-        /// <summary>
-        /// The left mouse button was released.
-        /// </summary>
-        IconLeftMouseUp,
+    /// <summary>
+    /// The left mouse button was released.
+    /// </summary>
+    IconLeftMouseUp,
 
-        /// <summary>
-        /// The middle mouse button was clicked.
-        /// </summary>
-        IconMiddleMouseDown,
+    /// <summary>
+    /// The middle mouse button was clicked.
+    /// </summary>
+    IconMiddleMouseDown,
 
-        /// <summary>
-        /// The middle mouse button was released.
-        /// </summary>
-        IconMiddleMouseUp,
+    /// <summary>
+    /// The middle mouse button was released.
+    /// </summary>
+    IconMiddleMouseUp,
 
-        /// <summary>
-        /// The taskbar icon was double clicked.
-        /// </summary>
-        IconDoubleClick,
+    /// <summary>
+    /// The taskbar icon was double clicked.
+    /// </summary>
+    IconDoubleClick,
 
-        /// <summary>
-        /// The balloon tip was clicked.
-        /// </summary>
-        BalloonToolTipClicked
-    }
+    /// <summary>
+    /// The balloon tip was clicked.
+    /// </summary>
+    BalloonToolTipClicked
 }

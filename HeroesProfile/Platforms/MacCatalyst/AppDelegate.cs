@@ -2,7 +2,7 @@
 
 using Microsoft.Maui;
 
-namespace MauiApp2
+namespace HeroesProfile.UI
 {
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate

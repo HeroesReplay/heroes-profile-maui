@@ -1,0 +1,279 @@
+﻿@page "/analysis"
+@inherits ReactiveInjectableComponentBase<AnalysisViewModel>
+
+<Row>
+    <Column ColumnSize=ColumnSize.Is6>
+        <Card Margin="Margin.Is4.OnY">
+            <CardHeader>
+                <CardTitle>File Detection</CardTitle>
+            </CardHeader>
+            <CardBody>
+                <Field Horizontal="true">
+                    <FieldLabel ColumnSize="ColumnSize.Is4">BattleLobby</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.Is8">
+                        @if (ViewModel.HasBattleLobby)
+                    {
+                        <TextEdit Text=@ViewModel.Session.Files.BattleLobby.Created.ToString() ReadOnly=true />
+                    }
+                    else
+                    {
+                        <TextEdit Text="Pending" ReadOnly=true />
+                    }
+                    </FieldBody>
+                </Field>
+                <Field Horizontal="true">
+                    <FieldLabel ColumnSize="ColumnSize.Is4">StormSave</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.Is8">
+                        @if (ViewModel.HasStormSave)
+                    {
+                        <TextEdit Text=@ViewModel.Session.Files.StormSave.Created.ToString() ReadOnly=true />
+                    }
+                    else
+                    {
+                        <TextEdit Text="Pending" ReadOnly=true />
+                    }
+                    </FieldBody>
+                </Field>
+                <Field Horizontal="true">
+                    <FieldLabel ColumnSize="ColumnSize.Is4">StormReplay</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.Is8">
+                        @if (ViewModel.HasStormReplay)
+                    {
+                        <TextEdit Text=@ViewModel.Session.Files.StormReplay.Created.ToString() ReadOnly=true />
+                    }
+                    else
+                    {
+                        <TextEdit Text="Pending" ReadOnly=true />
+                    }
+                    </FieldBody>
+                </Field>
+            </CardBody>
+        </Card>
+    </Column>
+    <Column ColumnSize=ColumnSize.Is6>
+        <Card Margin="Margin.Is4.OnY">
+            <CardHeader>
+                <CardTitle>Heroes Profile Analysis</CardTitle>
+            </CardHeader>
+            <CardBody>
+                <Field Horizontal="true">
+                    <FieldLabel ColumnSize="ColumnSize.Is4">Pre Match</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.Is8">
+                        @if (ViewModel.IsPreMatchEnabled)
+                    {
+                        @if (ViewModel.HasPreMatch)
+                        {
+                            <Button Color=Color.Primary Size=Size.Small @onclick=@((e) => ViewModel.OpenInBrowser(ViewModel.Session.PreMatchUri.ToString()))>Open Pre match data Web Link</Button>
+                        }
+                        else
+                        {
+                            <TextEdit Text="No data available." ReadOnly=true />
+                        }
+                    }
+                    else
+                    {
+                        <Alert Color=Color.Info Dismisable=false Visible=true>
+                                <AlertDescription>This feature can be enabled in the Settings</AlertDescription>
+                            </Alert>
+                    }
+                    </FieldBody>
+                </Field>
+                <Field Horizontal="true">
+                    <FieldLabel ColumnSize="ColumnSize.Is4">Post Match</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.Is8">
+                        @if (ViewModel.IsPostMatchEnabled)
+                    {
+                        @if (ViewModel.HasPostMatch)
+                        {
+                            <Button Color=Color.Primary Size=Size.Small @onclick=@((e) => ViewModel.OpenInBrowser(ViewModel.Session.PostMatchUri.ToString()))>Open Post match data Web Link</Button>
+                        }
+                        else
+                        {
+                            <TextEdit Text="No data available." ReadOnly=true />
+                        }
+                    }
+                    else
+                    {
+                        <Alert Color=Color.Info Dismisable=false Visible=true>
+                                <AlertDescription>This feature can be enabled in the Settings</AlertDescription>
+                            </Alert>
+                    }
+                    </FieldBody>
+                </Field>
+            </CardBody>
+        </Card>
+    </Column>
+</Row>
+
+<Row>
+    <Column ColumnSize=ColumnSize.Is12>
+        <Card Margin="Margin.Is4.OnY">
+            <CardHeader>
+                <CardTitle>Detected BattleNet Ids</CardTitle>
+            </CardHeader>
+            <CardBody>
+                    <Paragraph>BattleNet Ids are used for Auto Twitch Predictions & Discord Rich Presence</Paragraph> 
+                    <ListGroup>
+                        @foreach (var item in ViewModel.BattlenetIds)
+                    {
+                        <ListGroupItem>@item</ListGroupItem>
+                    }
+                    </ListGroup>
+                </CardBody> 
+        </Card>
+    </Column>
+</Row>
+
+
+<Row>
+    <Column ColumnSize=ColumnSize.Is6>
+        <Card Margin="Margin.Is4.OnY">
+            <CardHeader>
+                <CardTitle>Twitch Talents Extension</CardTitle>
+            </CardHeader>
+
+            @if (ViewModel.IsTwitchTalentsEnabled)
+        {
+            <CardBody>
+                     <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">Last Update</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            @if (ViewModel.Session.TalentsExtension.LastUpdate != null)
+                        {
+                            <TextEdit Text=@ViewModel.Session.TalentsExtension.LastUpdate.ToString() ReadOnly=true />
+                        }
+                        else
+                        {
+                            <TextEdit Placeholder="None" ReadOnly=true />
+                        }
+                        </FieldBody>
+                    </Field>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">Session ID</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            @if (ViewModel.Session.TalentsExtension.SessionId != null)
+                        {
+                            <TextEdit Text=@ViewModel.Session.TalentsExtension.SessionId ReadOnly=true />
+                        }
+                        else
+                        {
+                            <TextEdit Placeholder="None" ReadOnly=true />
+                        }
+                        </FieldBody>
+                    </Field>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">Tracker Event Index</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            <TextEdit Text=@ViewModel.Session.TalentsExtension.TrackerEventIndex.ToString() ReadOnly=true />
+                        </FieldBody>
+                    </Field>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">Talents Detected</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            <TextEdit Text=@ViewModel.Session.TalentsExtension.PlayerFoundTalents.Count().ToString() ReadOnly=true />
+                        </FieldBody>
+                    </Field>
+                </CardBody>
+        } 
+        else
+        {
+            <CardBody>
+                    <Alert Color=Color.Info Dismisable=false Visible=true>
+                         <AlertMessage>Feature disabled.</AlertMessage>
+                        <AlertDescription>
+                            This feature can be enabled in the Settings. To find out more information about the Talents extension please visit <a href="https://api.heroesprofile.com/docs/1.0/Twitch/Extension/Usage">The Extension Documentation.</a>
+                        </AlertDescription>
+                    </Alert>
+                </CardBody>
+        }
+        </Card>
+    </Column>
+    <Column ColumnSize=ColumnSize.Is6>
+        <Card Margin="Margin.Is4.OnY">
+            <CardHeader>
+                <CardTitle>Twitch Auto Predictions</CardTitle>
+            </CardHeader>
+            @if (ViewModel.IsTwitchPredictionsEnabled)
+        {
+            <CardBody>
+                    <Paragraph>BattleNet Ids are used during the Prediction analysis.</Paragraph> 
+                    <ListGroup>
+                        @foreach (var item in ViewModel.BattlenetIds)
+                    {
+                        <ListGroupItem>@item</ListGroupItem>
+                    }
+                    </ListGroup>
+                </CardBody>
+            <CardBody>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">Last Update</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            @if (ViewModel.Session.Prediction.LastUpdate != null)
+                        {
+                            <TextEdit Text=@ViewModel.Session.Prediction.LastUpdate.ToString() ReadOnly=true />
+                        }
+                        else
+                        {
+                            <TextEdit Placeholder="None" ReadOnly=true />
+                        }
+                        </FieldBody>
+                    </Field>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">ID</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            @if (ViewModel.Session.Prediction.PredictionId != null)
+                        {
+                            <TextEdit Text=@ViewModel.Session.Prediction.PredictionId ReadOnly=true />
+                        }
+                        else
+                        {
+                            <TextEdit Placeholder="None" ReadOnly=true />
+                        }
+                        </FieldBody>
+                    </Field>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">Winning Id</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            @if (ViewModel.Session.Prediction.WinningOutcomeId != null)
+                        {
+                            <TextEdit Text=@ViewModel.Session.Prediction.WinningOutcomeId ReadOnly=true />
+                        }
+                        else
+                        {
+                            <TextEdit Placeholder="None" ReadOnly=true />
+                        }
+                        </FieldBody>
+                    </Field>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">Other Id</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            @if (ViewModel.Session.Prediction.OtherOutcomeId != null)
+                        {
+                            <TextEdit Text=@ViewModel.Session.Prediction.OtherOutcomeId ReadOnly=true />
+                        }
+                        else
+                        {
+                            <TextEdit Placeholder="None" ReadOnly=true />
+                        }
+                        </FieldBody>
+                    </Field>
+                </CardBody>
+        }
+        else
+        {
+           <CardBody>
+                    <Alert Color=Color.Info Dismisable=false Visible=true>
+                         <AlertMessage>Feature disabled.</AlertMessage>
+                        <AlertDescription>
+                            This feature can be enabled in the Settings. To find out more information about the Predictions feature please visit <a href="https://api.heroesprofile.com/docs/1.0/Twitch/Extension/Usage">The Predictions Documentation.</a>
+                        </AlertDescription>
+                    </Alert>
+                </CardBody>
+        }
+        </Card>
+    </Column>
+</Row>
+
+@code {
+protected async override Task OnInitializedAsync() => await ViewModel.LoadAsync();
+}

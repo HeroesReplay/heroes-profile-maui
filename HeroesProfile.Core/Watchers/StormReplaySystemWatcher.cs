@@ -1,16 +1,14 @@
-﻿
-using MauiApp2.Core.Models;
+﻿using HeroesProfile.Core.Models;
 
-namespace MauiApp2.Core.Watchers
+namespace HeroesProfile.Core.Watchers;
+
+public sealed class StormReplaySystemWatcher : AbstractGameFileSystemWatcher
 {
-    public sealed class StormReplaySystemWatcher : AbstractGameFileSystemWatcher
+    public StormReplaySystemWatcher(AppSettings appSettings)
     {
-        public StormReplaySystemWatcher(AppSettings appSettings)
-        {
-            Path = appSettings.GameDocumentsDirectory;
-            Filter = "*.StormReplay";
-            EnableRaisingEvents = false;
-            IncludeSubdirectories = true;
-        }
+        Path = appSettings.GameDocumentsDirectory;
+        Filter = "*.StormReplay";
+        EnableRaisingEvents = false;
+        IncludeSubdirectories = true;
     }
 }

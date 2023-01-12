@@ -7,44 +7,43 @@ using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Extensions.Http;
 
-namespace MauiApp2.Core
+namespace HeroesProfile.Core;
+
+/// <summary>
+/// https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/implement-http-call-retries-exponential-backoff-polly
+/// </summary>
+public static class PollyPolicies
 {
-    /// <summary>
-    /// https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/implement-http-call-retries-exponential-backoff-polly
-    /// </summary>
-    public static class PollyPolicies
+    private const string RetryAfterKey = "retry-after";
+
+    public static IAsyncPolicy<HttpResponseMessage> GetHeroesProfileRetryPolicy<T>(ILogger<T> logger)
     {
-        private const string RetryAfterKey = "retry-after";
+        return HttpPolicyExtensions
+            .HandleTransientHttpError()
+            .OrResult(responseMessage => responseMessage.StatusCode != HttpStatusCode.OK)
+            .WaitAndRetryAsync(
+                retryCount: 10,
+                sleepDurationProvider: (retryAttempt, context) => GetSleepDuration(retryAttempt, context, logger),
+                onRetry: (dr, ts, retryAttempt, ctx) => OnRetry(dr, ts, retryAttempt, ctx, logger));
+    }
 
-        public static IAsyncPolicy<HttpResponseMessage> GetHeroesProfileRetryPolicy<T>(ILogger<T> logger)
+    private static void OnRetry<T>(DelegateResult<HttpResponseMessage> dr, TimeSpan timeSpan, int retryAttempt, Context context, ILogger<T> logger)
+    {
+        if (dr?.Result?.Headers?.RetryAfter != null && dr.Result.Headers.RetryAfter.Delta != null)
         {
-            return HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .OrResult(responseMessage => responseMessage.StatusCode != HttpStatusCode.OK)
-                .WaitAndRetryAsync(
-                    retryCount: 10,
-                    sleepDurationProvider: (retryAttempt, context) => GetSleepDuration(retryAttempt, context, logger),
-                    onRetry: (dr, ts, retryAttempt, ctx) => OnRetry(dr, ts, retryAttempt, ctx, logger));
+            logger.LogInformation($"Setting RetryAfter: {dr.Result.Headers.RetryAfter.Delta.Value}");
+
+            context[RetryAfterKey] = dr.Result.Headers.RetryAfter.Delta.Value;
+        }
+    }
+
+    private static TimeSpan GetSleepDuration<T>(int retryAttempt, Context context, ILogger<T> logger)
+    {
+        if (context.ContainsKey(RetryAfterKey))
+        {
+            return (TimeSpan)context[RetryAfterKey];
         }
 
-        private static void OnRetry<T>(DelegateResult<HttpResponseMessage> dr, TimeSpan timeSpan, int retryAttempt, Context context, ILogger<T> logger)
-        {
-            if (dr?.Result?.Headers?.RetryAfter != null && dr.Result.Headers.RetryAfter.Delta != null)
-            {
-                logger.LogInformation($"Setting RetryAfter: {dr.Result.Headers.RetryAfter.Delta.Value}");
-
-                context[RetryAfterKey] = dr.Result.Headers.RetryAfter.Delta.Value;
-            }
-        }
-
-        private static TimeSpan GetSleepDuration<T>(int retryAttempt, Context context, ILogger<T> logger)
-        {
-            if (context.ContainsKey(RetryAfterKey))
-            {
-                return (TimeSpan)context[RetryAfterKey];
-            }
-
-            return TimeSpan.FromSeconds(Math.Pow(2, retryAttempt));
-        }
+        return TimeSpan.FromSeconds(Math.Pow(2, retryAttempt));
     }
 }

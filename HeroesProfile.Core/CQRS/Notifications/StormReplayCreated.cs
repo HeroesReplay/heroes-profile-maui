@@ -1,47 +1,45 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-
-using MauiApp2.Core.CQRS.Commands.Twitch;
-using MauiApp2.Core.Models;
-using MauiApp2.Core.Repositories;
-
+using HeroesProfile.Core.CQRS.Commands.Discord;
+using HeroesProfile.Core.CQRS.Commands.Twitch;
+using HeroesProfile.Core.Models;
+using HeroesProfile.Core.Repositories;
 using MediatR;
 
-namespace MauiApp2.Core.CQRS.Notifications
+namespace HeroesProfile.Core.CQRS.Notifications;
+
+public static class StormReplayCreated
 {
-    public static class StormReplayCreated
+    public record Notification(ReplayParseData ReplayParseData) : INotification;
+
+    public class Handler : INotificationHandler<Notification>
     {
-        public record Notification(ReplayParseData ReplayParseData) : INotification;
+        private readonly IMediator mediator;
+        private readonly UserSettingsRepository userSettingsRepository;
 
-        public class Handler : INotificationHandler<Notification>
+        public Handler(IMediator mediator, UserSettingsRepository userSettingsRepository)
         {
-            private readonly IMediator mediator;
-            private readonly UserSettingsRepository userSettingsRepository;
+            this.mediator = mediator;
+            this.userSettingsRepository = userSettingsRepository;
+        }
 
-            public Handler(IMediator mediator, UserSettingsRepository userSettingsRepository)
+        public async Task Handle(Notification notification, CancellationToken cancellationToken)
+        {
+            UserSettings settings = await userSettingsRepository.LoadAsync(cancellationToken);
+
+            if (settings.EnableTalentsExtension && notification.ReplayParseData.ParseResult == ParseResult.Success)
             {
-                this.mediator = mediator;
-                this.userSettingsRepository = userSettingsRepository;
+                await mediator.Send(new UpdateTalents.Command(notification.ReplayParseData.Replay, notification.ReplayParseData.ParseType), cancellationToken);
             }
 
-            public async Task Handle(Notification notification, CancellationToken cancellationToken)
+            if (settings.EnablePredictions)
             {
-                UserSettings settings = await userSettingsRepository.LoadAsync(cancellationToken);
+                await mediator.Send(new ClosePrediction.Command(), cancellationToken);
+            }
 
-                if (settings.EnableTalentsExtension && notification.ReplayParseData.ParseResult == ParseResult.Success)
-                {
-                    await mediator.Send(new UpdateTalents.Command(notification.ReplayParseData.Replay, notification.ReplayParseData.ParseType), cancellationToken);
-                }
-
-                if (settings.EnablePredictions)
-                {
-                    await mediator.Send(new ClosePrediction.Command(), cancellationToken);
-                }
-
-                if (settings.EnableDiscordEnhancement)
-                {
-                    await mediator.Send(new Commands.Discord.ClearActivity.Command(), cancellationToken);
-                }
+            if (settings.EnableDiscordEnhancement)
+            {
+                await mediator.Send(new ClearActivity.Command(), cancellationToken);
             }
         }
     }
