@@ -45,7 +45,19 @@ public static class ProcessOldestUnknownReplay
             foreach (FileInfo[] batch in replays.Chunk(batchSize).ToList())
             {
                 // Parse batch in parallel
-                GetParsedReplay.Response[] parsedResponses = await Task.WhenAll(batch.AsParallel().WithCancellation(cancellationToken).Select(info => mediator.Send(new GetParsedReplay.Query(info, null), cancellationToken)).ToArray());
+                var options = new Heroes.ReplayParser.ParseOptions 
+                { 
+                    AllowPTR = true, 
+                    IgnoreErrors = true, 
+                    ShouldParseDetailedBattleLobby = true, 
+                    ShouldParseEvents = false, 
+                    ShouldParseMessageEvents = false, 
+                    ShouldParseStatistics = false, 
+                    ShouldParseUnits = false, 
+                    ShouldParseMouseEvents = false
+                };
+
+                GetParsedReplay.Response[] parsedResponses = await Task.WhenAll(batch.AsParallel().WithCancellation(cancellationToken).Select(info => mediator.Send(new GetParsedReplay.Query(info, options), cancellationToken)).ToArray());
 
                 // Save batch in one operation (1 read / 1 write)
                 SaveReplays.Response saveResponse = await mediator.Send(new SaveReplays.Command(parsedResponses.Select(x => x.Data).ToArray()), cancellationToken);

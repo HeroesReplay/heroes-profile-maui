@@ -32,8 +32,8 @@ public static class GetParsedReplay
                 /* 
                  * We do care?
                  */
-                ShouldParseDetailedBattleLobby = true,
-                ShouldParseEvents = true,
+                ShouldParseDetailedBattleLobby = false,
+                ShouldParseEvents = false,
 
                 /* 
                  * We dont care?
