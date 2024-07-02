@@ -6,6 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Heroes.ReplayParser;
+using Heroes.StormReplayParser;
+
 using HeroesProfile.Core.CQRS.Commands.Replays;
 using HeroesProfile.Core.CQRS.Commands.Session;
 using HeroesProfile.Core.CQRS.Notifications;

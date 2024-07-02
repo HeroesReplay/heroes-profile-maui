@@ -7,7 +7,7 @@ using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Commands.Replays;
 
-public static class ClearStoredReplays
+public static class InitStoredReplays
 {
     public record Command : IRequest;
 
@@ -22,7 +22,7 @@ public static class ClearStoredReplays
 
         public async Task Handle(Command request, CancellationToken cancellationToken)
         {
-            await repository.ClearAsync(cancellationToken);
+            await repository.InitAsync(cancellationToken);
         }
     }
 }

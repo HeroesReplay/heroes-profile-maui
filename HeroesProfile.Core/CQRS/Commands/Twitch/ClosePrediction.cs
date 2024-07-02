@@ -47,7 +47,7 @@ public static class ClosePrediction
             {
                 GetKnownBattleNetIds.Response knownBattleNetIds = await mediator.Send(new GetKnownBattleNetIds.Query());
 
-                bool isWon = session.StormReplay.Players.Any(p => knownBattleNetIds.BattleNetIds.Any(battleNetId => p.IsWinner && p.BattleNetId == battleNetId));
+                bool isWon = session.StormReplay.StormPlayers.Any(p => knownBattleNetIds.BattleNetIds.Any(battleNetId => p.IsWinner && p.ToonHandle!.Id == battleNetId));
 
                 string outcomeId = isWon ? session.Prediction.WinningOutcomeId : session.Prediction.OtherOutcomeId;
 

@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using HeroesProfile.Core.Clients;
 using HeroesProfile.Core.CQRS.Queries;
 using HeroesProfile.Core.Models;
@@ -40,21 +41,23 @@ public static class UploadAndUpdateReplay
             // Load the Replay for Upload (bytes to send)
             GetParsedReplay.Response response = await mediator.Send(new GetParsedReplay.Query(new FileInfo(command.StoredReplay.Path), options: null), cancellationToken);
 
-            if (response.Data.Bytes == null || string.IsNullOrEmpty(response.Data.Fingerprint))
+            if (response.Data.Replay == null || string.IsNullOrEmpty(response.Data.Fingerprint))
                 return new(false, null, UploadStatus.UploadError);
 
+            var bytes = File.ReadAllBytes(response.Data.File.FullName);
+
             // Upload the Replay
-            if (false)
+            if (appSettings.EnableUploadToHotsApi)
             {
-                await uploadUploadClient.UploadToHotsApiAsync(response.Data.Bytes, response.Data.Fingerprint, cancellationToken);
+                // await uploadUploadClient.UploadToHotsApiAsync(response.Data.Bytes, response.Data.Fingerprint, cancellationToken);
             }
 
-            if (false)
-            {
-                await uploadUploadClient.UploadToHeroesProfileAsync(response.Data.Bytes, response.Data.Fingerprint, cancellationToken);
+            if (appSettings.EnableUploadToHeroesProfile)
+            {               
+                // await uploadUploadClient.UploadToHeroesProfileAsync(bytes, response.Data.Fingerprint, cancellationToken);
             }
 
-            UploadResponse uploadResponse = await uploadUploadClient.UploadToHeroesProfileAsync(response.Data.Bytes, response.Data.Fingerprint, cancellationToken);
+            UploadResponse uploadResponse = await uploadUploadClient.UploadToHeroesProfileAsync(bytes, response.Data.Fingerprint, cancellationToken);
 
             UploadStatus uploadStatus = uploadResponse.Status;
             StoredReplay storedReplay = command.StoredReplay;

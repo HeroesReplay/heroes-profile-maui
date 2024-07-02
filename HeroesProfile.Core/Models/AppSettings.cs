@@ -17,7 +17,7 @@ public class AppSettings
     public string GameTempDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Temp", "Heroes of the Storm");
     public string GameDocumentsDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Heroes of the Storm");
     public string SimulationTargetDirectory => Path.Combine(GameDocumentsDirectory, "Simulation");
-    public string ApplicationDataDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Heroes Profile");
+    public string ApplicationDataDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Heroes Profile 2");
     public string ApplicationSessionDirectory => Path.Combine(ApplicationDataDirectory, "Session");
     public string SimulationSourceDirectory => Path.Combine(ApplicationDataDirectory, "Simulation");
     public string UserSettingsPath => Path.Combine(ApplicationDataDirectory, "usersettings.json");
@@ -30,6 +30,8 @@ public class AppSettings
     public bool EnableFakeHttp { get; set; }
     public bool DefaultUserSettingsOnStart { get; set; }
     public bool ClearStoredReplaysOnStart { get; set; }
+    public bool EnableUploadToHotsApi { get; set; }
+    public bool EnableUploadToHeroesProfile { get; set; }
 
     public AppSettings()
     {

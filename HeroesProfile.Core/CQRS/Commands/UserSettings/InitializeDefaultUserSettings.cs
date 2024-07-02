@@ -20,11 +20,9 @@ public static class InitializeDefaultUserSettings
             this.defaultUserSettings = defaultUserSettings;
         }
 
-        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+        public async Task Handle(Command request, CancellationToken cancellationToken)
         {
             await repository.SaveAsync(defaultUserSettings, cancellationToken);
-
-            return Unit.Value;
         }
     }
 }

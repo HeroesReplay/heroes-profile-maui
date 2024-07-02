@@ -28,15 +28,13 @@ public static class UpdateSessionPostMatch
             this.mediator = mediator;
         }
 
-        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+        public async Task Handle(Command request, CancellationToken cancellationToken)
         {
             if (sessionRepository.SessionData.StormReplay != null)
             {
                 sessionRepository.SessionData.PostMatchUri = new Uri(new Uri(appSettings.HeroesProfileApiUri, PostMatchUri), new Uri($"?replayID={request.ReplayId}", UriKind.Relative));
                 await mediator.Publish(new SessionUpdated.Notification(sessionRepository.SessionData), cancellationToken);
             }
-
-            return Unit.Value;
         }
     }
 }

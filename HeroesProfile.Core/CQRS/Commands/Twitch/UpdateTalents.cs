@@ -4,6 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Heroes.ReplayParser;
+using Heroes.StormReplayParser;
+
 using HeroesProfile.Core.Clients;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
@@ -14,7 +16,7 @@ namespace HeroesProfile.Core.CQRS.Commands.Twitch;
 
 public static class UpdateTalents
 {
-    public record Command(Replay Replay, ParseType ParseType) : IRequest<Response>;
+    public record Command(StormReplay Replay, ParseType ParseType) : IRequest<Response>;
 
     public record Response(SessionData Session);
 
@@ -61,81 +63,85 @@ public static class UpdateTalents
 
         private async Task UpdateFinalTwitchTalents(Dictionary<string, string> identity, CancellationToken cancellationToken)
         {
-            await client.SaveMissingTalents(identity, sessionRepository.SessionData, cancellationToken);
+            throw new NotImplementedException();
+
+            // await client.SaveMissingTalents(identity, sessionRepository.SessionData, cancellationToken);
         }
 
         private async Task UpdateTwitchTalents(Dictionary<string, string> identity, CancellationToken cancellationToken)
         {
-            SessionData session = sessionRepository.SessionData;
+            throw new NotImplementedException();    
 
-            // We need BOTH BattleLobby data and StormSave data
-            if (session.StormSave == null || session.BattleLobby == null) return;
+            //SessionData session = sessionRepository.SessionData;
 
-            // Can this not be processed once? IsBattleLobbyToStormSaveSynced = false/true
-            for (int stormPlayIndex = 0; stormPlayIndex < session.StormSave.Players.Length; stormPlayIndex++)
-            {
-                for (int stormLobbyIndex = 0; stormLobbyIndex < session.BattleLobby.Players.Length; stormLobbyIndex++)
-                {
-                    if (session.StormSave.Players[stormPlayIndex].Name == session.BattleLobby.Players[stormLobbyIndex].Name)
-                    {
-                        session.StormSave.Players[stormPlayIndex].BattleTag = session.BattleLobby.Players[stormLobbyIndex].BattleTag;
-                        break;
-                    }
-                }
-            }
+            //// We need BOTH BattleLobby data and StormSave data
+            //if (session.StormSave == null || session.BattleLobby == null) return;
 
-            if (session.StormSave.TrackerEvents != null)
-            {
-                for (int i = session.TalentsExtension.TrackerEventIndex; i < session.StormSave.TrackerEvents.Count; i++)
-                {
-                    var trackerEvent = session.StormSave.TrackerEvents[i];
-                    string eventName = trackerEvent.Data.dictionary[0].blobText;
+            //// Can this not be processed once? IsBattleLobbyToStormSaveSynced = false/true
+            //for (int stormPlayIndex = 0; stormPlayIndex < session.StormSave.Players.Length; stormPlayIndex++)
+            //{
+            //    for (int stormLobbyIndex = 0; stormLobbyIndex < session.BattleLobby.Players.Length; stormLobbyIndex++)
+            //    {
+            //        if (session.StormSave.Players[stormPlayIndex].Name == session.BattleLobby.Players[stormLobbyIndex].Name)
+            //        {
+            //            session.StormSave.Players[stormPlayIndex].BattleTag = session.BattleLobby.Players[stormLobbyIndex].BattleTag;
+            //            break;
+            //        }
+            //    }
+            //}
 
-                    if (eventName == "TalentChosen")
-                    {
-                        int playerId = (int)trackerEvent.Data.dictionary[2].optionalData.array[0].dictionary[1].vInt.Value - 1;
+            //if (session.StormSave.TrackerEvents != null)
+            //{
+            //    for (int i = session.TalentsExtension.TrackerEventIndex; i < session.StormSave.TrackerEvents.Count; i++)
+            //    {
+            //        var trackerEvent = session.StormSave.TrackerEvents[i];
+            //        string eventName = trackerEvent.Data.dictionary[0].blobText;
 
-                        Player player = session.StormSave.Players[playerId];
+            //        if (eventName == "TalentChosen")
+            //        {
+            //            int playerId = (int)trackerEvent.Data.dictionary[2].optionalData.array[0].dictionary[1].vInt.Value - 1;
 
-                        Talent talent = new Talent()
-                        {
-                            TalentName = trackerEvent.Data.dictionary[1].optionalData.array[0].dictionary[1].blobText,
-                            TimeSpanSelected = trackerEvent.TimeSpan
-                        };
+            //            Player player = session.StormSave.Players[playerId];
 
-                        if (!session.TalentsExtension.GameModeUpdated)
-                        {
-                            await client.UpdateReplayData(identity, session, cancellationToken);
-                            await client.UpdatePlayerData(identity, session, cancellationToken);
-                            session.TalentsExtension.GameModeUpdated = true;
-                        }
+            //            Talent talent = new Talent()
+            //            {
+            //                TalentName = trackerEvent.Data.dictionary[1].optionalData.array[0].dictionary[1].blobText,
+            //                TimeSpanSelected = trackerEvent.TimeSpan
+            //            };
 
-                        var playerTalent = $"{player.Name}:{talent.TalentName}";
+            //            if (!session.TalentsExtension.GameModeUpdated)
+            //            {
+            //                await client.UpdateReplayData(identity, session, cancellationToken);
+            //                await client.UpdatePlayerData(identity, session, cancellationToken);
+            //                session.TalentsExtension.GameModeUpdated = true;
+            //            }
 
-                        if (!session.TalentsExtension.PlayerFoundTalents.Contains(playerTalent))
-                        {
-                            session.TalentsExtension.PlayerFoundTalents.Add(playerTalent);
-                            await client.SaveTalentData(identity, session, player, talent, cancellationToken);
-                            session.TalentsExtension.TalentsUpdated = true;
-                        }
+            //            var playerTalent = $"{player.Name}:{talent.TalentName}";
 
-                        session.TalentsExtension.TrackerEventIndex = i;
-                    }
-                }
+            //            if (!session.TalentsExtension.PlayerFoundTalents.Contains(playerTalent))
+            //            {
+            //                session.TalentsExtension.PlayerFoundTalents.Add(playerTalent);
+            //                await client.SaveTalentData(identity, session, player, talent, cancellationToken);
+            //                session.TalentsExtension.TalentsUpdated = true;
+            //            }
 
-                if (session.TalentsExtension.TalentsUpdated)
-                {
-                    await client.NotifyTwitchTalentChange(identity, cancellationToken);
-                    session.TalentsExtension.TalentsUpdated = false;
-                }
-            }
+            //            session.TalentsExtension.TrackerEventIndex = i;
+            //        }
+            //    }
 
-            if (!session.TalentsExtension.GameModeUpdated)
-            {
-                await client.UpdateReplayData(identity, session, cancellationToken);
-                await client.UpdatePlayerData(identity, session, cancellationToken);
-                session.TalentsExtension.GameModeUpdated = true;
-            }
+            //    if (session.TalentsExtension.TalentsUpdated)
+            //    {
+            //        await client.NotifyTwitchTalentChange(identity, cancellationToken);
+            //        session.TalentsExtension.TalentsUpdated = false;
+            //    }
+            //}
+
+            //if (!session.TalentsExtension.GameModeUpdated)
+            //{
+            //    await client.UpdateReplayData(identity, session, cancellationToken);
+            //    await client.UpdatePlayerData(identity, session, cancellationToken);
+            //    session.TalentsExtension.GameModeUpdated = true;
+            //}
         }
     }
 }

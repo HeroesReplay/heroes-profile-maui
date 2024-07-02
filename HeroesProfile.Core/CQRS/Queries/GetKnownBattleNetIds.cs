@@ -12,7 +12,7 @@ public static class GetKnownBattleNetIds
 {
     public record Query : IRequest<Response>;
 
-    public record Response(IEnumerable<int> BattleNetIds);
+    public record Response(IEnumerable<long> BattleNetIds);
 
 
     public class Handler : IRequestHandler<Query, Response>
@@ -26,10 +26,10 @@ public static class GetKnownBattleNetIds
 
         public Task<Response> Handle(Query request, CancellationToken cancellationToken)
         {
-            IEnumerable<int> battleNetIds = new DirectoryInfo(appSettings.GameDocumentsDirectory)
+            IEnumerable<long> battleNetIds = new DirectoryInfo(appSettings.GameDocumentsDirectory)
                     .EnumerateDirectories("*-*", SearchOption.AllDirectories)
-                    .Where(directory => int.TryParse(directory.Parent.Name, out var accountId))
-                    .Select(directory => int.Parse(directory.Name.Split("-").Last()))
+                    .Where(directory => long.TryParse(directory.Parent.Name, out var accountId))
+                    .Select(directory => long.Parse(directory.Name.Split("-").Last()))
                     .Distinct();
 
             return Task.FromResult(new Response(battleNetIds.ToList()));

@@ -1,8 +1,8 @@
 ﻿
 using System.Threading;
 using System.Threading.Tasks;
+
 using HeroesProfile.Core.Models;
-using HeroesProfile.Core.Repositories;
 
 using MediatR;
 

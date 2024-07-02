@@ -1,16 +1,7 @@
-﻿using Blazorise.Localization;
-using Blazorise;
-
-using MediatR;
-
-using Microsoft.AspNetCore.Components;
+﻿using MediatR;
 
 using ReactiveUI;
-
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Linq;
 using HeroesProfile.Core.CQRS.Queries;
 using HeroesProfile.Core.Models;
 
@@ -30,11 +21,11 @@ public class AnalysisViewModel : ReactiveObject
 
     private SessionData session;
     private UserSettings settings;
-    private IEnumerable<int> battlenetIds;
+    private IEnumerable<long> battlenetIds;
 
-    public IEnumerable<int> BattlenetIds
+    public IEnumerable<long> BattlenetIds
     {
-        get => battlenetIds ?? Enumerable.Empty<int>();
+        get => battlenetIds ?? Enumerable.Empty<long>();
         set
         {
             battlenetIds = value;

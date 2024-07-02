@@ -7,6 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Heroes.ReplayParser;
+using Heroes.StormReplayParser;
+using Heroes.StormReplayParser.Replay;
+
 using HeroesProfile.Core.Models;
 
 namespace HeroesProfile.Core.Parsers;
@@ -17,7 +20,7 @@ public class StormReplayParser : IReplayParser
 
     public string FileExtension => ".StormReplay";
 
-    private string GetFingerprint(Replay replay)
+    private string? GetFingerprint(StormReplay replay)
     {
         if (replay == null) return null;
 
@@ -25,7 +28,7 @@ public class StormReplayParser : IReplayParser
         {
             using (var md5 = MD5.Create())
             {
-                var battleNetIds = string.Join(string.Empty, replay.Players.Select(x => x.BattleNetId).OrderBy(x => x));
+                var battleNetIds = string.Join(string.Empty, replay.StormPlayers.Select(x => x.ToonHandle!.Id).OrderBy(x => x));
                 return new Guid(md5.ComputeHash(Encoding.UTF8.GetBytes(string.Join(string.Empty, battleNetIds, replay.RandomValue)))).ToString();
             }
         }
@@ -35,22 +38,25 @@ public class StormReplayParser : IReplayParser
         }
     }
 
-    public async Task<ReplayParseData> ParseAsync(FileInfo file, ParseOptions options = null, CancellationToken token = default)
+    public async Task<ReplayParseData> ParseAsync(FileInfo file, ParseOptions? options = null, CancellationToken token = default)
     {
         try
         {
-            byte[] bytes = await File.ReadAllBytesAsync(file.FullName, token);
-            var (status, replay) = DataParser.ParseReplay(bytes, options ?? ParseOptions.DefaultParsing);
+            // byte[] bytes = await File.ReadAllBytesAsync(file.FullName, token);
+            var result = StormReplay.Parse(file.FullName, options ?? ParseOptions.MinimalParsing);
 
-            if (status == DataParser.ReplayParseResult.Success)
+            var status = result.Status;
+            var replay = result.Replay;
+
+            if (status == StormReplayParseStatus.Success)
             {
-                var supported = new GameMode[] { GameMode.ARAM, GameMode.QuickMatch, GameMode.StormLeague, GameMode.UnrankedDraft };
+                var supported = new StormGameMode[] { StormGameMode.ARAM, StormGameMode.QuickMatch, StormGameMode.StormLeague, StormGameMode.UnrankedDraft };
 
-                if (supported.Contains(replay.GameMode))
+                if (supported.Contains(result.Replay.GameMode))
                 {
                     return new ReplayParseData()
                     {
-                        Bytes = bytes,
+                        //Bytes = bytes,
                         File = file,
                         Replay = replay,
                         ParseResult = ParseResult.Success,
@@ -61,27 +67,27 @@ public class StormReplayParser : IReplayParser
 
                 return new ReplayParseData()
                 {
-                    Bytes = bytes,
+                    //Bytes = bytes,
                     File = file,
                     Replay = replay,
-                    ParseResult = ParseResult.CustomGame,
+                    ParseResult = ParseResult.UnexpectedResult,
                     Fingerprint = null,
                     ParseType = ParseType
                 };
             }
 
-            string replayParseResult = Enum.GetName(typeof(DataParser.ReplayParseResult), status);
+            //string replayParseResult = Enum.GetName(typeof(DataParser.ReplayParseResult), status);
 
-            if (!string.IsNullOrWhiteSpace(replayParseResult))
+            if (result != null)
             {
-                var parseResult = Enum.Parse<ParseResult>(replayParseResult, ignoreCase: true);
+                //var parseResult = Enum.Parse<ParseResult>(result.Status, ignoreCase: true);
 
                 return new ReplayParseData()
                 {
-                    Bytes = bytes,
+                    //Bytes = bytes,
                     File = file,
                     Replay = replay,
-                    ParseResult = parseResult,
+                    ParseResult = (ParseResult)result.Status,
                     Fingerprint = null,
                     ParseType = ParseType
                 };
@@ -90,9 +96,9 @@ public class StormReplayParser : IReplayParser
             {
                 return new ReplayParseData()
                 {
-                    Bytes = bytes,
+                    //Bytes = bytes,
                     File = file,
-                    Replay = new Replay(),
+                    //Replay = new Replay(),
                     ParseResult = ParseResult.UnexpectedResult,
                     Fingerprint = null,
                     ParseType = ParseType
@@ -103,9 +109,9 @@ public class StormReplayParser : IReplayParser
         {
             return new ReplayParseData()
             {
-                Bytes = null,
+                //Bytes = null,
                 File = file,
-                Replay = new Replay(),
+                //Replay = new Replay(),
                 ParseResult = ParseResult.Exception,
                 Fingerprint = null,
                 ParseType = ParseType

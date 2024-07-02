@@ -6,6 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Heroes.ReplayParser;
+using Heroes.StormReplayParser;
+using Heroes.StormReplayParser.Player;
+
 using HeroesProfile.Core.Models;
 
 namespace HeroesProfile.Core.Clients;
@@ -82,9 +85,9 @@ public class TalentsClient
             {
                 { "replayID", session.TalentsExtension.SessionId },
                 { "game_type", $"{session.StormSave.GameMode}" },
-                { "game_map", session.StormSave.Map },
-                { "game_version", session.StormSave.ReplayVersion },
-                { "region", $"{session.StormSave.Players[0].BattleNetRegionId}" },
+                { "game_map", session.StormSave.MapInfo.MapName },
+                { "game_version", session.StormSave.ReplayVersion.ToString() },
+                { "region", $"{session.StormSave.StormPlayers.Select(sp => sp.ToonHandle?.Region).First() }" },
             };
 
             using (var content = new FormUrlEncodedContent(values))
@@ -103,18 +106,18 @@ public class TalentsClient
         }
     }
 
-    public async Task SaveTalentData(Dictionary<string, string> identity, SessionData session, Player player, Talent talent, CancellationToken cancellationToken)
+    public async Task SaveTalentData(Dictionary<string, string> identity, SessionData session, Heroes.StormReplayParser.Player.StormPlayer player, Heroes.StormReplayParser.Player.HeroTalent talent, CancellationToken cancellationToken)
     {
         var values = new Dictionary<string, string>(identity)
         {
             { "replayID", session.TalentsExtension.SessionId },
-            { "blizz_id", player.BattleNetId.ToString() },
-            { "battletag", player.Name + "#" + player.BattleTag },
-            { "region", player.BattleNetRegionId.ToString() },
-            { "talent", talent.TalentName },
-            { "hero", player.Character },
-            { "hero_id", player.HeroId },
-            { "hero_attribute_id", player.HeroAttributeId },
+            { "blizz_id", player.ToonHandle.Id.ToString() },
+            { "battletag", player.BattleTagName  },
+            { "region", player.ToonHandle.Region.ToString() },
+            { "talent", talent.TalentNameId },
+            { "hero", player.PlayerHero.HeroName },
+            { "hero_id", player.PlayerHero.HeroId },
+            { "hero_attribute_id", player.PlayerHero.HeroAttributeId },
         };
 
         using (var content = new FormUrlEncodedContent(values))
@@ -132,12 +135,12 @@ public class TalentsClient
     public async Task SavePlayerData(Dictionary<string, string> identity, SessionData session, CancellationToken cancellationToken)
     {
         // TODO: Serialize and POST as ARRAY of data
-        foreach (Player player in session.BattleLobby.Players)
+        foreach (StormPlayer player in session.BattleLobby.StormPlayers)
         {
             var values = new Dictionary<string, string>(identity)
             {
                 { "replayID", session.TalentsExtension.SessionId },
-                { "battletag", player.Name + "#" +  player.BattleTag },
+                { "battletag", player.Name + "#" +  player.BattleTagName },
                 { "team", player.Team.ToString() },
             };
 
@@ -159,18 +162,18 @@ public class TalentsClient
     public async Task UpdatePlayerData(Dictionary<string, string> identity, SessionData session, CancellationToken cancellationToken)
     {
         // TODO: Serialize and POST as ARRAY of data
-        foreach (Player player in session.StormSave.Players)
+        foreach (StormPlayer player in session.StormSave.StormPlayers)
         {
             var values = new Dictionary<string, string>(identity)
             {
                 { "replayID", session.TalentsExtension.SessionId },
-                { "blizz_id", player.BattleNetId.ToString() },
-                { "battletag", player.Name + "#" + player.BattleTag},
-                { "hero", player.Character },
-                { "hero_id", player.HeroId },
-                { "hero_attribute_id", player.HeroAttributeId },
+                { "blizz_id", player.ToonHandle.Id.ToString() },
+                { "battletag", player.Name + "#" + player.BattleTagName},
+                { "hero", player.PlayerHero.HeroName },
+                { "hero_id", player.PlayerHero.HeroId},
+                { "hero_attribute_id", player.PlayerHero.HeroAttributeId },
                 { "team", player.Team.ToString() },
-                { "region", player.BattleNetRegionId.ToString() },
+                { "region", player.ToonHandle.Region.ToString() },
             };
 
             using (var content = new FormUrlEncodedContent(values))
@@ -204,18 +207,18 @@ public class TalentsClient
     {
         if (!string.IsNullOrWhiteSpace(session.TalentsExtension.SessionId))
         {
-            Replay replay = session.StormReplay;
+            StormReplay replay = session.StormReplay;
 
             if (replay != null)
             {
                 // TODO: Serialize and POST as ARRAY of data
-                foreach (Player player in replay.Players.OrderByDescending(i => i.IsWinner))
+                foreach (StormPlayer player in replay.StormPlayers.OrderByDescending(i => i.IsWinner))
                 {
                     if (player.Talents != null)
                     {
-                        foreach (Talent talent in player.Talents)
+                        foreach (HeroTalent talent in player.Talents)
                         {
-                            var playerTalent = $"{player.Name}:{talent.TalentName}";
+                            var playerTalent = $"{player.Name}:{talent.TalentNameId}";
 
                             if (!session.TalentsExtension.PlayerFoundTalents.Contains(playerTalent))
                             {

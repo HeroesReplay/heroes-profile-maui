@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+
 using HeroesProfile.Core.CQRS.Commands.Session;
 using HeroesProfile.Core.CQRS.Commands.Twitch;
 using HeroesProfile.Core.Models;
@@ -28,6 +29,11 @@ public static class BattleLobbyCreated
         {
             var settings = await userSettingsRepository.LoadAsync(cancellationToken);
 
+            if (settings.EnablePreMatch)
+            {
+                await mediator.Send(new UpdateSessionPreMatch.Command(notification.Data), cancellationToken);
+            }
+
             if (settings.EnableTalentsExtension)
             {
                 await mediator.Send(new CreateTalents.Command(), cancellationToken);
@@ -36,11 +42,6 @@ public static class BattleLobbyCreated
             if (settings.EnablePredictions)
             {
                 await mediator.Send(new CreatePrediction.Command(), cancellationToken);
-            }
-
-            if (settings.EnablePreMatch)
-            {
-                await mediator.Send(new UpdateSessionPreMatch.Command(notification.Data), cancellationToken);
             }
         }
     }

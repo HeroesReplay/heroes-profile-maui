@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+
 using HeroesProfile.Core.Clients;
 
 using MediatR;
@@ -19,10 +20,11 @@ public static class ClearActivity
             this.discordClient = discordClient;
         }
 
-        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+        public Task Handle(Command request, CancellationToken cancellationToken)
         {
             discordClient.ClearActivity();
-            return Unit.Value;
+
+            return Task.CompletedTask;
         }
     }
 }

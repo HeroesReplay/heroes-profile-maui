@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HeroesProfile.Core.CQRS.Behaviours;
 
+
 public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse>
 {
     private readonly ILogger<TRequest> logger;

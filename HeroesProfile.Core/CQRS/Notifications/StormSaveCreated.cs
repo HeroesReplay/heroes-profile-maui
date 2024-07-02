@@ -1,8 +1,5 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-
-using HeroesProfile.Core.CQRS.Queries;
 
 using MediatR;
 using HeroesProfile.Core.CQRS.Commands.Discord;

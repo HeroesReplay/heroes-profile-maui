@@ -60,22 +60,15 @@ public class ReplaysViewModel : ReactiveObject
             {
                 return ParseResult switch
                 {
-                    ParseResult.ComputerPlayerFound => Color.Info,
                     ParseResult.PtrRegion => Color.Info,
                     ParseResult.PreAlphaWipe => Color.Info,
-
                     ParseResult.Incomplete => Color.Danger,
                     ParseResult.TryMeMode => Color.Danger,
                     ParseResult.Exception => Color.Danger,
                     ParseResult.FileNotFound => Color.Danger,
                     ParseResult.FileSizeTooLarge => Color.Danger,
-
                     ParseResult.UnexpectedResult => Color.Warning,
-
-                    ParseResult.Success => Color.Success,
-
-                    ParseResult.CustomGame => Color.Info,
-
+                    ParseResult.Success => Color.Success,                    
                     _ => Color.Warning,
                 };
             }
@@ -87,15 +80,15 @@ public class ReplaysViewModel : ReactiveObject
             {
                 return UploadStatus switch
                 {
-                    UploadStatus.Pending => Color.Info,
-                    UploadStatus.PtrRegion => Color.Info,
-                    UploadStatus.Incomplete => Color.Info,
-                    UploadStatus.TooOld => Color.Info,
-                    UploadStatus.AiDetected => Color.Info,
-                    UploadStatus.CustomGame => Color.Info,
-                    UploadStatus.Duplicate => Color.Info,
                     UploadStatus.Success => Color.Success,
                     UploadStatus.UploadError => Color.Danger,
+                    UploadStatus.Pending => Color.Info,
+                    UploadStatus.PtrRegion => Color.Warning,
+                    UploadStatus.Incomplete => Color.Danger,
+                    UploadStatus.TooOld => Color.Warning,
+                    UploadStatus.AiDetected => Color.Warning,
+                    UploadStatus.CustomGame => Color.Warning,
+                    UploadStatus.Duplicate => Color.Warning,                    
                     _ => Color.Warning,
                 };
             }
@@ -109,10 +102,9 @@ public class ReplaysViewModel : ReactiveObject
                 {
                     ProcessStatus.Pending => Color.Info,
                     ProcessStatus.Success => Color.Success,
-                    ProcessStatus.Duplicate => Color.Success,
+                    ProcessStatus.Duplicate => Color.Warning,
                     ProcessStatus.NotSupported => Color.Success,
                     ProcessStatus.Error => Color.Danger,
-
                     _ => Color.Warning,
                 };
             }
@@ -162,7 +154,7 @@ public class ReplaysViewModel : ReactiveObject
         public Uri WebLink { get; set; }
         public DateTime Created => Item.Created;
         public DateTime Updated => Item.Updated;
-        public string Path => System.IO.Path.GetFileName(Item.Path);
+        public string Path => System.IO.Path.GetFileNameWithoutExtension(Item.Path);
         public bool Exists => System.IO.File.Exists(Item.Path);
         public string Fingerprint => Item.Fingerprint;
         public ParseResult ParseResult => Item.ParseResult;

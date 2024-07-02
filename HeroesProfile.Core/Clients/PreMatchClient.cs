@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 
 using Heroes.ReplayParser;
+using Heroes.StormReplayParser;
 
 namespace HeroesProfile.Core.Clients;
 
@@ -21,11 +22,11 @@ public class PreMatchClient
         this.httpClient = httpClient;
     }
 
-    public async Task<int?> GetPreMatchId(Replay replay)
+    public async Task<int?> GetPreMatchId(StormReplay replay)
     {
         int? preMatchId = null;
 
-        var formData = JsonSerializer.Serialize(replay.Players.Select(player => new { player.Team, player.Name, player.BattleTag, player.BattleNetRegionId }));
+        var formData = JsonSerializer.Serialize(replay.StormPlayers.Select(player => new { player.Team, player.Name, player.BattleTagName, player.ToonHandle!.Id }));
 
         using (FormUrlEncodedContent content = new(new Dictionary<string, string>() { { "data", formData } }.AsEnumerable()))
         {

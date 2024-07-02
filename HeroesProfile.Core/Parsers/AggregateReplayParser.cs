@@ -19,7 +19,7 @@ public class AggregateReplayParser
         this.parsers = parsers;
     }
 
-    public async Task<ReplayParseData> ParseAsync(FileInfo file, ParseOptions options = null, CancellationToken cancellationToken = default)
+    public async Task<ReplayParseData> ParseAsync(FileInfo file, Heroes.StormReplayParser.ParseOptions? options = null, CancellationToken cancellationToken = default)
     {
         IReplayParser parser = parsers.Single(p => p.FileExtension.Equals(file.Extension, StringComparison.InvariantCultureIgnoreCase));
 

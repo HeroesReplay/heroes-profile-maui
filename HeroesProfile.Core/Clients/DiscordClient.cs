@@ -4,6 +4,8 @@ using System.Linq;
 using System.Numerics;
 
 using Heroes.ReplayParser;
+using Heroes.StormReplayParser.Player;
+
 using HeroesProfile.Core.Models;
 
 using Microsoft.Extensions.Logging;
@@ -50,7 +52,7 @@ public class DiscordClient : IDisposable
         }
     }
 
-    public void UpdatePresence(SessionData sessionData, UserSettings settings, IEnumerable<int> battleNetIds)
+    public void UpdatePresence(SessionData sessionData, UserSettings settings, IEnumerable<long> battleNetIds)
     {
         try
         {
@@ -73,7 +75,7 @@ public class DiscordClient : IDisposable
         }
     }
 
-    private void BattleLobby(SessionData sessionData, UserSettings settings, IEnumerable<int> battleNetIds)
+    private void BattleLobby(SessionData sessionData, UserSettings settings, IEnumerable<long> battleNetIds)
     {
         try
         {
@@ -96,18 +98,18 @@ public class DiscordClient : IDisposable
         }
     }
 
-    private void StormSave(SessionData sessionData, UserSettings settings, IEnumerable<int> battleNetIds)
+    private void StormSave(SessionData sessionData, UserSettings settings, IEnumerable<long> battleNetIds)
     {
         try
         {
-            Player? player = sessionData.Players.FirstOrDefault(p => battleNetIds.Contains(p.BattleNetId));
+            StormPlayer? player = sessionData.Players.FirstOrDefault(p => battleNetIds.Contains(p.ToonHandle!.Id));
 
             if (player is not null)
             {
                 //int partySize = sessionData.Players.Count(x => x.PartyValue == player.PartyValue && x.Team == player.Team);
                 //int partyMax = 5;
 
-                discord.UpdateLargeAsset("abathur", player.HeroAttributeId);
+                discord.UpdateLargeAsset("abathur", player.PlayerHero!.HeroAttributeId);
                 discord.UpdateState("In Game");
                 discord.UpdateDetails($"{sessionData.Map} ({sessionData.GameMode})");
 

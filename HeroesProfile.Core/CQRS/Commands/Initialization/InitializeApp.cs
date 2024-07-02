@@ -23,7 +23,7 @@ public static class InitializeApp
             this.mediator = mediator;
         }
 
-        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+        public async Task Handle(Command request, CancellationToken cancellationToken)
         {
             await mediator.Send(new InitStoredReplays.Command(), cancellationToken);
 
@@ -38,8 +38,6 @@ public static class InitializeApp
             }
 
             await mediator.Send(new ClearSession.Command(), cancellationToken);
-
-            return Unit.Value;
         }
     }
 }

@@ -27,15 +27,13 @@ public static class SetActivity
             this.discordClient = discordClient;
         }
 
-        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+        public async Task Handle(Command request, CancellationToken cancellationToken)
         {
             GetKnownBattleNetIds.Response? knownBattleNetIdsResponse = await mediator.Send(new GetKnownBattleNetIds.Query(), cancellationToken);
             GetSession.Response? sessionResponse = await mediator.Send(new GetSession.Query(), cancellationToken);
             GetUserSettings.Response? userSettingsResponse = await mediator.Send(new GetUserSettings.Query(), cancellationToken);
 
             discordClient.UpdatePresence(sessionResponse.Session, userSettingsResponse.UserSettings, knownBattleNetIdsResponse.BattleNetIds);
-
-            return Unit.Value;
         }
     }
 }

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using HeroesProfile.Core.CQRS.Queries;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
@@ -27,45 +28,57 @@ public static class ProcessOldestUnknownReplay
         private readonly ReplaysRepository repository;
         private readonly IMediator mediator;
 
+        private Heroes.StormReplayParser.ParseOptions options;
+
         public Handler(AppSettings appSettings, ReplaysRepository repository, IMediator mediator)
         {
             this.appSettings = appSettings;
             this.repository = repository;
             this.mediator = mediator;
+
+            this.options = new Heroes.StormReplayParser.ParseOptions
+            {
+                AllowPTR = true,
+                ShouldParseGameEvents = false,
+                ShouldParseMessageEvents = false,
+                ShouldParseTrackerEvents = false                
+            };
         }
 
         public async Task<Response> Handle(Command command, CancellationToken cancellationToken)
         {
             List<Item> items = new List<Item>();
 
-            IEnumerable<FileInfo> replays = (await GetOldestUknownReplays(cancellationToken)).Take(command.Take);
+            IEnumerable<FileInfo> replays = (await GetOldestUnknownReplays(cancellationToken)).Take(command.Take);
 
             int batchSize = Math.Max(Environment.ProcessorCount / 4, 1);
 
             foreach (FileInfo[] batch in replays.Chunk(batchSize).ToList())
             {
-                // Parse batch in parallel
-                var options = new Heroes.ReplayParser.ParseOptions 
-                { 
-                    AllowPTR = true, 
-                    IgnoreErrors = true, 
-                    ShouldParseDetailedBattleLobby = true, 
-                    ShouldParseEvents = false, 
-                    ShouldParseMessageEvents = false, 
-                    ShouldParseStatistics = false, 
-                    ShouldParseUnits = false, 
-                    ShouldParseMouseEvents = false
-                };
+                var parseReplayTasks = batch
+                    .AsParallel()
+                    .WithCancellation(cancellationToken)
+                    .Select(info => mediator.Send(new GetParsedReplay.Query(info, options), cancellationToken));
 
-                GetParsedReplay.Response[] parsedResponses = await Task.WhenAll(batch.AsParallel().WithCancellation(cancellationToken).Select(info => mediator.Send(new GetParsedReplay.Query(info, options), cancellationToken)).ToArray());
+                GetParsedReplay.Response[] parsedResponses = await Task.WhenAll(parseReplayTasks.ToArray());
 
                 // Save batch in one operation (1 read / 1 write)
-                SaveReplays.Response saveResponse = await mediator.Send(new SaveReplays.Command(parsedResponses.Select(x => x.Data).ToArray()), cancellationToken);
+                var parsedReplays = parsedResponses.Select(x => x.Data).ToArray();
+                SaveReplays.Response saveResponse = await mediator.Send(new SaveReplays.Command(parsedReplays), cancellationToken);
 
-                // Map stored replays to parsed replays
-                items.AddRange(parsedResponses.Select(parsed => new Item(saveResponse.StoredReplays.Find(stored => string.Equals(stored.Fingerprint, parsed.Data.Fingerprint, StringComparison.OrdinalIgnoreCase)), parsed.Data)));
+                foreach (var parsedReplay in parsedResponses)
+                {
+                    var replay = saveResponse.StoredReplays.Find(stored => string.Equals(stored.Fingerprint, parsedReplay.Data.Fingerprint, StringComparison.OrdinalIgnoreCase));
 
-                await Task.Delay(2000);
+                    if (replay is null)
+                    {
+                        throw new Exception("fingerprint not found");
+                    }
+
+                    // Map stored replays to parsed replays
+                    var item = new Item(replay, parsedReplay.Data);
+                    items.Add(item);
+                }
             }
 
             return new Response(items);
@@ -73,10 +86,12 @@ public static class ProcessOldestUnknownReplay
 
         private IEnumerable<FileInfo> GetAllReplaysOrderedByOldest()
         {
-            return new DirectoryInfo(appSettings.GameDocumentsDirectory).EnumerateFiles("*.StormReplay", SearchOption.AllDirectories).OrderBy(x => x.CreationTime);
+            return new DirectoryInfo(appSettings.GameDocumentsDirectory)
+            .EnumerateFiles("*.StormReplay", SearchOption.AllDirectories)
+            .OrderBy(x => x.CreationTime);
         }
 
-        private async Task<IEnumerable<FileInfo>> GetOldestUknownReplays(CancellationToken token)
+        private async Task<IEnumerable<FileInfo>> GetOldestUnknownReplays(CancellationToken token)
         {
             List<StoredReplay> storedReplays = await repository.LoadAsync(token);
             IEnumerable<FileInfo> replays = GetAllReplaysOrderedByOldest();

@@ -1,9 +1,11 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+
 using HeroesProfile.Core.CQRS.Commands.Discord;
 using HeroesProfile.Core.CQRS.Commands.Twitch;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
+
 using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Notifications;
@@ -27,9 +29,12 @@ public static class StormReplayCreated
         {
             UserSettings settings = await userSettingsRepository.LoadAsync(cancellationToken);
 
-            if (settings.EnableTalentsExtension && notification.ReplayParseData.ParseResult == ParseResult.Success)
+            if (settings.EnableTalentsExtension)
             {
-                await mediator.Send(new UpdateTalents.Command(notification.ReplayParseData.Replay, notification.ReplayParseData.ParseType), cancellationToken);
+                if (notification.ReplayParseData.ParseResult == ParseResult.Success)
+                {
+                    await mediator.Send(new UpdateTalents.Command(notification.ReplayParseData.Replay, notification.ReplayParseData.ParseType), cancellationToken);
+                }
             }
 
             if (settings.EnablePredictions)

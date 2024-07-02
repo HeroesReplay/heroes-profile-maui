@@ -3,17 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Heroes.ReplayParser;
+using Heroes.StormReplayParser;
+using Heroes.StormReplayParser.Player;
+using Heroes.StormReplayParser.Replay;
 
 namespace HeroesProfile.Core.Models;
 
 public class SessionData
 {
-    public Player[] Players => StormReplay?.Players ?? StormSave?.Players ?? BattleLobby?.Players ?? Array.Empty<Player>();
-    public string Map => StormReplay?.Map ?? StormSave?.Map ?? BattleLobby?.Map ?? "UNKNOWN";
+    public IEnumerable<StormPlayer> Players => StormReplay?.StormPlayers ?? StormSave?.StormPlayers ?? BattleLobby?.StormPlayers ?? Array.Empty<StormPlayer>();
+    public string Map => StormReplay?.MapInfo.MapName ?? StormSave?.MapInfo.MapName ?? BattleLobby?.MapInfo.MapName ?? "UNKNOWN";
     public DateTime StartTime => (BattleLobby?.Timestamp ?? StormSave?.Timestamp ?? StormReplay?.Timestamp) ?? DateTime.UtcNow;
     public DateTime? EndTime => StormReplay?.ReplayLength != null ? StartTime.Add(StormReplay.ReplayLength) : null;
-
-    public GameMode GameMode => StormReplay?.GameMode ?? StormSave?.GameMode ?? BattleLobby?.GameMode ?? GameMode.Unknown;
+    public StormGameMode GameMode => StormReplay?.GameMode ?? StormSave?.GameMode ?? BattleLobby?.GameMode ?? StormGameMode.Unknown;
 
 
     public SessionState State
@@ -27,9 +29,9 @@ public class SessionData
         }
     }
 
-    public Replay BattleLobby => Files?.BattleLobby?.Replay;
-    public Replay StormSave => Files?.StormSave?.Replay;
-    public Replay StormReplay => Files?.StormReplay?.Replay;
+    public StormReplay? BattleLobby => Files?.BattleLobby?.Replay;
+    public StormReplay? StormSave => Files?.StormSave?.Replay;
+    public StormReplay? StormReplay => Files?.StormReplay?.Replay;
 
     public Uri PostMatchUri { get; set; }
 
@@ -56,7 +58,7 @@ public class ReplayFilesData
     public SessionFile? StormReplay { get; set; }
 }
 
-public record SessionFile(Replay Replay, ParseType ParseType, DateTime Created);
+public record SessionFile(StormReplay Replay, ParseType ParseType, DateTime Created);
 
 public class TwitchPredictionData
 {

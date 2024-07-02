@@ -32,7 +32,7 @@ public static class UpdateSessionPreMatch
             this.mediator = mediator;
         }
 
-        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+        public async Task Handle(Command request, CancellationToken cancellationToken)
         {
             int? response = await preMatchClient.GetPreMatchId(request.ReplayParseData.Replay);
 
@@ -41,8 +41,6 @@ public static class UpdateSessionPreMatch
                 sessionRepository.SessionData.PreMatchUri = new Uri(new Uri(appSettings.HeroesProfileUri, PreMatchResultsUri), new Uri($"?prematchID={response.Value}", UriKind.Relative));
                 await mediator.Publish(new SessionUpdated.Notification(sessionRepository.SessionData), cancellationToken);
             }
-
-            return Unit.Value;
         }
     }
 }

@@ -5,6 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Heroes.ReplayParser;
+using Heroes.StormReplayParser;
+
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Parsers;
 
@@ -79,14 +81,10 @@ public class SessionRepository
     {
         var options = new ParseOptions
         {
-            ShouldParseMessageEvents = false,
-            ShouldParseMouseEvents = false,
-            ShouldParseUnits = false,
-            AllowPTR = false,
-            IgnoreErrors = true,
-            ShouldParseDetailedBattleLobby = true,
-            ShouldParseStatistics = false,
-            ShouldParseEvents = true
+           AllowPTR = true,
+           ShouldParseGameEvents = false,
+           ShouldParseMessageEvents = false,
+           ShouldParseTrackerEvents = false
         };
 
         ReplayParseData parseData = await replayParser.ParseAsync(new FileInfo(sessionFile), options, cancellationToken);

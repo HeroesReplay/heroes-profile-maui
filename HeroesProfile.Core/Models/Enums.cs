@@ -14,17 +14,15 @@ public enum SessionState
 
 public enum ParseResult
 {
-    Success = DataParser.ReplayParseResult.Success,
-    ComputerPlayerFound = DataParser.ReplayParseResult.ComputerPlayerFound,
-    Incomplete = DataParser.ReplayParseResult.Incomplete,
-    PtrRegion = DataParser.ReplayParseResult.PTRRegion,
-    TryMeMode = DataParser.ReplayParseResult.TryMeMode,
-    Exception = DataParser.ReplayParseResult.Exception,
-    PreAlphaWipe = DataParser.ReplayParseResult.PreAlphaWipe,
-    FileSizeTooLarge = DataParser.ReplayParseResult.FileSizeTooLarge,
-    FileNotFound = DataParser.ReplayParseResult.FileNotFound,
-    UnexpectedResult = DataParser.ReplayParseResult.UnexpectedResult,
-    CustomGame = 1000
+    Success = Heroes.StormReplayParser.StormReplayParseResult.Success,    
+    Incomplete = Heroes.StormReplayParser.StormReplayParseResult.Incomplete,
+    PtrRegion = Heroes.StormReplayParser.StormReplayParseResult.PTRRegion,
+    TryMeMode = Heroes.StormReplayParser.StormReplayParseResult.TryMeMode,    
+    Exception = Heroes.StormReplayParser.StormReplayParseResult.Exception,
+    PreAlphaWipe = Heroes.StormReplayParser.StormReplayParseResult.PreAlphaWipe,
+    FileSizeTooLarge = Heroes.StormReplayParser.StormReplayParseResult.FileSizeTooLarge,
+    FileNotFound = Heroes.StormReplayParser.StormReplayParseResult.FileNotFound,
+    UnexpectedResult = Heroes.StormReplayParser.StormReplayParseResult.UnexpectedResult
 }
 
 public enum ParseType
