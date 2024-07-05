@@ -1,6 +1,9 @@
 ﻿using HeroesProfile.UI.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Maui;
+using Microsoft.Maui.Controls;
 
-namespace HeroesProfile;
+namespace HeroesProfile.UI;
 
 public partial class App : Application
 {
@@ -13,8 +16,7 @@ public partial class App : Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        var tray = HeroesProfile.UI.Services.ServiceProvider.GetService<ITrayService>();
-        
+        var tray = ServiceProvider.Current.Services.GetRequiredService<ITrayService>();
         tray.Initialize();
         
         var window = base.CreateWindow(activationState);

@@ -9,30 +9,17 @@ using HeroesProfile.Core.Models;
 
 namespace HeroesProfile.Core.Clients;
 
-
 public interface IUploadClient
 {
-    Task<List<string>> CheckDuplicatesAsync(List<string> Fingerprints, CancellationToken cancellationToken);
+    Task<List<string>> CheckDuplicatesAsync(List<string> fingerprints, CancellationToken cancellationToken);
     Task<UploadResponse> UploadToHeroesProfileAsync(byte[] data, string fingerprint, CancellationToken cancellationToken);
-    Task<UploadResponse> UploadToHotsApiAsync(byte[] data, string fingerprint, CancellationToken cancellationToken); // We don't care other than a HTTP 200
-    Task<UploadResponse> UploadToHotsLogsAsync(byte[] data, string fingerprint, CancellationToken cancellationToken); // We don't care other than a HTTP 200
 }
 
+public record UploadResponse(bool Success, UploadStatus Status, long? ReplayId = null);
 
-public record UploadResponse(bool Success, UploadStatus Status, int? ReplayId = null);
-
-public class UploadClient : IUploadClient
+public class UploadClient(AppSettings appSettings, HttpClient httpClient) : IUploadClient
 {
-    private readonly AppSettings appSettings;
-    private readonly HttpClient httpClient;
-
-    public UploadClient(AppSettings appSettings, HttpClient httpClient)
-    {
-        this.appSettings = appSettings;
-        this.httpClient = httpClient;
-    }
-
-    public async Task<List<string>> CheckDuplicatesAsync(List<string> Fingerprints, CancellationToken cancellationToken)
+    public async Task<List<string>> CheckDuplicatesAsync(List<string> fingerprints, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
@@ -51,26 +38,18 @@ public class UploadClient : IUploadClient
 
                     using (var document = JsonDocument.Parse(json))
                     {
-                        int replayId = document.RootElement.GetProperty("replayID").GetInt32();
+                        long replayId = document.RootElement.GetProperty("replayID").GetInt64();
                         bool success = document.RootElement.GetProperty("success").GetBoolean();
-                        UploadStatus status = Enum.Parse<UploadStatus>(document.RootElement.GetProperty("status").GetString(), ignoreCase: true);
+                        string status = document.RootElement.GetProperty("status").GetString();
 
-                        return new UploadResponse(Success: success, Status: status, ReplayId: replayId);
+                        return Enum.TryParse(status, ignoreCase: true, out UploadStatus uploadStatus)
+                            ? new UploadResponse(Success: success, Status: uploadStatus, ReplayId: replayId)
+                            : new UploadResponse(Success: success, Status: UploadStatus.UploadError, ReplayId: replayId);
                     }
                 }
             }
         }
 
         return new UploadResponse(Success: false, Status: UploadStatus.UploadError, ReplayId: null);
-    }
-
-    public async Task<UploadResponse> UploadToHotsApiAsync(byte[] data, string fingerprint, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<UploadResponse> UploadToHotsLogsAsync(byte[] data, string fingerprint, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
     }
 }

@@ -4,23 +4,14 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-
-using Heroes.ReplayParser;
 using Heroes.StormReplayParser;
 
 namespace HeroesProfile.Core.Clients;
 
 
-public class PreMatchClient
+public class PreMatchClient(HttpClient httpClient)
 {
-    private readonly HttpClient httpClient;
-
     public static readonly Uri PreMatchUri = new Uri("PreMatch", UriKind.Relative);
-
-    public PreMatchClient(HttpClient httpClient)
-    {
-        this.httpClient = httpClient;
-    }
 
     public async Task<int?> GetPreMatchId(StormReplay replay)
     {

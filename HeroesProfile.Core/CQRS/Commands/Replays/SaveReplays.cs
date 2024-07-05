@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using HeroesProfile.Core.CQRS.Notifications;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
-
 using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Commands.Replays;
@@ -17,36 +16,24 @@ public static class SaveReplays
 
     public record Response(List<StoredReplay> StoredReplays);
 
-    public class Handler : IRequestHandler<Command, Response>
+    public class Handler(ReplaysRepository replaysRepository, IMediator mediator) : IRequestHandler<Command, Response>
     {
-        private readonly ReplaysRepository replaysRepository;
-        private readonly IMediator mediator;
-
-        public Handler(ReplaysRepository replaysRepository, IMediator mediator)
-        {
-            this.replaysRepository = replaysRepository;
-            this.mediator = mediator;
-        }
-
         public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
         {
             var storedReplays = request.ParseDatas.Select(data => new StoredReplay()
             {
                 Updated = DateTime.UtcNow,
-                Created = data.ParseResult == ParseResult.Success ? data.Replay.Timestamp : data.File.CreationTime,
+                ProcessStatus = data.ProcessStatus,
+                ParseStatus = data.ParseStatus,
+                Created = data.Replay?.Timestamp ?? data.File.CreationTime,
                 Path = data.File.FullName,
-                ParseResult = data.ParseResult,
                 Fingerprint = data.Fingerprint,
-                ProcessStatus = ProcessStatus.Pending
-            });
+            })
+            .ToList();
 
-            var list = storedReplays.ToList();
-
-            await replaysRepository.InsertAsync(list, cancellationToken);
-
-            await mediator.Publish(new StoredReplaysUpdated.Notification(list), cancellationToken);
-
-            return new Response(list);
+            await replaysRepository.InsertAsync(storedReplays, cancellationToken);
+            await mediator.Publish(new StoredReplaysUpdated.Notification(storedReplays), cancellationToken);
+            return new Response(storedReplays);
         }
     }
 }

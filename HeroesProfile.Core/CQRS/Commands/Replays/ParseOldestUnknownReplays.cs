@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,7 +13,7 @@ using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Commands.Replays;
 
-public static class ProcessOldestUnknownReplay
+public static class ParseOldestUnknownReplays
 {
     public record Item(StoredReplay StoredReplay, ReplayParseData ParseData);
 
@@ -22,28 +21,15 @@ public static class ProcessOldestUnknownReplay
 
     public record Command(int Take) : IRequest<Response>;
 
-    public class Handler : IRequestHandler<Command, Response>
+    public class Handler(AppSettings appSettings, ReplaysRepository repository, IMediator mediator) : IRequestHandler<Command, Response>
     {
-        private readonly AppSettings appSettings;
-        private readonly ReplaysRepository repository;
-        private readonly IMediator mediator;
-
-        private Heroes.StormReplayParser.ParseOptions options;
-
-        public Handler(AppSettings appSettings, ReplaysRepository repository, IMediator mediator)
+        private readonly Heroes.StormReplayParser.ParseOptions options = new()
         {
-            this.appSettings = appSettings;
-            this.repository = repository;
-            this.mediator = mediator;
-
-            this.options = new Heroes.StormReplayParser.ParseOptions
-            {
-                AllowPTR = true,
-                ShouldParseGameEvents = false,
-                ShouldParseMessageEvents = false,
-                ShouldParseTrackerEvents = false                
-            };
-        }
+            AllowPTR = true,
+            ShouldParseGameEvents = false,
+            ShouldParseMessageEvents = false,
+            ShouldParseTrackerEvents = false
+        };
 
         public async Task<Response> Handle(Command command, CancellationToken cancellationToken)
         {
@@ -62,7 +48,6 @@ public static class ProcessOldestUnknownReplay
 
                 GetParsedReplay.Response[] parsedResponses = await Task.WhenAll(parseReplayTasks.ToArray());
 
-                // Save batch in one operation (1 read / 1 write)
                 var parsedReplays = parsedResponses.Select(x => x.Data).ToArray();
                 SaveReplays.Response saveResponse = await mediator.Send(new SaveReplays.Command(parsedReplays), cancellationToken);
 
@@ -70,14 +55,10 @@ public static class ProcessOldestUnknownReplay
                 {
                     var replay = saveResponse.StoredReplays.Find(stored => string.Equals(stored.Fingerprint, parsedReplay.Data.Fingerprint, StringComparison.OrdinalIgnoreCase));
 
-                    if (replay is null)
+                    if (replay != null)
                     {
-                        throw new Exception("fingerprint not found");
+                        items.Add(new Item(replay, parsedReplay.Data));
                     }
-
-                    // Map stored replays to parsed replays
-                    var item = new Item(replay, parsedReplay.Data);
-                    items.Add(item);
                 }
             }
 

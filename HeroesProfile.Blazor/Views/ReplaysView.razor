@@ -5,6 +5,7 @@
 {
     <Row>
         <Column>
+
             <DataGrid TItem=ReplaysViewModel.GridItem
                       Data=@ViewModel.StoredReplays
                       Filterable=true
@@ -16,46 +17,34 @@
                       Narrow=true
                       FilterMethod=DataGridFilterMethod.Contains>
 
-                @*<DataGridCommandColumn TItem="ReplaysViewModel.GridItem" />*@
-                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Path)" Caption="Name" />
+                <!-- Name -->
+                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Path)" Caption="Name" SortField="Created" Sortable=true />
 
-                @*
-            - We do not care about Created Column - its part of the Replay File Name
-            - We do not care about the Finger print - users wont gain any value from it
-            <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Created)" Caption="Created" />
-            <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Fingerprint)" Caption="Fingerprint" />
-            *@
+                <!-- Created -->
+                <DataGridDateColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Created)" Caption="Created" Sortable=true Displayable=true />
 
-                <DataGridColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Updated)" Caption="Updated" />
+                <!-- Updated -->
+                <DataGridDateColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Updated)" Caption="Updated" />
 
-                @*
-
-            No value because the Final Process Status will tell the user if it was successful
-            Maybe these columns can be useful in Debug/Developer mode
-
-            <DataGridColumn Filterable=false TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.ParseResult)" Caption="Parse">
-            <DisplayTemplate>
-            <Badge Color=context.ParseResultColor>@context.ParseResult</Badge>
-            </DisplayTemplate>
-            </DataGridColumn>
-
-            No value because the Final Process Status will tell the user if it was successful
-
-            <DataGridColumn Filterable=false TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.UploadStatus)" Caption="Upload">
-            <DisplayTemplate>
-            <Badge Color=context.UploadStatusColor>@context.UploadStatus</Badge>
-            </DisplayTemplate>
-            </DataGridColumn>
-            *@
-
-
-                <DataGridColumn Filterable=true TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.ProcessStatus)" Caption="Status">
+                <!-- Process Status -->
+                <DataGridNumericColumn Filterable=true TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.ProcessStatus)" Caption="Process">
                     <DisplayTemplate>
                         <Badge Color=context.ProcessStatusColor>
                             @context.ProcessStatus
                         </Badge>
                     </DisplayTemplate>
-                </DataGridColumn>
+                </DataGridNumericColumn>
+
+                <!-- Parse Status -->
+                <DataGridNumericColumn Filterable=true TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.ParseStatus)" Caption="Parsing">
+                    <DisplayTemplate>
+                        <Badge Color=context.ParseStatusColor>
+                            @context.ParseStatus
+                        </Badge>
+                    </DisplayTemplate>
+                </DataGridNumericColumn>
+
+                <!-- Launch Heroes with the .StormReplay -->
                 <DataGridColumn Filterable=false TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Exists)" Caption="Launch">
                     <DisplayTemplate>
                         @if (!context.Exists)
@@ -68,25 +57,30 @@
                         }
                     </DisplayTemplate>
                 </DataGridColumn>
+
+                <!-- Heroes Profile Web Link -->
                 <DataGridColumn Filterable=false TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.WebLink)" Caption="Web Link">
                     <DisplayTemplate>
-                        @if (context.WebLink != null && context.UploadStatus == UploadStatus.Success)
+                        @if (context.WebLink != null && context.ProcessStatus == ProcessStatus.Success)
                         {
-                            <Button Size=Size.Small Color=Color.Primary @onclick="@context.OpenInBrowser">Open in Browser</Button>
+                            <Button Size=Size.Small Color=Color.Primary @onclick="@context.OpenInBrowser">
+                                Open in Browser
+                            </Button>
                         }
                         else
                         {
-                            <Badge Color=Color.Info>No ReplayID</Badge>
+                            <Badge Color=Color.Info>
+                                No ReplayID
+                            </Badge>
                         }
                     </DisplayTemplate>
                 </DataGridColumn>
+
             </DataGrid>
         </Column>
     </Row>
 }
 
 @code {
-
-    protected async override Task OnInitializedAsync() => await ViewModel.LoadAsync(CancellationToken.None);
-
+    protected override async Task OnInitializedAsync() => await ViewModel!.LoadAsync(CancellationToken.None);
 }

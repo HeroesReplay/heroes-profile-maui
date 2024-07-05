@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HeroesProfile.UI.Platforms.Windows;
+﻿namespace HeroesProfile.UI.Platforms.Windows;
 
 /// <summary>
 /// Event flags for clicked events.

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -13,12 +14,12 @@ using Microsoft.Extensions.Logging;
 namespace HeroesProfile.Core.CQRS.Behaviours;
 
 
-public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse>
+public class LoggingBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse>
 {
-    private readonly ILogger<TRequest> logger;
+    private readonly ILogger<LoggingBehaviour<TRequest, TResponse>> logger;
     private readonly JsonSerializerOptions options;
 
-    public LoggingBehavior(ILogger<TRequest> logger, IEnumerable<JsonConverter> converters)
+    public LoggingBehaviour(ILogger<LoggingBehaviour<TRequest, TResponse>> logger, IEnumerable<JsonConverter> converters)
     {
         this.logger = logger;
 
@@ -33,7 +34,7 @@ public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
         }
     }
 
-    public async Task<TResponse?> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         var stopwatch = Stopwatch.StartNew();
         var requestName = request.GetType().DeclaringType?.Name ?? request.GetType().Name;

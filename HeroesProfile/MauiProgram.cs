@@ -1,17 +1,18 @@
-﻿using Blazorise;
-using Blazorise.Bootstrap;
-using Blazorise.Icons.FontAwesome;
-
-using HeroesProfile.Blazor.ViewModels;
+﻿using HeroesProfile.Blazor.ViewModels;
 using HeroesProfile.Core;
 using HeroesProfile.Core.CQRS.Behaviours;
 using HeroesProfile.UI.Services;
+
+using Blazorise;
+using Blazorise.Icons.FontAwesome;
 
 using MediatR;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+
 using Microsoft.Maui.LifecycleEvents;
+using Blazorise.Bootstrap5;
 
 namespace HeroesProfile.UI;
 
@@ -19,15 +20,11 @@ public class MauiProgram
 {
     public static MauiApp CreateMauiApp()
     {
-
         var builder = MauiApp
             .CreateBuilder(useDefaults: true)
             .UseMauiApp<App>()
             .ConfigureFonts(fonts => { fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular"); })
-            .ConfigureEssentials((eb) =>
-            {
-
-            })
+            .ConfigureEssentials((eb) => { })
             .ConfigureLifecycleEvents((lifecycle) =>
             {
 #if WINDOWS
@@ -43,7 +40,10 @@ public class MauiProgram
                         {
                             foreach (IWindow window in MauiWinUIApplication.Current.Application.Windows)
                             {
-                                // window.SetIcon("Platforms/Windows/Images/logo.ico");
+                                if (window is Window w)
+                                {
+                                    // Platforms.Windows.WindowExtensions.SetIcon(w, "Platforms/Windows/Images/logo.ico");
+                                }
                             }
 
                             Initializer.Start();
@@ -82,7 +82,6 @@ public class MauiProgram
                         });
                     });
 #endif
-
             });
 
 
@@ -96,15 +95,14 @@ public class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-        builder.Services.AddBlazorise(options =>
+        builder.Services
+            .AddBlazorise(options =>
             {
-                // options.ChangeTextOnKeyPress = false;                        
-                // options.DelayTextOnKeyPressInterval = 500;
-                // options.DelayTextOnKeyPress = true;
                 options.Immediate = true;
+                options.IconStyle = IconStyle.Solid;
             })
-            .AddBootstrapProviders()
-            .AddBootstrapComponents()
+            .AddBootstrap5Providers()
+            .AddBootstrap5Components()
             .AddFontAwesomeIcons();
 
         builder.Services
@@ -112,7 +110,6 @@ public class MauiProgram
             .AddSingleton<ReplaysViewModel>()
             .AddSingleton<AnalysisViewModel>()
             .AddSingleton<SettingsViewModel>();
-
 
 #if WINDOWS
         builder.Services.AddSingleton<HeroesProfile.UI.Services.ITrayService, HeroesProfile.UI.Platforms.Windows.WindowsTrayService>();
@@ -122,8 +119,10 @@ public class MauiProgram
 
         builder.Services.AddMediatR(config =>
         {
-            config.BehaviorsToRegister.Add(ServiceDescriptor.Singleton(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>)));
-            config.RegisterServicesFromAssemblyContaining<Module>();
+#if DEBUG
+            config.BehaviorsToRegister.Add(ServiceDescriptor.Singleton(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>)));
+#endif            
+            config.RegisterServicesFromAssemblyContaining<IMarker>();
             config.RegisterServicesFromAssemblyContaining<MauiProgram>();
         });
 

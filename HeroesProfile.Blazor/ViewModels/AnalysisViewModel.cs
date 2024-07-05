@@ -8,24 +8,20 @@ using HeroesProfile.Core.Models;
 namespace HeroesProfile.Blazor.ViewModels;
 
 
-public class AnalysisViewModel : ReactiveObject
+public class AnalysisViewModel(IMediator mediator, IEnumerable<long> battlenetIds) : ReactiveObject
 {
-    private readonly IMediator mediator;
-
     public bool HasBattleLobby => Session?.BattleLobby != null;
     public bool HasStormSave => Session?.StormSave != null;
     public bool HasStormReplay => Session?.StormReplay != null;
     public bool HasPreMatch => session?.PreMatchUri != null;
     public bool HasPostMatch => session?.PostMatchUri != null;
 
-
     private SessionData session;
     private UserSettings settings;
-    private IEnumerable<long> battlenetIds;
 
     public IEnumerable<long> BattlenetIds
     {
-        get => battlenetIds ?? Enumerable.Empty<long>();
+        get => battlenetIds;
         set
         {
             battlenetIds = value;
@@ -53,16 +49,13 @@ public class AnalysisViewModel : ReactiveObject
         }
     }
 
-    public bool IsTwitchTalentsEnabled => UserSettings != null && UserSettings.EnableTalentsExtension;
-    public bool IsTwitchPredictionsEnabled => UserSettings != null && UserSettings.EnablePredictions;
-
-    public bool IsPostMatchEnabled => UserSettings != null && UserSettings.EnablePostMatch;
-    public bool IsPreMatchEnabled => UserSettings != null && UserSettings.EnablePreMatch;
+    public bool IsPostMatchEnabled => UserSettings.EnablePostMatch;
+    public bool IsPreMatchEnabled => UserSettings.EnablePreMatch;
 
 
     public void OpenInBrowser(string uri)
     {
-        if (System.OperatingSystem.IsWindows())
+        if (OperatingSystem.IsWindows())
         {
             using (Process proc = new Process())
             {
@@ -71,15 +64,10 @@ public class AnalysisViewModel : ReactiveObject
                 proc.Start();
             }
         }
-        else if (System.OperatingSystem.IsMacCatalyst())
+        else if (OperatingSystem.IsMacCatalyst())
         {
-            Process.Start(uri);
+            Process.Start("open", uri);
         }
-    }
-
-    public AnalysisViewModel(IMediator mediator)
-    {
-        this.mediator = mediator;
     }
 
     public async Task LoadAsync()

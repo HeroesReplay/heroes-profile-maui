@@ -11,7 +11,7 @@ namespace HeroesProfile.Core.CQRS.Commands.Session;
 
 public static class UpdateSessionPostMatch
 {
-    public record Command(int ReplayId) : IRequest;
+    public record Command(long ReplayId) : IRequest;
 
     public class Handler : IRequestHandler<Command>
     {

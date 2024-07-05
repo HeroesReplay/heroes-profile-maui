@@ -3,8 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Heroes.ReplayParser;
 using Heroes.StormReplayParser;
 
 using HeroesProfile.Core.Models;
@@ -93,19 +91,19 @@ public class SessionRepository
         {
             case ParseType.BattleLobby:
                 {
-                    SessionData.Files.BattleLobby = new SessionFile(parseData.Replay, parseData.ParseType, DateTime.Now);
+                    SessionData.Files.BattleLobby = new SessionFile(parseData.Replay!, parseData.ParseType.Value, DateTime.Now);
                     break;
                 }
             case ParseType.StormReplay:
                 {
-                    SessionData.Files.StormReplay = new SessionFile(parseData.Replay, parseData.ParseType, DateTime.Now);
+                    SessionData.Files.StormReplay = new SessionFile(parseData.Replay!, parseData.ParseType.Value, DateTime.Now);
                     break;
                 }
-            case ParseType.StormSave:
-                {
-                    SessionData.Files.StormSave = new SessionFile(parseData.Replay, parseData.ParseType, DateTime.Now);
-                    break;
-                }
+            // case ParseType.StormSave:
+            //     {
+            //         SessionData.Files.StormSave = new SessionFile(parseData.Replay, parseData.ParseType, DateTime.Now);
+            //         break;
+            //     }
         }
     }
 }

@@ -1,19 +1,12 @@
 ﻿using Blazorise.Localization;
 
 using ReactiveUI;
-
-using System;
 using System.Diagnostics;
 
 namespace HeroesProfile.Blazor.ViewModels;
 
-public class MainLayoutViewModel : ReactiveObject
+public class MainLayoutViewModel(ITextLocalizerService LocalizationService) : ReactiveObject
 {
-    public MainLayoutViewModel(ITextLocalizerService LocalizationService)
-    {
-        this.LocalizationService = LocalizationService;
-    }
-
     public void OpenInBrowser(string uri)
     {
         if (OperatingSystem.IsWindows())
@@ -27,9 +20,9 @@ public class MainLayoutViewModel : ReactiveObject
         }
         else if (OperatingSystem.IsMacCatalyst())
         {
-            Process.Start(uri);
+            Process.Start("open", uri);
         }
     }
 
-    protected ITextLocalizerService LocalizationService { get; set; }
+    protected ITextLocalizerService LocalizationService { get; set; } = LocalizationService;
 }

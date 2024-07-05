@@ -15,15 +15,8 @@ public static class GetSession
 
     public record Query : IRequest<Response>;
 
-    public class Handler : IRequestHandler<Query, Response>
+    public class Handler(SessionRepository sessionManager) : IRequestHandler<Query, Response>
     {
-        private readonly SessionRepository sessionManager;
-
-        public Handler(SessionRepository sessionManager)
-        {
-            this.sessionManager = sessionManager;
-        }
-
         public Task<Response> Handle(Query request, CancellationToken cancellationToken)
         {
             return Task.FromResult(new Response(sessionManager.SessionData));

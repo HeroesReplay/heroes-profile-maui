@@ -14,16 +14,8 @@ public static class GetKnownBattleNetIds
 
     public record Response(IEnumerable<long> BattleNetIds);
 
-
-    public class Handler : IRequestHandler<Query, Response>
+    public class Handler(AppSettings appSettings) : IRequestHandler<Query, Response>
     {
-        private readonly AppSettings appSettings;
-
-        public Handler(AppSettings appSettings)
-        {
-            this.appSettings = appSettings;
-        }
-
         public Task<Response> Handle(Query request, CancellationToken cancellationToken)
         {
             IEnumerable<long> battleNetIds = new DirectoryInfo(appSettings.GameDocumentsDirectory)

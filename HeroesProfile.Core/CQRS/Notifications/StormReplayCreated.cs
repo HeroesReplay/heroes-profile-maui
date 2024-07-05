@@ -1,8 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-using HeroesProfile.Core.CQRS.Commands.Discord;
-using HeroesProfile.Core.CQRS.Commands.Twitch;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
 
@@ -28,24 +26,6 @@ public static class StormReplayCreated
         public async Task Handle(Notification notification, CancellationToken cancellationToken)
         {
             UserSettings settings = await userSettingsRepository.LoadAsync(cancellationToken);
-
-            if (settings.EnableTalentsExtension)
-            {
-                if (notification.ReplayParseData.ParseResult == ParseResult.Success)
-                {
-                    await mediator.Send(new UpdateTalents.Command(notification.ReplayParseData.Replay, notification.ReplayParseData.ParseType), cancellationToken);
-                }
-            }
-
-            if (settings.EnablePredictions)
-            {
-                await mediator.Send(new ClosePrediction.Command(), cancellationToken);
-            }
-
-            if (settings.EnableDiscordEnhancement)
-            {
-                await mediator.Send(new ClearActivity.Command(), cancellationToken);
-            }
         }
     }
 }

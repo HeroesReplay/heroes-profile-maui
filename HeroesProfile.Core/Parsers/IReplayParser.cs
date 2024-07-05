@@ -1,8 +1,6 @@
 ﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Heroes.ReplayParser;
 using HeroesProfile.Core.Models;
 
 namespace HeroesProfile.Core.Parsers;

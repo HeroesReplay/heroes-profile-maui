@@ -21,7 +21,6 @@
 //
 // THIS COPYRIGHT NOTICE MAY NOT BE REMOVED FROM THIS FILE
 
-using System;
 using System.ComponentModel;
 using System.Diagnostics;
 

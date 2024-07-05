@@ -22,10 +22,9 @@ public class UserSettingsRepository
 
     public async Task SaveAsync(UserSettings settings, CancellationToken token)
     {
-        await semaphore.WaitAsync(token);
-
         try
         {
+            await semaphore.WaitAsync(token);
             await File.WriteAllTextAsync(appSettings.UserSettingsPath, JsonSerializer.Serialize(settings, options), token);
         }
         catch(Exception e)

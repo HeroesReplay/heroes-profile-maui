@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
+using Heroes.StormReplayParser;
 using MediatR;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
@@ -10,31 +11,28 @@ namespace HeroesProfile.Core.CQRS.Queries;
 
 public static class GetReplays
 {
-    public record Filter(ParseResult ParseResult, ProcessStatus ProcessStatus);
+    public record Filter(ProcessStatus ProcessStatus, StormReplayParseStatus ParseStatus);
 
-    public record Query(List<Filter> filters) : IRequest<Response>;
+    public record Query(List<Filter>? Filters = null) : IRequest<Response>;
 
-    public record Response(IEnumerable<StoredReplay> Replays);
+    public record Response(List<StoredReplay> Replays);
 
-    public class Handler : IRequestHandler<Query, Response>
+    public class Handler(ReplaysRepository repository) : IRequestHandler<Query, Response>
     {
-        private readonly ReplaysRepository repository;
-
-        public Handler(ReplaysRepository repository)
-        {
-            this.repository = repository;
-        }
-
         public async Task<Response> Handle(Query request, CancellationToken cancellationToken)
         {
             List<StoredReplay> replays = await repository.LoadAsync(cancellationToken);
 
-            if (request.filters == null || request.filters.Count == 0)
-            {
-                return new(replays);
-            }
+            if (request.Filters == null || request.Filters.Count == 0) return new Response(replays);
 
-            return new(replays.Where(replay => request.filters.Any(filter => replay.ParseResult == filter.ParseResult && replay.ProcessStatus == filter.ProcessStatus)).ToList());
+            var filtered = replays.Where(replay =>
+            {
+                return request.Filters.Any(filter =>
+                    replay.ProcessStatus == filter.ProcessStatus &&
+                    replay.ParseStatus == filter.ParseStatus);
+            });
+
+            return new Response(filtered.ToList());
         }
     }
 }

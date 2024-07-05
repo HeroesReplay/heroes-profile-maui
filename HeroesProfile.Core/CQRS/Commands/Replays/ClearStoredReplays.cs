@@ -11,15 +11,8 @@ public static class ClearStoredReplays
 {
     public record Command : IRequest;
 
-    public class Handler : IRequestHandler<Command>
+    public class Handler(ReplaysRepository repository) : IRequestHandler<Command>
     {
-        private readonly ReplaysRepository repository;
-
-        public Handler(ReplaysRepository repository)
-        {
-            this.repository = repository;
-        }
-
         public async Task Handle(Command request, CancellationToken cancellationToken)
         {
             await repository.ClearAsync(cancellationToken);

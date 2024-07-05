@@ -12,21 +12,10 @@ public static class InitializeApp
 {
     public record Command : IRequest;
 
-    public class Handler : IRequestHandler<Command>
+    public class Handler(AppSettings appSettings, IMediator mediator) : IRequestHandler<Command>
     {
-        private readonly AppSettings appSettings;
-        private readonly IMediator mediator;
-
-        public Handler(AppSettings appSettings, IMediator mediator)
-        {
-            this.appSettings = appSettings;
-            this.mediator = mediator;
-        }
-
         public async Task Handle(Command request, CancellationToken cancellationToken)
         {
-            await mediator.Send(new InitStoredReplays.Command(), cancellationToken);
-
             if (appSettings.ClearStoredReplaysOnStart)
             {
                 await mediator.Send(new ClearStoredReplays.Command(), cancellationToken);
@@ -38,6 +27,7 @@ public static class InitializeApp
             }
 
             await mediator.Send(new ClearSession.Command(), cancellationToken);
+            await mediator.Send(new InitStoredReplays.Command(), cancellationToken);
         }
     }
 }

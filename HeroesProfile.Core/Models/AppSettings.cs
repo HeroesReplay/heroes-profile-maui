@@ -3,13 +3,8 @@ using System.IO;
 
 namespace HeroesProfile.Core.Models;
 
-/*
- * Change the settings in appsettings.Development.json or appsettings.Production.json
- * These settings should be constants for the given environment.
- */
 public class AppSettings
 {
-    public string DiscordApplicationId { get; set; }
     public bool Debug { get; set; }
     public Uri HeroesProfileUri { get; set; }
     public Uri HeroesProfileApiUri { get; set; }
@@ -23,15 +18,13 @@ public class AppSettings
     public string UserSettingsPath => Path.Combine(ApplicationDataDirectory, "usersettings.json");
     public string StoredReplaysPath => Path.Combine(ApplicationDataDirectory, "replays.json");
     public string DateTimeFormat { get; set; }
-    public int PredictionWindowSeconds { get; set; }
+    
     public bool EnableRecord { get; set; }
     public bool EnableReplayProcessing { get; set; }
     public bool EnableFileSimulator { get; set; }
     public bool EnableFakeHttp { get; set; }
     public bool DefaultUserSettingsOnStart { get; set; }
     public bool ClearStoredReplaysOnStart { get; set; }
-    public bool EnableUploadToHotsApi { get; set; }
-    public bool EnableUploadToHeroesProfile { get; set; }
 
     public AppSettings()
     {

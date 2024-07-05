@@ -1,5 +1,4 @@
-﻿using Heroes.ReplayParser;
-using Heroes.StormReplayParser;
+﻿using Heroes.StormReplayParser;
 
 using System;
 using System.Text.Json;

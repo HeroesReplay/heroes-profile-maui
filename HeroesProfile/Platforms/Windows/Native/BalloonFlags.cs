@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace HeroesProfile.UI.Platforms.Windows;
+﻿namespace HeroesProfile.UI.Platforms.Windows;
 
 /// <summary>
 /// Flags that define the icon that is shown on a balloon

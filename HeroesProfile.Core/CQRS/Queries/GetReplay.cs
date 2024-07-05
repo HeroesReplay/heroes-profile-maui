@@ -13,15 +13,8 @@ public static class GetReplay
 
     public record Response(StoredReplay StoredReplay);
 
-    public class Handler : IRequestHandler<Query, Response>
+    public class Handler(ReplaysRepository repository) : IRequestHandler<Query, Response>
     {
-        private readonly ReplaysRepository repository;
-
-        public Handler(ReplaysRepository repository)
-        {
-            this.repository = repository;
-        }
-
         public async Task<Response> Handle(Query query, CancellationToken cancellationToken)
         {
             var replay = await repository.FindAsync(query.Path, cancellationToken);

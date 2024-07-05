@@ -4,22 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Heroes.ReplayParser;
+using Heroes.StormReplayParser;
 using HeroesProfile.Core.Models;
 
 namespace HeroesProfile.Core.Parsers;
 
-public class AggregateReplayParser
+public class AggregateReplayParser(IEnumerable<IReplayParser> parsers)
 {
-    private readonly IEnumerable<IReplayParser> parsers;
-
-    public AggregateReplayParser(IEnumerable<IReplayParser> parsers)
-    {
-        this.parsers = parsers;
-    }
-
-    public async Task<ReplayParseData> ParseAsync(FileInfo file, Heroes.StormReplayParser.ParseOptions? options = null, CancellationToken cancellationToken = default)
+    public async Task<ReplayParseData> ParseAsync(FileInfo file, ParseOptions? options = null, CancellationToken cancellationToken = default)
     {
         IReplayParser parser = parsers.Single(p => p.FileExtension.Equals(file.Extension, StringComparison.InvariantCultureIgnoreCase));
 

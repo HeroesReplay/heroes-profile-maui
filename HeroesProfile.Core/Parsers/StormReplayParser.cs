@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Heroes.ReplayParser;
 using Heroes.StormReplayParser;
 using Heroes.StormReplayParser.Replay;
 
@@ -20,7 +19,26 @@ public class StormReplayParser : IReplayParser
 
     public string FileExtension => ".StormReplay";
 
-    private string? GetFingerprint(StormReplay replay)
+    private readonly StormGameMode[] SupportedModes =
+    {
+        StormGameMode.QuickMatch,
+        StormGameMode.UnrankedDraft,
+        StormGameMode.StormLeague,
+    };
+
+    private readonly StormReplayParseStatus[] NotSupportedStatus =
+    [
+        StormReplayParseStatus.FileNotFound,
+        StormReplayParseStatus.Unknonwn,
+        StormReplayParseStatus.UnexpectedResult,
+        StormReplayParseStatus.TryMeMode,
+        StormReplayParseStatus.PreAlphaWipe,
+        StormReplayParseStatus.PTRRegion,
+        StormReplayParseStatus.Incomplete,
+        StormReplayParseStatus.FileSizeTooLarge
+    ];
+
+    private string? GetFingerprint(StormReplay? replay)
     {
         if (replay == null) return null;
 
@@ -42,78 +60,61 @@ public class StormReplayParser : IReplayParser
     {
         try
         {
-            // byte[] bytes = await File.ReadAllBytesAsync(file.FullName, token);
             var result = StormReplay.Parse(file.FullName, options ?? ParseOptions.MinimalParsing);
 
-            var status = result.Status;
-            var replay = result.Replay;
-
-            if (status == StormReplayParseStatus.Success)
+            if (result.Exception != null)
             {
-                var supported = new StormGameMode[] { StormGameMode.ARAM, StormGameMode.QuickMatch, StormGameMode.StormLeague, StormGameMode.UnrankedDraft };
-
-                if (supported.Contains(result.Replay.GameMode))
-                {
-                    return new ReplayParseData()
-                    {
-                        //Bytes = bytes,
-                        File = file,
-                        Replay = replay,
-                        ParseResult = ParseResult.Success,
-                        Fingerprint = GetFingerprint(replay),
-                        ParseType = ParseType
-                    };
-                }
-
                 return new ReplayParseData()
                 {
-                    //Bytes = bytes,
                     File = file,
-                    Replay = replay,
-                    ParseResult = ParseResult.UnexpectedResult,
-                    Fingerprint = null,
+                    Replay = result.Replay,
+                    ProcessStatus = ProcessStatus.NotSupported,
+                    ParseStatus = result.Status,
                     ParseType = ParseType
                 };
             }
 
-            //string replayParseResult = Enum.GetName(typeof(DataParser.ReplayParseResult), status);
-
-            if (result != null)
-            {
-                //var parseResult = Enum.Parse<ParseResult>(result.Status, ignoreCase: true);
-
-                return new ReplayParseData()
-                {
-                    //Bytes = bytes,
-                    File = file,
-                    Replay = replay,
-                    ParseResult = (ParseResult)result.Status,
-                    Fingerprint = null,
-                    ParseType = ParseType
-                };
-            }
-            else
+            if (NotSupportedStatus.Contains(result.Status))
             {
                 return new ReplayParseData()
                 {
-                    //Bytes = bytes,
                     File = file,
-                    //Replay = new Replay(),
-                    ParseResult = ParseResult.UnexpectedResult,
-                    Fingerprint = null,
+                    Replay = result.Replay,
+                    ProcessStatus = ProcessStatus.NotSupported,
+                    ParseStatus = result.Status,
                     ParseType = ParseType
                 };
             }
+
+            if (result.Status == StormReplayParseStatus.Success && SupportedModes.Contains(result.Replay.GameMode))
+            {
+                return new ReplayParseData()
+                {
+                    File = file,
+                    Replay = result.Replay,
+                    ProcessStatus = ProcessStatus.Pending,
+                    ParseStatus = result.Status,
+                    Fingerprint = GetFingerprint(result.Replay),
+                    ParseType = ParseType
+                };
+            }
+
+            return new ReplayParseData()
+            {
+                File = file,
+                Replay = result.Replay,
+                ProcessStatus = ProcessStatus.NotSupported,
+                ParseStatus = result.Status,
+                ParseType = ParseType
+            };
         }
         catch (Exception)
         {
             return new ReplayParseData()
             {
-                //Bytes = null,
                 File = file,
-                //Replay = new Replay(),
-                ParseResult = ParseResult.Exception,
-                Fingerprint = null,
+                ProcessStatus = ProcessStatus.Error,
+                ParseStatus = StormReplayParseStatus.UnexpectedResult,
                 ParseType = ParseType
             };
         }

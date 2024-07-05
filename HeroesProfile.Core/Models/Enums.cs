@@ -1,8 +1,4 @@
-﻿using System;
-
-using Heroes.ReplayParser;
-
-namespace HeroesProfile.Core.Models;
+﻿namespace HeroesProfile.Core.Models;
 
 public enum SessionState
 {
@@ -10,19 +6,6 @@ public enum SessionState
     BattleLobby,
     StormSave,
     StormReplay
-}
-
-public enum ParseResult
-{
-    Success = Heroes.StormReplayParser.StormReplayParseResult.Success,    
-    Incomplete = Heroes.StormReplayParser.StormReplayParseResult.Incomplete,
-    PtrRegion = Heroes.StormReplayParser.StormReplayParseResult.PTRRegion,
-    TryMeMode = Heroes.StormReplayParser.StormReplayParseResult.TryMeMode,    
-    Exception = Heroes.StormReplayParser.StormReplayParseResult.Exception,
-    PreAlphaWipe = Heroes.StormReplayParser.StormReplayParseResult.PreAlphaWipe,
-    FileSizeTooLarge = Heroes.StormReplayParser.StormReplayParseResult.FileSizeTooLarge,
-    FileNotFound = Heroes.StormReplayParser.StormReplayParseResult.FileNotFound,
-    UnexpectedResult = Heroes.StormReplayParser.StormReplayParseResult.UnexpectedResult
 }
 
 public enum ParseType
@@ -43,8 +26,9 @@ public enum ProcessStatus
 
 public enum UploadStatus
 {
-    Pending,
+    None,
     Success,
+    InProgress,
     UploadError,
     Duplicate,
     AiDetected,

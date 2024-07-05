@@ -3,12 +3,11 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
+using Heroes.StormReplayParser;
 using HeroesProfile.Core.Clients;
 using HeroesProfile.Core.CQRS.Queries;
 using HeroesProfile.Core.Models;
 using HeroesProfile.Core.Repositories;
-
 using MediatR;
 
 namespace HeroesProfile.Core.CQRS.Commands.Replays;
@@ -17,51 +16,40 @@ public static class UploadAndUpdateReplay
 {
     public record Command(StoredReplay StoredReplay) : IRequest<Response>;
 
-    public record Response(bool Success, int? ReplayId, UploadStatus UploadStatus);
+    public record Response(bool Success, long? ReplayId, ProcessStatus Status, StormReplayParseStatus ParseStatus);
 
-    public class Handler : IRequestHandler<Command, Response>
+    public class Handler(
+        IUploadClient uploadUploadClient,
+        IMediator mediator,
+        SessionRepository sessionRepository,
+        AppSettings appSettings,
+        UserSettingsRepository userSettingsRepository)
+        : IRequestHandler<Command, Response>
     {
-        private readonly IUploadClient uploadUploadClient;
-        private readonly IMediator mediator;
-        private readonly SessionRepository sessionRepository;
-        private readonly AppSettings appSettings;
-        private readonly UserSettingsRepository userSettingsRepository;
-
-        public Handler(IUploadClient uploadUploadClient, IMediator mediator, SessionRepository sessionRepository, AppSettings appSettings, UserSettingsRepository userSettingsRepository)
-        {
-            this.uploadUploadClient = uploadUploadClient;
-            this.mediator = mediator;
-            this.sessionRepository = sessionRepository;
-            this.appSettings = appSettings;
-            this.userSettingsRepository = userSettingsRepository;
-        }
+        private static readonly UploadStatus[] Unsupported =
+        [
+            UploadStatus.AiDetected,
+            UploadStatus.PtrRegion,
+            UploadStatus.TooOld,
+            UploadStatus.CustomGame,
+            UploadStatus.Incomplete
+        ];
 
         public async Task<Response> Handle(Command command, CancellationToken cancellationToken)
         {
-            // Load the Replay for Upload (bytes to send)
-            GetParsedReplay.Response response = await mediator.Send(new GetParsedReplay.Query(new FileInfo(command.StoredReplay.Path), options: null), cancellationToken);
+            var query = new GetParsedReplay.Query(new FileInfo(command.StoredReplay.Path), Options: ParseOptions.MinimalParsing);
+            GetParsedReplay.Response response = await mediator.Send(query, cancellationToken);
 
-            if (response.Data.Replay == null || string.IsNullOrEmpty(response.Data.Fingerprint))
-                return new(false, null, UploadStatus.UploadError);
-
-            var bytes = File.ReadAllBytes(response.Data.File.FullName);
-
-            // Upload the Replay
-            if (appSettings.EnableUploadToHotsApi)
+            if (response.Data.ParseStatus != StormReplayParseStatus.Success)
             {
-                // await uploadUploadClient.UploadToHotsApiAsync(response.Data.Bytes, response.Data.Fingerprint, cancellationToken);
+                return new(Success: false, ReplayId: null, ProcessStatus.Error, ParseStatus: response.Data.ParseStatus);
             }
 
-            if (appSettings.EnableUploadToHeroesProfile)
-            {               
-                // await uploadUploadClient.UploadToHeroesProfileAsync(bytes, response.Data.Fingerprint, cancellationToken);
-            }
+            byte[] bytes = await File.ReadAllBytesAsync(response.Data.File.FullName, cancellationToken);
 
-            UploadResponse uploadResponse = await uploadUploadClient.UploadToHeroesProfileAsync(bytes, response.Data.Fingerprint, cancellationToken);
-
-            UploadStatus uploadStatus = uploadResponse.Status;
+            UploadResponse uploadResponse = await uploadUploadClient.UploadToHeroesProfileAsync(bytes, response.Data.Fingerprint!, cancellationToken);
             StoredReplay storedReplay = command.StoredReplay;
-            int? replayId = uploadResponse.ReplayId;
+            long? replayId = uploadResponse.ReplayId;
 
             if (uploadResponse.Success)
             {
@@ -75,19 +63,17 @@ public static class UploadAndUpdateReplay
             {
                 storedReplay.ProcessStatus = ProcessStatus.Error;
             }
-            else if (new[] { UploadStatus.AiDetected, UploadStatus.PtrRegion, UploadStatus.TooOld, UploadStatus.CustomGame, UploadStatus.Incomplete }.Contains(uploadResponse.Status))
+            else if (Unsupported.Contains(uploadResponse.Status))
             {
                 storedReplay.ProcessStatus = ProcessStatus.NotSupported;
             }
 
             storedReplay.Updated = DateTime.UtcNow;
-            storedReplay.UploadStatus = uploadStatus;
             storedReplay.ReplayId = replayId;
 
-            await mediator.Send(new UpdateReplays.Command(storedReplay));
+            await mediator.Send(new UpdateReplays.Command([storedReplay]), cancellationToken);
 
-
-            return new(uploadResponse.Success, replayId, uploadStatus);
+            return new(uploadResponse.Success, replayId, storedReplay.ProcessStatus, ParseStatus: response.Data.ParseStatus);
         }
     }
 }

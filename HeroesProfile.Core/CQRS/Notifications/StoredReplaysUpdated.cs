@@ -7,5 +7,5 @@ namespace HeroesProfile.Core.CQRS.Notifications;
 
 public static class StoredReplaysUpdated
 {
-    public record Notification(IEnumerable<StoredReplay> storedReplays) : INotification;
+    public record Notification(List<StoredReplay> StoredReplays) : INotification;
 }

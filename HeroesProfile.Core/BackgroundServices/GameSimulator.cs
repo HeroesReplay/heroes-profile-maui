@@ -9,15 +9,8 @@ using Microsoft.Extensions.Hosting;
 
 namespace HeroesProfile.Core.BackgroundServices;
 
-public class GameSimulator : BackgroundService
+public class GameSimulator(AppSettings appSettings) : BackgroundService
 {
-    private readonly AppSettings appSettings;
-
-    public GameSimulator(AppSettings appSettings)
-    {
-        this.appSettings = appSettings;
-    }
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (!appSettings.EnableFileSimulator) return;
