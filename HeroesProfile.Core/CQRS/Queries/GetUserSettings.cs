@@ -14,15 +14,8 @@ public static class GetUserSettings
 
     public record Response(UserSettings UserSettings);
 
-    public class Handler : IRequestHandler<Query, Response>
+    public class Handler(UserSettingsRepository repository) : IRequestHandler<Query, Response>
     {
-        private readonly UserSettingsRepository repository;
-
-        public Handler(UserSettingsRepository repository)
-        {
-            this.repository = repository;
-        }
-
         public async Task<Response> Handle(Query request, CancellationToken cancellationToken)
         {
             return new(await repository.LoadAsync(cancellationToken));

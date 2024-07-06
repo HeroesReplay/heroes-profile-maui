@@ -1,10 +1,9 @@
-using System;
-using HeroesProfile.UI.Services;
+using HeroesProfile.UI.Services.Notification;
 using UserNotifications;
 
-namespace HeroesProfile.UI.Platforms.Services;
+namespace HeroesProfile.UI.Services;
 
-public class NotificationService : INotificationService
+public class PlatformNotificationService : IPlatformNotificationService
 {
     public void ShowNotification(string title, string subtitle, string body)
     {

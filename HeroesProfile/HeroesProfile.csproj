@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
-    <PropertyGroup>        
+    <PropertyGroup>
+
         <TargetFrameworks>net8.0-maccatalyst</TargetFrameworks>
         <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
-        <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers>
         <OutputType>Exe</OutputType>
         <RootNamespace>HeroesProfile.UI</RootNamespace>
         <UseMaui>true</UseMaui>
@@ -11,36 +11,32 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <EnableDefaultCssItems>false</EnableDefaultCssItems>
         <Nullable>enable</Nullable>
+
         <ApplicationTitle>Heroes Profile Uploader</ApplicationTitle>
         <ApplicationId>com.heroesprofile.uploader</ApplicationId>
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
         <ApplicationVersion>1</ApplicationVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.19041.0</SupportedOSPlatformVersion>
-        <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.19041.0</TargetPlatformMinVersion>
-        <IsPackable>true</IsPackable>
-    </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <MtouchLink>None</MtouchLink>
-      <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+        <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+
     </PropertyGroup>
 
     <ItemGroup>
-        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
         <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
         <MauiImage Include="Resources\Images\*" />
         <MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
         <MauiFont Include="Resources\Fonts\*" />
         <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
-        <Content Remove="Resources\Raw\appsettings.json" />
-        <MauiAsset Include="Resources\Raw\appsettings.json">
-          <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        <MauiAsset Include="Platforms\Windows\Images\logo.ico">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </MauiAsset>
-        <Content Remove="Resources\Raw\appsettings.Development.json" />
-        <MauiAsset Include="Resources\Raw\appsettings.Development.json">
-          <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-        </MauiAsset>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="Platforms\Windows\Images\logo.ico" />
     </ItemGroup>
 
     <ItemGroup>
@@ -52,31 +48,29 @@
 
     <!-- Mac Catalyst -->
     <ItemGroup Condition="$(TargetFramework.StartsWith('net8.0-maccatalyst')) != true">
+        <Compile Remove="**\*.MacCatalyst.cs" />
+        <None Include="**\*.MacCatalyst.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
         <Compile Remove="**\MacCatalyst\**\*.cs" />
         <None Include="**\MacCatalyst\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
-        <Compile Update="Platforms\MacCatalyst\Services\NotificationService.cs">
-          <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
-        </Compile>
-        <Compile Update="Platforms\MacCatalyst\Services\TrayService.cs">
-          <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
-        </Compile>
-        <Compile Update="Platforms\MacCatalyst\Native\TrayServiceNative.cs">
-          <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
-        </Compile>
     </ItemGroup>
 
-	<ItemGroup Condition="$(TargetFramework.Contains('-windows'))">
-		<PackageReference Include="CommunityToolkit.WinUI" Version="7.1.2" />
-		<PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.3" />
-		<PackageReference Include="PInvoke.User32" Version="0.7.124" />
-	</ItemGroup>
+    <!-- Windows -->
+    <ItemGroup Condition="$(TargetFramework.Contains('-windows')) != true">
+        <Compile Remove="**\*.Windows.cs" />
+        <None Include="**\*.Windows.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+        <Compile Remove="**\Windows\**\*.cs" />
+        <None Include="**\Windows\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\HeroesProfile.Blazor\HeroesProfile.Blazor.csproj" />
+    <ItemGroup Condition="$(TargetFramework.Contains('-windows')) == true">
+        <PackageReference Include="CommunityToolkit.WinUI" Version="7.1.2" />
+        <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.3" />
+        <PackageReference Include="PInvoke.User32" Version="0.7.124" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Platforms\MacCatalyst\Images\" />
+        <ProjectReference Include="..\HeroesProfile.Blazor\HeroesProfile.Blazor.csproj" />
     </ItemGroup>
-   
+
+
 </Project>

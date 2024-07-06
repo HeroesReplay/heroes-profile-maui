@@ -1,10 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using HeroesProfile.Core.BackgroundServices;
+﻿using HeroesProfile.Core.BackgroundServices;
 using HeroesProfile.Core.CQRS.Commands.Initialization;
 using MediatR;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace HeroesProfile.UI.Services;
 
@@ -15,9 +11,9 @@ public static class Initializer
 
     public static void Start()
     {
-        OnLaunchReplayProcessor processor = ServiceProvider.Current.Services.GetRequiredService<OnLaunchReplayProcessor>();
-        FileWatchers watchers = ServiceProvider.Current.Services.GetRequiredService<FileWatchers>();
-        IMediator mediator = ServiceProvider.Current.Services.GetRequiredService<IMediator>();
+        OnLaunchReplayProcessor processor = IPlatformApplication.Current!.Services.GetRequiredService<OnLaunchReplayProcessor>();
+        FileWatchers watchers = IPlatformApplication.Current.Services.GetRequiredService<FileWatchers>();
+        IMediator mediator = IPlatformApplication.Current.Services.GetRequiredService<IMediator>();
         
         mediator.Send(new InitializeApp.Command(), TokenSource.Token);
 

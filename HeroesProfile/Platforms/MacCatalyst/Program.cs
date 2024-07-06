@@ -1,6 +1,5 @@
 ﻿using UIKit;
-
-namespace HeroesProfile.UI;
+namespace HeroesProfile.UI.Platforms.MacCatalyst;
 
 public static class Program
 {

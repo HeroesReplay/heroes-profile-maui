@@ -8,7 +8,7 @@ using HeroesProfile.Core.Models;
 namespace HeroesProfile.Blazor.ViewModels;
 
 
-public class AnalysisViewModel(IMediator mediator, IEnumerable<long> battlenetIds) : ReactiveObject
+public class AnalysisViewModel(IMediator mediator) : ReactiveObject
 {
     public bool HasBattleLobby => Session?.BattleLobby != null;
     public bool HasStormSave => Session?.StormSave != null;
@@ -16,8 +16,9 @@ public class AnalysisViewModel(IMediator mediator, IEnumerable<long> battlenetId
     public bool HasPreMatch => session?.PreMatchUri != null;
     public bool HasPostMatch => session?.PostMatchUri != null;
 
-    private SessionData session;
-    private UserSettings settings;
+    private SessionData? session;
+    private UserSettings? settings;
+    private IEnumerable<long> battlenetIds = [];
 
     public IEnumerable<long> BattlenetIds
     {
@@ -29,7 +30,7 @@ public class AnalysisViewModel(IMediator mediator, IEnumerable<long> battlenetId
         }
     }
 
-    public SessionData Session
+    public SessionData? Session
     {
         get => session;
         set
@@ -39,7 +40,7 @@ public class AnalysisViewModel(IMediator mediator, IEnumerable<long> battlenetId
         }
     }
 
-    public UserSettings UserSettings
+    public UserSettings? UserSettings
     {
         get => settings;
         set
@@ -49,20 +50,15 @@ public class AnalysisViewModel(IMediator mediator, IEnumerable<long> battlenetId
         }
     }
 
-    public bool IsPostMatchEnabled => UserSettings.EnablePostMatch;
-    public bool IsPreMatchEnabled => UserSettings.EnablePreMatch;
+    //public bool IsPostMatchEnabled => UserSettings.EnablePostMatch;
+    //public bool IsPreMatchEnabled => UserSettings.EnablePreMatch;
 
 
     public void OpenInBrowser(string uri)
     {
         if (OperatingSystem.IsWindows())
         {
-            using (Process proc = new Process())
-            {
-                proc.StartInfo.UseShellExecute = true;
-                proc.StartInfo.FileName = uri;
-                proc.Start();
-            }
+            Process.Start(new ProcessStartInfo(uri) { UseShellExecute = true });
         }
         else if (OperatingSystem.IsMacCatalyst())
         {
@@ -72,12 +68,13 @@ public class AnalysisViewModel(IMediator mediator, IEnumerable<long> battlenetId
 
     public async Task LoadAsync()
     {
-        GetSession.Response sessionResponse = await mediator.Send(new GetSession.Query());
         GetUserSettings.Response settingsResponse = await mediator.Send(new GetUserSettings.Query());
-        GetKnownBattleNetIds.Response battleNetResponse = await mediator.Send(new GetKnownBattleNetIds.Query());
-
-        Session = sessionResponse.Session;
         UserSettings = settingsResponse.UserSettings;
+
+        GetSession.Response sessionResponse = await mediator.Send(new GetSession.Query());
+        Session = sessionResponse.Session;
+
+        GetKnownBattleNetIds.Response battleNetResponse = await mediator.Send(new GetKnownBattleNetIds.Query());
         BattlenetIds = battleNetResponse.BattleNetIds;
     }
 }

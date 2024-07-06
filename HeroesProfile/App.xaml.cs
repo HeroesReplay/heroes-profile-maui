@@ -1,7 +1,4 @@
-﻿using HeroesProfile.UI.Services;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Maui;
-using Microsoft.Maui.Controls;
+﻿using HeroesProfile.UI.Services.Tray;
 
 namespace HeroesProfile.UI;
 
@@ -10,17 +7,38 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
-
         MainPage = new MainPage();
     }
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        var tray = HeroesProfile.UI.Services.ServiceProvider.Current.Services.GetRequiredService<ITrayService>();
+        return base.CreateWindow(activationState);
+    }
+
+    protected override void OnStart()
+    {
+        IPlatformTrayService tray = IPlatformApplication.Current!.Services.GetRequiredService<IPlatformTrayService>();
         tray.Initialize();
-        
-        var window = base.CreateWindow(activationState);
-        window.Title = "Heroes Profile - Alpha";
-        return window;
+
+        base.OnStart();
+    }
+
+    protected override void OnSleep()
+    {
+        base.OnSleep();
+    }
+    protected override void OnResume()
+    {
+        base.OnResume();
+    }
+
+    public override void CloseWindow(Window window)
+    {
+        base.CloseWindow(window);
+    }
+
+    protected override void CleanUp()
+    {
+        base.CleanUp();
     }
 }

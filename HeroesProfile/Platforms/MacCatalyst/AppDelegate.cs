@@ -1,8 +1,5 @@
 ﻿using Foundation;
-using Microsoft.Maui;
-using Microsoft.Maui.Hosting;
-
-namespace HeroesProfile.UI;
+namespace HeroesProfile.UI.Platforms.MacCatalyst;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate

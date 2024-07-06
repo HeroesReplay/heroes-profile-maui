@@ -1,130 +1,135 @@
 ﻿@page "/analysis"
 @inherits ReactiveInjectableComponentBase<AnalysisViewModel>
 
-<Row>
-    <Column ColumnSize=ColumnSize.Is6>
-        <Card Margin="Margin.Is4.OnY">
-            <CardHeader>
-                <CardTitle>File Detection</CardTitle>
-            </CardHeader>
-            <CardBody>
-                <Field Horizontal="true">
-                    <FieldLabel ColumnSize="ColumnSize.Is4">BattleLobby</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is8">
-                        @if (ViewModel.HasBattleLobby)
-                        {
-                            <TextEdit Text=@ViewModel.Session.Files.BattleLobby.Created.ToString() ReadOnly=true/>
-                        }
-                        else
-                        {
-                            <TextEdit Text="Pending" ReadOnly=true/>
-                        }
-                    </FieldBody>
-                </Field>
-                <Field Horizontal="true">
-                    <FieldLabel ColumnSize="ColumnSize.Is4">StormSave</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is8">
-                        @if (ViewModel.HasStormSave)
-                        {
-                            <TextEdit Text=@ViewModel.Session.Files.StormSave.Created.ToString() ReadOnly=true/>
-                        }
-                        else
-                        {
-                            <TextEdit Text="Pending" ReadOnly=true/>
-                        }
-                    </FieldBody>
-                </Field>
-                <Field Horizontal="true">
-                    <FieldLabel ColumnSize="ColumnSize.Is4">StormReplay</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is8">
-                        @if (ViewModel.HasStormReplay)
-                        {
-                            <TextEdit Text=@ViewModel.Session.Files.StormReplay.Created.ToString() ReadOnly=true/>
-                        }
-                        else
-                        {
-                            <TextEdit Text="Pending" ReadOnly=true/>
-                        }
-                    </FieldBody>
-                </Field>
-            </CardBody>
-        </Card>
-    </Column>
-    <Column ColumnSize=ColumnSize.Is6>
-        <Card Margin="Margin.Is4.OnY">
-            <CardHeader>
-                <CardTitle>Heroes Profile Analysis</CardTitle>
-            </CardHeader>
-            <CardBody>
-                <Field Horizontal="true">
-                    <FieldLabel ColumnSize="ColumnSize.Is4">Pre Match</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is8">
-                        @if (ViewModel.IsPreMatchEnabled)
-                        {
-                            @if (ViewModel.HasPreMatch)
-                            {
-                                <Button Color=Color.Primary Size=Size.Small @onclick=@((e) => ViewModel.OpenInBrowser(ViewModel.Session.PreMatchUri.ToString()))>Open Pre match data Web Link</Button>
-                            }
-                            else
-                            {
-                                <TextEdit Text="No data available." ReadOnly=true/>
-                            }
-                        }
-                        else
-                        {
-                            <Alert Color=Color.Info Dismisable=false Visible=true>
-                                <AlertDescription>This feature can be enabled in the Settings</AlertDescription>
-                            </Alert>
-                        }
-                    </FieldBody>
-                </Field>
-                <Field Horizontal="true">
-                    <FieldLabel ColumnSize="ColumnSize.Is4">Post Match</FieldLabel>
-                    <FieldBody ColumnSize="ColumnSize.Is8">
-                        @if (ViewModel.IsPostMatchEnabled)
-                        {
-                            @if (ViewModel.HasPostMatch)
-                            {
-                                <Button Color=Color.Primary Size=Size.Small @onclick=@((e) => ViewModel.OpenInBrowser(ViewModel.Session.PostMatchUri.ToString()))>Open Post match data Web Link</Button>
-                            }
-                            else
-                            {
-                                <TextEdit Text="No data available." ReadOnly=true/>
-                            }
-                        }
-                        else
-                        {
-                            <Alert Color=Color.Info Dismisable=false Visible=true>
-                                <AlertDescription>This feature can be enabled in the Settings</AlertDescription>
-                            </Alert>
-                        }
-                    </FieldBody>
-                </Field>
-            </CardBody>
-        </Card>
-    </Column>
-</Row>
+@if (ViewModel != null)
+{
 
-<Row>
-    <Column ColumnSize=ColumnSize.Is12>
-        <Card Margin="Margin.Is4.OnY">
-            <CardHeader>
-                <CardTitle>Detected BattleNet Ids</CardTitle>
-            </CardHeader>
-            <CardBody>
-                <Paragraph>BattleNet Ids are used for Auto Twitch Predictions & Discord Rich Presence</Paragraph>
-                <ListGroup>
-                    @foreach (var item in ViewModel.BattlenetIds)
-                    {
-                        <ListGroupItem>@item</ListGroupItem>
-                    }
-                </ListGroup>
-            </CardBody>
-        </Card>
-    </Column>
-</Row>
+    <Row>
+        <Column ColumnSize=ColumnSize.Is6>
+            <Card Margin="Margin.Is4.OnY">
+                <CardHeader>
+                    <CardTitle>File Detection</CardTitle>
+                </CardHeader>
+                <CardBody>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">BattleLobby</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            @if (ViewModel.HasBattleLobby)
+                            {
+                                <TextEdit Text=@ViewModel.Session.Files.BattleLobby.Created.ToString() ReadOnly=true />
+                            }
+                            else
+                            {
+                                <TextEdit Text="Pending" ReadOnly=true />
+                            }
+                        </FieldBody>
+                    </Field>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">StormSave</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            @if (ViewModel.HasStormSave)
+                            {
+                                <TextEdit Text=@ViewModel.Session.Files.StormSave.Created.ToString() ReadOnly=true />
+                            }
+                            else
+                            {
+                                <TextEdit Text="Pending" ReadOnly=true />
+                            }
+                        </FieldBody>
+                    </Field>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">StormReplay</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            @if (ViewModel.HasStormReplay)
+                            {
+                                <TextEdit Text=@ViewModel.Session.Files.StormReplay.Created.ToString() ReadOnly=true />
+                            }
+                            else
+                            {
+                                <TextEdit Text="Pending" ReadOnly=true />
+                            }
+                        </FieldBody>
+                    </Field>
+                </CardBody>
+            </Card>
+        </Column>
+        <Column ColumnSize=ColumnSize.Is6>
+            <Card Margin="Margin.Is4.OnY">
+                <CardHeader>
+                    <CardTitle>Heroes Profile Analysis</CardTitle>
+                </CardHeader>
+                <CardBody>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">Pre Match</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            @if (ViewModel.UserSettings?.EnablePreMatch == true)
+                            {
+                                @if (ViewModel.HasPreMatch)
+                                {
+                                    <Button Color=Color.Primary Size=Size.Small @onclick=@((e) => ViewModel.OpenInBrowser(ViewModel.Session.PreMatchUri.ToString()))>Open Pre match data Web Link</Button>
+                                }
+                                else
+                                {
+                                    <TextEdit Text="No data available." ReadOnly=true />
+                                }
+                            }
+                            else
+                            {
+                                <Alert Color=Color.Info Dismisable=false Visible=true>
+                                    <AlertDescription>This feature can be enabled in the Settings</AlertDescription>
+                                </Alert>
+                            }
+                        </FieldBody>
+                    </Field>
+                    <Field Horizontal="true">
+                        <FieldLabel ColumnSize="ColumnSize.Is4">Post Match</FieldLabel>
+                        <FieldBody ColumnSize="ColumnSize.Is8">
+                            @if (ViewModel.UserSettings?.EnablePostMatch == true)
+                            {
+                                @if (ViewModel.HasPostMatch)
+                                {
+                                    <Button Color=Color.Primary Size=Size.Small @onclick=@((e) => ViewModel.OpenInBrowser(ViewModel.Session.PostMatchUri.ToString()))>Open Post match data Web Link</Button>
+                                }
+                                else
+                                {
+                                    <TextEdit Text="No data available." ReadOnly=true />
+                                }
+                            }
+                            else
+                            {
+                                <Alert Color=Color.Info Dismisable=false Visible=true>
+                                    <AlertDescription>This feature can be enabled in the Settings</AlertDescription>
+                                </Alert>
+                            }
+                        </FieldBody>
+                    </Field>
+                </CardBody>
+            </Card>
+        </Column>
+    </Row>
+
+    <Row>
+        <Column ColumnSize=ColumnSize.Is12>
+            <Card Margin="Margin.Is4.OnY">
+                <CardHeader>
+                    <CardTitle>Detected BattleNet Ids</CardTitle>
+                </CardHeader>
+                <CardBody>
+                   @*  <Paragraph>BattleNet Ids are used for Auto Twitch Predictions & Discord Rich Presence</Paragraph> *@
+                    <ListGroup>
+                        @foreach (var item in ViewModel.BattlenetIds)
+                        {
+                            <ListGroupItem>@item</ListGroupItem>
+                        }
+                    </ListGroup>
+                </CardBody>
+            </Card>
+        </Column>
+    </Row>
+
+}
 
 
 @code {
-    protected async override Task OnInitializedAsync() => await ViewModel.LoadAsync();
+    protected override async Task OnInitializedAsync() => await ViewModel.LoadAsync();
 }

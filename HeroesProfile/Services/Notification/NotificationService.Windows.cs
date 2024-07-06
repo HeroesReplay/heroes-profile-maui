@@ -1,9 +1,8 @@
-﻿using HeroesProfile.UI.Services;
+﻿using HeroesProfile.UI.Services.Notification;
 using Microsoft.Toolkit.Uwp.Notifications;
+namespace HeroesProfile.UI.Services.Notification;
 
-namespace HeroesProfile.UI.Platforms.Windows;
-
-public class WindowsNotificationService : INotificationService
+public class PlatformNotificationService : IPlatformNotificationService
 {
     public void ShowNotification(string title, string subtitle, string body)
     {

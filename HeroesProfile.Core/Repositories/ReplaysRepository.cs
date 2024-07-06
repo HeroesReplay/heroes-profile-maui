@@ -37,7 +37,7 @@ public class ReplaysRepository(AppSettings appSettings)
 
             if (!File.Exists(appSettings.StoredReplaysPath))
             {
-                await File.WriteAllTextAsync(appSettings.StoredReplaysPath, "[]", token);
+                await File.WriteAllTextAsync(appSettings.StoredReplaysPath,  JsonSerializer.Serialize(Array.Empty<StoredReplay>(), writeOptions), token);
             }
         }
         finally
