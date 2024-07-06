@@ -1,4 +1,5 @@
-﻿using HeroesProfile.Blazor.ViewModels;
+﻿using System.Reflection;
+using HeroesProfile.Blazor.ViewModels;
 using HeroesProfile.Core;
 using HeroesProfile.Core.CQRS.Behaviours;
 using HeroesProfile.UI.Services;
@@ -13,6 +14,10 @@ using Microsoft.Extensions.Logging;
 
 using Microsoft.Maui.LifecycleEvents;
 using Blazorise.Bootstrap5;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Maui.Controls.Hosting;
+using Microsoft.Maui.Hosting;
+using Microsoft.Maui.Storage;
 
 namespace HeroesProfile.UI;
 
@@ -24,10 +29,22 @@ public class MauiProgram
             .CreateBuilder(useDefaults: true)
             .UseMauiApp<App>()
             .ConfigureFonts(fonts => { fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular"); })
-            .ConfigureEssentials((eb) => { })
+            .ConfigureEssentials((eb) =>
+            {
+                
+            })
+            .ConfigureDispatching()
             .ConfigureLifecycleEvents((lifecycle) =>
             {
-#if WINDOWS
+                #if MACCATALYST
+                lifecycle.AddiOS(configure =>
+                {
+                    
+                });
+            
+                #endif
+                
+                #if WINDOWS
                 lifecycle
                     .AddWindows(configure =>
                     {
@@ -84,10 +101,8 @@ public class MauiProgram
 #endif
             });
 
-
-        builder.Configuration.AddJsonFile("appsettings.json", optional: false);
-        builder.Configuration.AddJsonFile("appsettings.Development.json", optional: true);
-
+        builder.Configuration.AddJsonStream(FileSystem.OpenAppPackageFileAsync("appsettings.json").Result);
+        builder.Configuration.AddJsonStream(FileSystem.OpenAppPackageFileAsync("appsettings.Development.json").Result);
         builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
@@ -99,7 +114,6 @@ public class MauiProgram
             .AddBlazorise(options =>
             {
                 options.Immediate = true;
-                options.IconStyle = IconStyle.Solid;
             })
             .AddBootstrap5Providers()
             .AddBootstrap5Components()
@@ -115,6 +129,8 @@ public class MauiProgram
         builder.Services.AddSingleton<HeroesProfile.UI.Services.ITrayService, HeroesProfile.UI.Platforms.Windows.WindowsTrayService>();
         builder.Services.AddSingleton<HeroesProfile.UI.Services.INotificationService, HeroesProfile.UI.Platforms.Windows.WindowsNotificationService>();
 #elif MACCATALYST
+        builder.Services.AddSingleton<ITrayService, HeroesProfile.UI.Platforms.Services.TrayService>();
+        builder.Services.AddSingleton<HeroesProfile.UI.Services.INotificationService, HeroesProfile.UI.Platforms.Services.NotificationService>();
 #endif
 
         builder.Services.AddMediatR(config =>

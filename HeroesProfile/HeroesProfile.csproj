@@ -3,14 +3,7 @@
     <PropertyGroup>        
         <TargetFrameworks>net8.0-maccatalyst</TargetFrameworks>
         <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
-        
-        <!-- Note for MacCatalyst:
-            The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.
-            When specifying both architectures, use the plural <RuntimeIdentifiers> instead of the singular <RuntimeIdentifier>.
-            The Mac App Store will NOT accept apps with ONLY maccatalyst-arm64 indicated;
-            either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
-        <!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
-
+        <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers>
         <OutputType>Exe</OutputType>
         <RootNamespace>HeroesProfile.UI</RootNamespace>
         <UseMaui>true</UseMaui>
@@ -25,6 +18,12 @@
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.19041.0</SupportedOSPlatformVersion>
         <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.19041.0</TargetPlatformMinVersion>
+        <IsPackable>true</IsPackable>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <MtouchLink>None</MtouchLink>
+      <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
     </PropertyGroup>
 
     <ItemGroup>
@@ -34,6 +33,14 @@
         <MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
         <MauiFont Include="Resources\Fonts\*" />
         <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+        <Content Remove="Resources\Raw\appsettings.json" />
+        <MauiAsset Include="Resources\Raw\appsettings.json">
+          <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        </MauiAsset>
+        <Content Remove="Resources\Raw\appsettings.Development.json" />
+        <MauiAsset Include="Resources\Raw\appsettings.Development.json">
+          <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        </MauiAsset>
     </ItemGroup>
 
     <ItemGroup>
@@ -47,6 +54,15 @@
     <ItemGroup Condition="$(TargetFramework.StartsWith('net8.0-maccatalyst')) != true">
         <Compile Remove="**\MacCatalyst\**\*.cs" />
         <None Include="**\MacCatalyst\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+        <Compile Update="Platforms\MacCatalyst\Services\NotificationService.cs">
+          <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
+        </Compile>
+        <Compile Update="Platforms\MacCatalyst\Services\TrayService.cs">
+          <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
+        </Compile>
+        <Compile Update="Platforms\MacCatalyst\Native\TrayServiceNative.cs">
+          <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
+        </Compile>
     </ItemGroup>
 
 	<ItemGroup Condition="$(TargetFramework.Contains('-windows'))">
@@ -60,7 +76,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="MainPage.xaml" />
+      <Folder Include="Platforms\MacCatalyst\Images\" />
     </ItemGroup>
    
 </Project>

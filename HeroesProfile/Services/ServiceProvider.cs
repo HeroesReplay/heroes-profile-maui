@@ -1,4 +1,6 @@
-﻿namespace HeroesProfile.UI;
+﻿using Microsoft.Maui;
+
+namespace HeroesProfile.UI.Services;
 
 public static class ServiceProvider
 {

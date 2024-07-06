@@ -3,7 +3,7 @@
              xmlns:local="clr-namespace:HeroesProfile.Blazor;assembly=HeroesProfile.Blazor"
              x:Class="HeroesProfile.UI.MainPage"             
              BackgroundColor="{DynamicResource PageBackgroundColor}">
-    <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
+    <BlazorWebView x:Name="BlazorWebView" HostPage="wwwroot/index.html">
         <BlazorWebView.RootComponents>
             <RootComponent Selector="#app" ComponentType="{x:Type local:Main}" />
         </BlazorWebView.RootComponents>

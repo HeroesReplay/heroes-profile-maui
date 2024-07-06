@@ -1,6 +1,10 @@
-﻿using HeroesProfile.Core.BackgroundServices;
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using HeroesProfile.Core.BackgroundServices;
 using HeroesProfile.Core.CQRS.Commands.Initialization;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HeroesProfile.UI.Services;
 

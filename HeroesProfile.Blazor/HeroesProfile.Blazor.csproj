@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Blazorise.Generator.Features" Version="1.5.3" />
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.6" />
         <PackageReference Include="ReactiveUI.Blazor" Version="20.1.1" />
         <PackageReference Include="Blazorise" Version="1.5.3" />

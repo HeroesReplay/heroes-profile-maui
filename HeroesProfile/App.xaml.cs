@@ -16,13 +16,11 @@ public partial class App : Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        var tray = ServiceProvider.Current.Services.GetRequiredService<ITrayService>();
+        var tray = HeroesProfile.UI.Services.ServiceProvider.Current.Services.GetRequiredService<ITrayService>();
         tray.Initialize();
         
         var window = base.CreateWindow(activationState);
-        
         window.Title = "Heroes Profile - Alpha";
-
         return window;
     }
 }

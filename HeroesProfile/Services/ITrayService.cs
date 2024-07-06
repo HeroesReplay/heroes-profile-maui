@@ -1,4 +1,6 @@
-﻿namespace HeroesProfile.UI.Services;
+﻿using System;
+
+namespace HeroesProfile.UI.Services;
 
 public interface ITrayService
 {
