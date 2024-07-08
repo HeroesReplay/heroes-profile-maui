@@ -1,8 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using HeroesProfile.Blazor.ViewModels;
-using HeroesProfile.Core;
-using HeroesProfile.Core.CQRS.Behaviours;
-
 using Blazorise;
 using Blazorise.Icons.FontAwesome;
 
@@ -15,16 +11,19 @@ using Microsoft.Maui.LifecycleEvents;
 using Blazorise.Bootstrap5;
 using HeroesProfile.UI.Services.Notification;
 using HeroesProfile.UI.Services.Tray;
-using HeroesProfile.Core.BackgroundServices;
-using HeroesProfile.Core.Clients;
-using HeroesProfile.Core.Fakes;
-using HeroesProfile.Core.JsonConverters;
-using HeroesProfile.Core.Models;
-using HeroesProfile.Core.Parsers;
-using HeroesProfile.Core.Repositories;
-using HeroesProfile.Core.Watchers;
+using HeroesProfile.UI.Core;
+using HeroesProfile.UI.Core.BackgroundServices;
+using HeroesProfile.UI.Core.Clients;
+using HeroesProfile.UI.Core.CQRS.Behaviours;
+using HeroesProfile.UI.Core.Fakes;
+using HeroesProfile.UI.Core.JsonConverters;
+using HeroesProfile.UI.Core.Models;
+using HeroesProfile.UI.Core.Parsers;
+using HeroesProfile.UI.Core.Repositories;
+using HeroesProfile.UI.Core.Watchers;
 using HeroesProfile.UI.Services;
 using HeroesProfile.UI.Services.LifeCycle;
+using HeroesProfile.UI.ViewModels;
 
 namespace HeroesProfile.UI;
 
@@ -35,12 +34,8 @@ public class MauiProgram
         var builder = MauiApp
             .CreateBuilder(useDefaults: true)
             .UseMauiApp<App>()
+            
             .ConfigureFonts(fonts => { fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular"); })
-            .ConfigureEssentials((eb) =>
-            {
-
-            })
-            .ConfigureDispatching()
             .ConfigureLifecycleEvents(Lifecycle.AddPlatformEvents);
 
         builder.Configuration.AddJsonStream(FileSystem.OpenAppPackageFileAsync("appsettings.json").Result);
@@ -54,10 +49,7 @@ public class MauiProgram
 #endif
 
         builder.Services
-            .AddBlazorise(options =>
-            {
-                options.Immediate = true;
-            })
+            .AddBlazorise(options => options.Immediate = true)
             .AddBootstrap5Providers()
             .AddBootstrap5Components()
             .AddFontAwesomeIcons();
@@ -76,7 +68,6 @@ public class MauiProgram
 #if DEBUG
             config.BehaviorsToRegister.Add(ServiceDescriptor.Singleton(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>)));
 #endif            
-            config.RegisterServicesFromAssemblyContaining<IMarker>();
             config.RegisterServicesFromAssemblyContaining<MauiProgram>();
         });
 

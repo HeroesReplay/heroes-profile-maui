@@ -1,5 +1,4 @@
-﻿using HeroesProfile.UI.Services.Notification;
-using Microsoft.Toolkit.Uwp.Notifications;
+﻿using Microsoft.Toolkit.Uwp.Notifications;
 namespace HeroesProfile.UI.Services.Notification;
 
 public class PlatformNotificationService : IPlatformNotificationService

@@ -1,5 +1,5 @@
-﻿using HeroesProfile.Core.BackgroundServices;
-using HeroesProfile.Core.CQRS.Commands.Initialization;
+﻿using HeroesProfile.UI.Core.BackgroundServices;
+using HeroesProfile.UI.Core.CQRS.Commands.Initialization;
 using MediatR;
 
 namespace HeroesProfile.UI.Services;

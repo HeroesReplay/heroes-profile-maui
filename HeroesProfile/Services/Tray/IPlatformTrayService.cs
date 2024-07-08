@@ -4,5 +4,5 @@ public interface IPlatformTrayService
 {
     void Initialize();
 
-    Action ClickHandler { get; set; }
+    Action? ClickHandler { get; set; }
 }

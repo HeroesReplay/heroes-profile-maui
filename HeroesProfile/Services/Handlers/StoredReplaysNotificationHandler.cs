@@ -1,9 +1,6 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using HeroesProfile.Blazor.ViewModels;
-
+﻿using HeroesProfile.UI.Core.CQRS.Notifications;
 using MediatR;
-using HeroesProfile.Core.CQRS.Notifications;
+using HeroesProfile.UI.ViewModels;
 
 namespace HeroesProfile.UI.Services.Handlers;
 

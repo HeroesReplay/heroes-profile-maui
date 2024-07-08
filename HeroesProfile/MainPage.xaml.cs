@@ -1,6 +1,4 @@
-﻿using Microsoft.Maui.Controls;
-
-namespace HeroesProfile.UI;
+﻿namespace HeroesProfile.UI;
 
 public partial class MainPage : ContentPage
 {

@@ -1,10 +1,8 @@
-using HeroesProfile.UI.Services;
-
 using Microsoft.Maui.LifecycleEvents;
 
 namespace HeroesProfile.UI.Services.LifeCycle;
 
-public static partial class Lifecycle
+public static class Lifecycle
 {
     public static void Configure(IWindowsLifecycleBuilder configure)
     {
