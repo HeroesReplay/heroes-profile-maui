@@ -72,10 +72,10 @@ public class SessionRepository
     {
         var options = new ParseOptions
         {
-           AllowPTR = true,
-           ShouldParseGameEvents = false,
-           ShouldParseMessageEvents = false,
-           ShouldParseTrackerEvents = false
+            AllowPTR = true,
+            ShouldParseGameEvents = false,
+            ShouldParseMessageEvents = false,
+            ShouldParseTrackerEvents = false
         };
 
         ReplayParseData parseData = await replayParser.ParseAsync(new FileInfo(sessionFile), options, cancellationToken);
@@ -92,11 +92,11 @@ public class SessionRepository
                     SessionData.Files.StormReplay = new SessionFile(parseData.Replay!, parseData.ParseType.Value, DateTime.Now);
                     break;
                 }
-            // case ParseType.StormSave:
-            //     {
-            //         SessionData.Files.StormSave = new SessionFile(parseData.Replay, parseData.ParseType, DateTime.Now);
-            //         break;
-            //     }
+            case ParseType.StormSave:
+                {
+                    SessionData.Files.StormSave = new SessionFile(parseData.Replay!, parseData.ParseType.Value, DateTime.Now);
+                    break;
+                }
         }
     }
 }

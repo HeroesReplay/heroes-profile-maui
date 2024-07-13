@@ -34,7 +34,6 @@ public class MauiProgram
         var builder = MauiApp
             .CreateBuilder(useDefaults: true)
             .UseMauiApp<App>()
-            
             .ConfigureFonts(fonts => { fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular"); })
             .ConfigureLifecycleEvents(Lifecycle.AddPlatformEvents);
       
@@ -80,7 +79,8 @@ public class MauiProgram
     {
         AppSettings appSettings = new AppSettings()
         {
-            EnableFakeHttp = true
+            EnableFakeHttp = false,
+            ClearStoredReplaysOnStart = true
         };
 
         Directory.CreateDirectory(appSettings.GameTempDirectory);

@@ -19,7 +19,7 @@ public class FakeHeroesProfileDelegatingHandler(AppSettings appSettings, ILogger
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        await Task.Delay(TimeSpan.FromSeconds(Random.Shared.Next(1, 2)), cancellationToken);
+        await Task.Delay(TimeSpan.FromSeconds(Random.Shared.Next(0, 1)), cancellationToken);
 
         if (Random.Shared.Next(1, 8) == 1)
         {

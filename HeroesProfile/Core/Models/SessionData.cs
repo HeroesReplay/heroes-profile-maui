@@ -8,11 +8,11 @@ public record SessionFile(StormReplay Replay, ParseType ParseType, DateTime Crea
 
 public class SessionData
 {
-    public IEnumerable<StormPlayer> Players => StormReplay?.StormPlayers ?? StormSave?.StormPlayers ?? BattleLobby?.StormPlayers ?? Array.Empty<StormPlayer>();
-    public string? Map => StormReplay?.MapInfo.MapName ?? StormSave?.MapInfo.MapName ?? BattleLobby?.MapInfo.MapName ?? "UNKNOWN";
-    public DateTime? StartTime => (BattleLobby?.Timestamp ?? StormSave?.Timestamp ?? StormReplay?.Timestamp) ?? DateTime.UtcNow;
-    public DateTime? EndTime => StormReplay?.ReplayLength != null ? StartTime.GetValueOrDefault().Add(StormReplay.ReplayLength) : null;
-    public StormGameMode GameMode => StormReplay?.GameMode ?? StormSave?.GameMode ?? BattleLobby?.GameMode ?? StormGameMode.Unknown;
+    // public IEnumerable<StormPlayer> Players => StormReplay?.StormPlayers ?? StormSave?.StormPlayers ?? BattleLobby?.StormPlayers ?? Array.Empty<StormPlayer>();
+    // public string? Map => StormReplay?.MapInfo.MapName ?? StormSave?.MapInfo.MapName ?? BattleLobby?.MapInfo.MapName ?? "UNKNOWN";
+    // public DateTime? StartTime => (BattleLobby?.Timestamp ?? StormSave?.Timestamp ?? StormReplay?.Timestamp) ?? DateTime.UtcNow;
+    // public DateTime? EndTime => StormReplay?.ReplayLength != null ? StartTime.GetValueOrDefault().Add(StormReplay.ReplayLength) : null;
+    // public StormGameMode GameMode => StormReplay?.GameMode ?? StormSave?.GameMode ?? BattleLobby?.GameMode ?? StormGameMode.Unknown;
 
     public SessionState State
     {

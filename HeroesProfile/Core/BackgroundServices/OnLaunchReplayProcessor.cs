@@ -21,7 +21,8 @@ public class OnLaunchReplayProcessor(IMediator mediator, AppSettings appSettings
         {
             while (true)
             {
-                ParseOldestUnknownReplays.Response response = await mediator.Send(new ParseOldestUnknownReplays.Command(Take: 1000), stoppingToken);
+                // Find the OLDEST 100 replays and process those first
+                ParseOldestUnknownReplays.Response response = await mediator.Send(new ParseOldestUnknownReplays.Command(Take: 100), stoppingToken);
 
                 if (response.Processed.Any())
                 {

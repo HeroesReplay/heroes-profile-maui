@@ -16,7 +16,8 @@ public class StormReplayParser : IReplayParser
     {
         StormGameMode.QuickMatch,
         StormGameMode.UnrankedDraft,
-        StormGameMode.StormLeague,
+        StormGameMode.StormLeague,        
+        StormGameMode.ARAM        
     };
 
     private readonly StormReplayParseStatus[] NotSupportedStatus =

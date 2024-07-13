@@ -28,8 +28,10 @@ public static class CopyToSession
 
         public async Task<Response> Handle(Command command, CancellationToken cancellationToken)
         {
-            var context = new Context();
-            context.Add("Command", command);
+            var context = new Context
+            {
+                { "Command", command }
+            };
 
             PolicyResult result = await Policy
                 .Handle<IOException>()
@@ -48,16 +50,7 @@ public static class CopyToSession
         {
             string extension = Path.GetExtension(command.FileToCopy).TrimStart('.');
             string fullName = Path.Combine(appSettings.ApplicationSessionDirectory, $"session.{extension}");
-
-            if (File.Exists(fullName))
-            {
-                File.Delete(fullName);
-            }
-            else
-            {
-                File.Copy(command.FileToCopy, fullName, overwrite: true);
-            }
-
+            File.Copy(command.FileToCopy, fullName, overwrite: true);
             await sessionRepository.UpdateAsync(fullName, cancellationToken);
         }
     }

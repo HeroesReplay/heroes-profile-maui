@@ -3,7 +3,7 @@
 public class AppSettings
 {
     public Uri HeroesProfileUri { get; } = new("https://www.heroesprofile.com");
-    public Uri HeroesProfileApiUri { get; } = new("https://api.heroesprofile.com");
+    public Uri HeroesProfileApiUri { get; } = new("https://apitest.heroesprofile.com");
 
     public string GameTempDirectory
     {

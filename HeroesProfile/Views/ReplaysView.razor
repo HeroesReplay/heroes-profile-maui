@@ -28,7 +28,7 @@
                 <DataGridDateColumn TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.Updated)" Caption="Updated" />
 
                 <!-- Process Status -->
-                <DataGridNumericColumn Filterable=true TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.ProcessStatus)" Caption="Process">
+                <DataGridNumericColumn Filterable=true TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.ProcessStatus)" Caption="Status">
                     <DisplayTemplate>
                         <Badge Color=context.ProcessStatusColor>
                             @context.ProcessStatus
@@ -62,7 +62,7 @@
                 <!-- Heroes Profile Web Link -->
                 <DataGridColumn Filterable=false TItem="ReplaysViewModel.GridItem" Field="@nameof(ReplaysViewModel.GridItem.WebLink)" Caption="Web Link">
                     <DisplayTemplate>
-                        @if (context.WebLink != null && context.ProcessStatus == ProcessStatus.Success)
+                        @if (context.WebLink != null)
                         {
                             <Button Size=Size.Small Color=Color.Primary @onclick="@context.OpenInBrowser">
                                 Open in Browser

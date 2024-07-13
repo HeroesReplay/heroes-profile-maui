@@ -40,9 +40,15 @@ public static class UploadAndUpdateReplay
                 return new(Success: false, ReplayId: null, ProcessStatus.Error, ParseStatus: response.Data.ParseStatus);
             }
 
-            byte[] bytes = await File.ReadAllBytesAsync(response.Data.File.FullName, cancellationToken);
+            if (response.Data.ProcessStatus == ProcessStatus.Duplicate || response.Data.ProcessStatus == ProcessStatus.NotSupported)
+            {
+                return new(Success: false, ReplayId: null, response.Data.ProcessStatus, ParseStatus: response.Data.ParseStatus);
+            }
 
-            UploadResponse uploadResponse = await uploadUploadClient.UploadToHeroesProfileAsync(bytes, response.Data.Fingerprint!, cancellationToken);
+            if (!response.Data.IsUploadable)
+                throw new NotSupportedException("The state of the replay is not supported for upload.");
+
+            UploadResponse uploadResponse = await uploadUploadClient.UploadToHeroesProfileAsync(command.StoredReplay, response.Data.Fingerprint!, cancellationToken);
             StoredReplay storedReplay = command.StoredReplay;
             long? replayId = uploadResponse.ReplayId;
 
@@ -63,7 +69,7 @@ public static class UploadAndUpdateReplay
                 storedReplay.ProcessStatus = ProcessStatus.NotSupported;
             }
 
-            storedReplay.Updated = DateTime.UtcNow;
+            storedReplay.Updated = DateTime.Now;
             storedReplay.ReplayId = replayId;
 
             await mediator.Send(new UpdateReplays.Command([storedReplay]), cancellationToken);

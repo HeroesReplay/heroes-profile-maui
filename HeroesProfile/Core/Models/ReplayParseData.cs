@@ -9,5 +9,7 @@ public class ReplayParseData
     public StormReplay? Replay { get; init; } = null;
     public StormReplayParseStatus ParseStatus { get; init; } = StormReplayParseStatus.Unknonwn;
     public ProcessStatus ProcessStatus { get; init; } = ProcessStatus.Pending;
-    public string? Fingerprint { get; init; }
+    public string? Fingerprint { get; init; }   
+
+    public bool IsUploadable => ProcessStatus == ProcessStatus.Pending && ParseStatus == StormReplayParseStatus.Success;
 }

@@ -42,7 +42,11 @@ public class ReplaysViewModel(IMediator mediator, AppSettings appSettings) : Rea
         public GridItem(StoredReplay replay, Uri matchUri)
         {
             Item = replay;
-            WebLink = replay.ReplayId != null ? new Uri(matchUri, $"?replayID={Item.ReplayId.Value}") : null;
+
+            if (replay.ProcessStatus == ProcessStatus.Success || replay.ProcessStatus == ProcessStatus.Duplicate)
+            {
+                WebLink = replay.ReplayId != null ? new Uri(matchUri, $"?replayID={Item.ReplayId!.Value}") : null;
+            }
         }
 
         public Color ParseStatusColor
