@@ -17,8 +17,6 @@ public class OnLaunchReplayProcessor(IMediator mediator, AppSettings appSettings
         if (started) return;
         started = true;
 
-        if (!appSettings.EnableReplayProcessing) return;
-
         while (!stoppingToken.IsCancellationRequested)
         {
             while (true)

@@ -4,9 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.31717.71
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HeroesProfile", "HeroesProfile\HeroesProfile.csproj", "{409D5B92-E629-4D97-9601-95C36B893C14}"
-	ProjectSection(ProjectDependencies) = postProject
-		{7C9716A2-1116-412A-8F32-AF072FE2DEFF} = {7C9716A2-1116-412A-8F32-AF072FE2DEFF}
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

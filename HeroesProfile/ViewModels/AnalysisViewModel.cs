@@ -28,6 +28,16 @@ public class AnalysisViewModel(IMediator mediator) : ReactiveObject
             this.RaisePropertyChanged();
         }
     }
+    
+    public IEnumerable<long> AccountIds
+    {
+        get => battlenetIds;
+        set
+        {
+            battlenetIds = value;
+            this.RaisePropertyChanged();
+        }
+    }
 
     public SessionData? Session
     {
@@ -75,5 +85,7 @@ public class AnalysisViewModel(IMediator mediator) : ReactiveObject
 
         GetKnownBattleNetIds.Response battleNetResponse = await mediator.Send(new GetKnownBattleNetIds.Query());
         BattlenetIds = battleNetResponse.BattleNetIds;
+        
+        GetKnownAccountIds.Response accountIdsResponse = await mediator.Send(new GetKnownAccountIds.Query());
     }
 }
