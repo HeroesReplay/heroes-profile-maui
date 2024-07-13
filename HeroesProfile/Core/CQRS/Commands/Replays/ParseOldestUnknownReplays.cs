@@ -2,6 +2,7 @@
 using HeroesProfile.UI.Core.Models;
 using HeroesProfile.UI.Core.Repositories;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace HeroesProfile.UI.Core.CQRS.Commands.Replays;
 
@@ -13,7 +14,7 @@ public static class ParseOldestUnknownReplays
 
     public record Command(int Take) : IRequest<Response>;
 
-    public class Handler(AppSettings appSettings, ReplaysRepository repository, IMediator mediator) : IRequestHandler<Command, Response>
+    public class Handler(ILogger<Handler> logger, AppSettings appSettings, ReplaysRepository repository, IMediator mediator) : IRequestHandler<Command, Response>
     {
         private readonly Heroes.StormReplayParser.ParseOptions options = new()
         {
@@ -59,6 +60,8 @@ public static class ParseOldestUnknownReplays
 
         private IEnumerable<FileInfo> GetAllReplaysOrderedByOldest()
         {
+            logger.LogInformation("Getting all replays ordered by oldest {GameDocumentsDirectory}", appSettings.GameDocumentsDirectory);
+
             return new DirectoryInfo(appSettings.GameDocumentsDirectory)
             .EnumerateFiles("*.StormReplay", SearchOption.AllDirectories)
             .OrderBy(x => x.CreationTime);
