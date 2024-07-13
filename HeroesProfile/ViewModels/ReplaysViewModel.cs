@@ -95,7 +95,7 @@ public class ReplaysViewModel(IMediator mediator, AppSettings appSettings) : Rea
                         proc.Start();
                     }
                 }
-                else if (OperatingSystem.IsMacOS())
+                else if (OperatingSystem.IsMacCatalyst())
                 {
                     Process.Start("open", WebLink.ToString());
                 }
@@ -104,20 +104,22 @@ public class ReplaysViewModel(IMediator mediator, AppSettings appSettings) : Rea
 
         public void LaunchReplay(MouseEventArgs e)
         {
-            if (WebLink != null)
+            if (OperatingSystem.IsWindows())
             {
-                if (OperatingSystem.IsWindows())
+                using (Process proc = new Process())
                 {
-                    using (Process proc = new Process())
-                    {
-                        proc.StartInfo.UseShellExecute = true;
-                        proc.StartInfo.FileName = Item.Path;
-                        proc.Start();
-                    }
+                    proc.StartInfo.UseShellExecute = true;
+                    proc.StartInfo.FileName = Item.Path;
+                    proc.Start();
                 }
-                else if (OperatingSystem.IsMacOS())
+            }
+            else if (OperatingSystem.IsMacCatalyst())
+            {
+                using (Process proc = new Process())
                 {
-                    Process.Start("open", WebLink.ToString());
+                    proc.StartInfo.UseShellExecute = true;
+                    proc.StartInfo.FileName = Item.Path;
+                    proc.Start();
                 }
             }
         }

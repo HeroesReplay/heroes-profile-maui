@@ -23,7 +23,7 @@ public class AppSettings
             if (OperatingSystem.IsMacCatalyst())
             {
                 // ~/Users/User/Library/Application Support/Blizzard/Heroes of the Storm
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Blizzard", "Heroes of the Storm");
+                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "Blizzard", "Heroes of the Storm");
             }
             else if(OperatingSystem.IsWindows())
             {
