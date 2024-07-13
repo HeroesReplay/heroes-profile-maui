@@ -109,17 +109,33 @@
     </Row>
 
     <Row>
-        <Column ColumnSize=ColumnSize.Is12>
+        <Column ColumnSize=ColumnSize.Is6>
             <Card Margin="Margin.Is4.OnY">
                 <CardHeader>
                     <CardTitle>Detected BattleNet Ids</CardTitle>
                 </CardHeader>
                 <CardBody>
-                   @*  <Paragraph>BattleNet Ids are used for Auto Twitch Predictions & Discord Rich Presence</Paragraph> *@
+                    @*  <Paragraph>BattleNet Ids are used for Auto Twitch Predictions & Discord Rich Presence</Paragraph> *@
                     <ListGroup>
                         @foreach (var item in ViewModel.BattlenetIds)
                         {
                             <ListGroupItem>@item</ListGroupItem>
+                        }
+                    </ListGroup>
+                </CardBody>
+            </Card>
+        </Column>
+        <Column ColumnSize=ColumnSize.Is6>
+            <Card Margin="Margin.Is4.OnY">
+                <CardHeader>
+                    <CardTitle>Detected Account Ids</CardTitle>
+                </CardHeader>
+                <CardBody>
+                    @*  <Paragraph>BattleNet Ids are used for Auto Twitch Predictions & Discord Rich Presence</Paragraph> *@
+                    <ListGroup>
+                        @foreach (var item in ViewModel.AccountIds)
+                        {
+                        <ListGroupItem>@item</ListGroupItem>
                         }
                     </ListGroup>
                 </CardBody>

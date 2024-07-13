@@ -37,12 +37,9 @@ public class MauiProgram
             
             .ConfigureFonts(fonts => { fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular"); })
             .ConfigureLifecycleEvents(Lifecycle.AddPlatformEvents);
-
-        builder.Configuration.AddJsonStream(FileSystem.OpenAppPackageFileAsync("appsettings.json").Result);
-        builder.Configuration.AddJsonStream(FileSystem.OpenAppPackageFileAsync("appsettings.Development.json").Result);
-
+      
         builder.Services.AddMauiBlazorWebView();
-
+        
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
         builder.Logging.AddDebug();
@@ -63,6 +60,9 @@ public class MauiProgram
         builder.Services.AddSingleton<IPlatformTrayService, PlatformTrayService>();
         builder.Services.AddSingleton<IPlatformNotificationService, PlatformNotificationService>();
 
+        builder.Services.AddSingleton<IFileSystem>(FileSystem.Current);
+        builder.Services.AddSingleton<IPreferences>(Preferences.Default);
+
         builder.Services.AddMediatR(config =>
         {
 #if DEBUG
@@ -78,20 +78,24 @@ public class MauiProgram
 
     public static MauiAppBuilder AddCore(MauiAppBuilder builder)
     {
-        AppSettings appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>()!;
-        UserSettings defaultUserSettings = builder.Configuration.GetSection("UserSettings").Get<UserSettings>()!;
+        AppSettings appSettings = new AppSettings()
+        {
+            EnableFakeHttp = true
+        };
 
         Directory.CreateDirectory(appSettings.GameTempDirectory);
         Directory.CreateDirectory(appSettings.GameDocumentsDirectory);
-        Directory.CreateDirectory(appSettings.SimulationTargetDirectory);
-        Directory.CreateDirectory(appSettings.SimulationSourceDirectory);
         Directory.CreateDirectory(appSettings.ApplicationDataDirectory);
         Directory.CreateDirectory(appSettings.ApplicationSessionDirectory);
 
         builder.Services
             .AddSingleton(builder.Configuration)
             .AddSingleton(appSettings)
-            .AddSingleton(defaultUserSettings);
+            .AddSingleton(new UserSettings()
+            {
+                EnablePostMatch = false,
+                EnablePreMatch = false
+            });
 
         builder.Services
             .AddSingleton<AbstractGameFileSystemWatcher, BattleLobbySystemWatcher>()

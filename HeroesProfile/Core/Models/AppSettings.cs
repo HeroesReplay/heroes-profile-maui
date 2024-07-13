@@ -2,29 +2,53 @@
 
 public class AppSettings
 {
-    public bool Debug { get; set; }
-    public Uri HeroesProfileUri { get; set; }
-    public Uri HeroesProfileApiUri { get; set; }
+    public Uri HeroesProfileUri { get; } = new("https://www.heroesprofile.com");
+    public Uri HeroesProfileApiUri { get; } = new("https://api.heroesprofile.com");
 
-    public string GameTempDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Temp", "Heroes of the Storm");
-    public string GameDocumentsDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Heroes of the Storm");
-    public string SimulationTargetDirectory => Path.Combine(GameDocumentsDirectory, "Simulation");
-    public string ApplicationDataDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Heroes Profile 2");
-    public string ApplicationSessionDirectory => Path.Combine(ApplicationDataDirectory, "Session");
-    public string SimulationSourceDirectory => Path.Combine(ApplicationDataDirectory, "Simulation");
-    public string UserSettingsPath => Path.Combine(ApplicationDataDirectory, "usersettings.json");
-    public string StoredReplaysPath => Path.Combine(ApplicationDataDirectory, "replays.json");
-    public string DateTimeFormat { get; set; }
+    public string GameTempDirectory
+    {
+        get
+        {
+            // TODO: ~/Library/Caches/Blizzard/Heroes of the Storm
+            
+            // ~/Users/User/AppData/Local/Temp/Heroes of the Storm
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Temp", "Heroes of the Storm");
+        }
+    }
+
+    public string GameDocumentsDirectory
+    {
+        get
+        {
+            if (OperatingSystem.IsMacCatalyst())
+            {
+                // ~/Users/User/Library/Application Support/Blizzard/Heroes of the Storm
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Blizzard", "Heroes of the Storm");
+            }
+            else if(OperatingSystem.IsWindows())
+            {
+                // C:\Users\User\Documents\Heroes of the Storm
+                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Heroes of the Storm");
+            }
+            
+            throw new PlatformNotSupportedException();
+        }
+    }
+
+    public string ApplicationDataDirectory
+    {
+        get
+        {
+            // ~/Users/User/AppData/Local/Heroes Profile 2
+            // ~/Users/User/Library/Application Support/Heroes Profile 2
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Heroes Profile 2");
+        }
+    }
     
-    public bool EnableRecord { get; set; }
-    public bool EnableReplayProcessing { get; set; }
-    public bool EnableFileSimulator { get; set; }
+    public string ApplicationSessionDirectory => Path.Combine(ApplicationDataDirectory, "Session");
+    public string StoredReplaysPath => Path.Combine(ApplicationDataDirectory, "replays.json");
+
     public bool EnableFakeHttp { get; set; }
     public bool DefaultUserSettingsOnStart { get; set; }
     public bool ClearStoredReplaysOnStart { get; set; }
-
-    public AppSettings()
-    {
-
-    }
 }
