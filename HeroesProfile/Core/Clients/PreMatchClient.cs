@@ -12,7 +12,13 @@ public class PreMatchClient(HttpClient httpClient)
     {
         int? preMatchId = null;
 
-        var formData = JsonSerializer.Serialize(replay.StormPlayers.Select(player => new { player.Team, player.Name, player.BattleTagName, player.ToonHandle!.Id }));
+        var formData = JsonSerializer.Serialize(replay.StormPlayers.Select(player => new 
+        { 
+            player.Team, 
+            player.Name, 
+            player.BattleTagName,
+             player.ToonHandle!.Id
+        }));
 
         using (FormUrlEncodedContent content = new(new Dictionary<string, string>() { { "data", formData } }.AsEnumerable()))
         {

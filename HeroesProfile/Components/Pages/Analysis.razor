@@ -3,24 +3,21 @@
 
 @if (ViewModel != null)
 {
-
     <Row>
         <Column ColumnSize=ColumnSize.Is6>
             <Card Margin="Margin.Is4.OnY">
-                <CardHeader>
-                    <CardTitle>File Detection</CardTitle>
-                </CardHeader>
                 <CardBody>
+                    <CardTitle>File Detection</CardTitle>
                     <Field Horizontal="true">
                         <FieldLabel ColumnSize="ColumnSize.Is4">BattleLobby</FieldLabel>
                         <FieldBody ColumnSize="ColumnSize.Is8">
                             @if (ViewModel.HasBattleLobby)
                             {
-                                <TextEdit Text=@ViewModel.Session.Files.BattleLobby.Created.ToString() ReadOnly=true />
+                                <TextEdit Text=@ViewModel.Session.Files.BattleLobby.Created.ToString() ReadOnly=true/>
                             }
                             else
                             {
-                                <TextEdit Text="Pending" ReadOnly=true />
+                                <TextEdit Text="Pending" ReadOnly=true/>
                             }
                         </FieldBody>
                     </Field>
@@ -29,11 +26,11 @@
                         <FieldBody ColumnSize="ColumnSize.Is8">
                             @if (ViewModel.HasStormSave)
                             {
-                                <TextEdit Text=@ViewModel.Session.Files.StormSave.Created.ToString() ReadOnly=true />
+                                <TextEdit Text=@ViewModel.Session.Files.StormSave.Created.ToString() ReadOnly=true/>
                             }
                             else
                             {
-                                <TextEdit Text="Pending" ReadOnly=true />
+                                <TextEdit Text="Pending" ReadOnly=true/>
                             }
                         </FieldBody>
                     </Field>
@@ -42,23 +39,23 @@
                         <FieldBody ColumnSize="ColumnSize.Is8">
                             @if (ViewModel.HasStormReplay)
                             {
-                                <TextEdit Text=@ViewModel.Session.Files.StormReplay.Created.ToString() ReadOnly=true />
+                                <TextEdit Text=@ViewModel.Session.Files.StormReplay.Created.ToString() ReadOnly=true/>
                             }
                             else
                             {
-                                <TextEdit Text="Pending" ReadOnly=true />
+                                <TextEdit Text="Pending" ReadOnly=true/>
                             }
                         </FieldBody>
                     </Field>
                 </CardBody>
             </Card>
+            
         </Column>
+
         <Column ColumnSize=ColumnSize.Is6>
             <Card Margin="Margin.Is4.OnY">
-                <CardHeader>
-                    <CardTitle>Heroes Profile Analysis</CardTitle>
-                </CardHeader>
                 <CardBody>
+                    <CardTitle>Heroes Profile Analysis</CardTitle>
                     <Field Horizontal="true">
                         <FieldLabel ColumnSize="ColumnSize.Is4">Pre Match</FieldLabel>
                         <FieldBody ColumnSize="ColumnSize.Is8">
@@ -70,7 +67,7 @@
                                 }
                                 else
                                 {
-                                    <TextEdit Text="No data available." ReadOnly=true />
+                                    <TextEdit Text="No data available." ReadOnly=true/>
                                 }
                             }
                             else
@@ -92,7 +89,7 @@
                                 }
                                 else
                                 {
-                                    <TextEdit Text="No data available." ReadOnly=true />
+                                    <TextEdit Text="No data available." ReadOnly=true/>
                                 }
                             }
                             else
@@ -111,11 +108,8 @@
     <Row>
         <Column ColumnSize=ColumnSize.Is6>
             <Card Margin="Margin.Is4.OnY">
-                <CardHeader>
-                    <CardTitle>Detected BattleNet Ids</CardTitle>
-                </CardHeader>
                 <CardBody>
-                    @*  <Paragraph>BattleNet Ids are used for Auto Twitch Predictions & Discord Rich Presence</Paragraph> *@
+                    <CardTitle>Detected BattleNet Ids</CardTitle>
                     <ListGroup>
                         @foreach (var item in ViewModel.BattlenetIds)
                         {
@@ -127,11 +121,8 @@
         </Column>
         <Column ColumnSize=ColumnSize.Is6>
             <Card Margin="Margin.Is4.OnY">
-                <CardHeader>
-                    <CardTitle>Detected Account Ids</CardTitle>
-                </CardHeader>
                 <CardBody>
-                    @*  <Paragraph>BattleNet Ids are used for Auto Twitch Predictions & Discord Rich Presence</Paragraph> *@
+                    <CardTitle>Detected Account Ids</CardTitle>
                     <ListGroup>
                         @foreach (var item in ViewModel.AccountIds)
                         {

@@ -6,42 +6,35 @@ using Microsoft.Extensions.Logging;
 
 namespace HeroesProfile.UI.Core.CQRS.Commands.Replays;
 
-public static class ParseOldestUnknownReplays
+public static class ParseOldestReplays
 {
     public record Item(StoredReplay StoredReplay, ReplayParseData ParseData);
 
-    public record Response(IEnumerable<Item> Processed);
+    public record Response(List<Item> Processed);
 
     public record Command(int Take) : IRequest<Response>;
 
     public class Handler(ILogger<Handler> logger, AppSettings appSettings, ReplaysRepository repository, IMediator mediator) : IRequestHandler<Command, Response>
     {
-        private readonly Heroes.StormReplayParser.ParseOptions options = new()
-        {
-            AllowPTR = true,
-            ShouldParseGameEvents = false,
-            ShouldParseMessageEvents = false,
-            ShouldParseTrackerEvents = false
-        };
+        private int batchSize = Math.Max(Environment.ProcessorCount / 4, 1);
 
         public async Task<Response> Handle(Command command, CancellationToken cancellationToken)
         {
             List<Item> items = new List<Item>();
+            List<FileInfo> replays = (await CombineOldestReplaysWithStored(cancellationToken)).Take(command.Take).ToList();
+            List<FileInfo[]> batches = replays.Chunk(batchSize).ToList();
 
-            IEnumerable<FileInfo> replays = (await GetOldestUnknownReplays(cancellationToken)).Take(command.Take);
-
-            int batchSize = Math.Max(Environment.ProcessorCount / 4, 1);
-
-            foreach (FileInfo[] batch in replays.Chunk(batchSize).ToList())
+            foreach (FileInfo[] batch in batches)
             {
-                var parseReplayTasks = batch
+                // You can batch parse them, but you cant batch upload them
+                GetParsedReplay.Response[] parsedResponses = await Task.WhenAll(batch
                     .AsParallel()
+                    .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
                     .WithCancellation(cancellationToken)
-                    .Select(info => mediator.Send(new GetParsedReplay.Query(info, options), cancellationToken));
+                    .Select(info => mediator.Send(new GetParsedReplay.Query(info), cancellationToken))
+                    .ToArray());
 
-                GetParsedReplay.Response[] parsedResponses = await Task.WhenAll(parseReplayTasks.ToArray());
-
-                var parsedReplays = parsedResponses.Select(x => x.Data).ToArray();
+                ReplayParseData[] parsedReplays = parsedResponses.Select(x => x.Data).ToArray();
                 SaveReplays.Response saveResponse = await mediator.Send(new SaveReplays.Command(parsedReplays), cancellationToken);
 
                 foreach (var parsedReplay in parsedResponses)
@@ -58,20 +51,33 @@ public static class ParseOldestUnknownReplays
             return new Response(items);
         }
 
-        private IEnumerable<FileInfo> GetAllReplaysOrderedByOldest()
+        private string[] GetAllReplays()
         {
-            logger.LogInformation("Getting all replays ordered by oldest {GameDocumentsDirectory}", appSettings.GameDocumentsDirectory);
-
-            return new DirectoryInfo(appSettings.GameDocumentsDirectory)
-            .EnumerateFiles("*.StormReplay", SearchOption.AllDirectories)
-            .OrderBy(x => x.CreationTime);
+            return Directory.GetFiles(appSettings.GameDocumentsDirectory, "*.StormReplay", SearchOption.AllDirectories);
         }
 
-        private async Task<IEnumerable<FileInfo>> GetOldestUnknownReplays(CancellationToken token)
+        private async Task<List<FileInfo>> CombineOldestReplaysWithStored(CancellationToken ct)
         {
-            List<StoredReplay> storedReplays = await repository.LoadAsync(token);
-            IEnumerable<FileInfo> replays = GetAllReplaysOrderedByOldest();
-            return replays.Where(replay => storedReplays.Find(stored => stored.Path == replay.FullName) == null).OrderBy(x => x.CreationTime);
+            List<StoredReplay> storedReplays = await repository.LoadAsync(ct);
+            string[] replays = GetAllReplays();
+            
+            return replays
+                .Where(replay => IsReplayProcessable(storedReplays, replay))
+                .OrderByDescending(x => File.GetCreationTime(x))
+                .Reverse()
+                .Select(x => new FileInfo(x))
+                .ToList();
+        }
+
+        private bool IsReplayProcessable(List<StoredReplay> storedReplays, string path)
+        {
+            // New file completely untracked
+            var isUntracked = storedReplays.Find(stored => stored.Path == path) == null;
+
+            // File is pending or errored in a previous run
+            var isPending = storedReplays.Find(stored => stored.Path == path && (stored.ProcessStatus == ProcessStatus.Pending || stored.ProcessStatus == ProcessStatus.Error)) != null;
+            
+            return isUntracked || isPending;
         }
     }
 }

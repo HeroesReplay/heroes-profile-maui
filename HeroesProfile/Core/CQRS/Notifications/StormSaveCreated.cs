@@ -10,12 +10,9 @@ public static class StormSaveCreated
 
     public class Handler(IMediator mediator, UserSettingsRepository userSettingsRepository) : INotificationHandler<Notification>
     {
-        private readonly IMediator mediator = mediator;
-        private readonly UserSettingsRepository userSettingsRepository = userSettingsRepository;
-
         public async Task Handle(Notification notification, CancellationToken cancellationToken)
         {
-            
+            await Task.CompletedTask;
         }
     }
 }

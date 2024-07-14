@@ -31,7 +31,7 @@ public class ReplaysRepository(AppSettings appSettings)
 
             if (!File.Exists(appSettings.StoredReplaysPath))
             {
-                await File.WriteAllTextAsync(appSettings.StoredReplaysPath,  JsonSerializer.Serialize(Array.Empty<StoredReplay>(), writeOptions), token);
+                await File.WriteAllTextAsync(appSettings.StoredReplaysPath, JsonSerializer.Serialize(Array.Empty<StoredReplay>(), writeOptions), token);
             }
         }
         finally
@@ -59,15 +59,15 @@ public class ReplaysRepository(AppSettings appSettings)
         return store.Find(replay => string.Equals(replay.Path, path, StringComparison.OrdinalIgnoreCase))!;
     }
 
-    public async Task InsertAsync(StoredReplay replay, CancellationToken token)
-    {
-        List<StoredReplay> store = await LoadAsync(token);
-        await SaveAsync(store.Prepend(replay).ToList(), token);
-    }
+    // public async Task InsertAsync(StoredReplay replay, CancellationToken ct)
+    // {
+    //     List<StoredReplay> store = await LoadAsync(ct);
+    //     await SaveAsync(store.Prepend(replay).ToList(), ct);
+    // }
 
-    public async Task<List<StoredReplay>> UpdateAsync(List<StoredReplay> replays, CancellationToken token)
+    public async Task<List<StoredReplay>> UpdateAsync(List<StoredReplay> replays, CancellationToken ct)
     {
-        List<StoredReplay> store = await LoadAsync(token);
+        List<StoredReplay> store = await LoadAsync(ct);
 
         foreach (StoredReplay replay in replays)
         {
@@ -75,47 +75,27 @@ public class ReplaysRepository(AppSettings appSettings)
             store.Insert(0, replay);
         }
 
-        await SaveAsync(store, token);
+        await SaveAsync(store, ct);
 
         return replays;
     }
 
-    public async Task InsertAsync(List<StoredReplay> replays, CancellationToken token)
+    // public async Task InsertAsync(List<StoredReplay> replays, CancellationToken ct)
+    // {
+    //     List<StoredReplay> current = await LoadAsync(ct);
+    //     List<StoredReplay> replacement = replays.Concat(current).Distinct().ToList();
+    //     await SaveAsync(replacement, ct);
+    // }
+
+    private async Task SaveAsync(List<StoredReplay> replays, CancellationToken ct)
     {
-        try
-        {
-            List<StoredReplay> current = await LoadAsync(token);
-            await SaveAsync(replays.Concat(current).Distinct().ToList(), token);
-        }
-        finally
-        {
-        }
+        replays.Sort((x, y) => x.Created.CompareTo(y.Created));
+        await File.WriteAllTextAsync(appSettings.StoredReplaysPath, JsonSerializer.Serialize(replays, writeOptions), ct);
     }
 
-    private async Task SaveAsync(List<StoredReplay> replays, CancellationToken token)
+    public async Task<List<StoredReplay>> LoadAsync(CancellationToken ct)
     {
-        try
-        {
-            await semaphore.WaitAsync(token);
-            await File.WriteAllTextAsync(appSettings.StoredReplaysPath, JsonSerializer.Serialize(replays, writeOptions), token);
-        }
-        finally
-        {
-            semaphore.Release();
-        }
-    }
-
-    public async Task<List<StoredReplay>> LoadAsync(CancellationToken token)
-    {
-        try
-        {
-            await semaphore.WaitAsync(token);
-            string json = await File.ReadAllTextAsync(appSettings.StoredReplaysPath, token);
-            return JsonSerializer.Deserialize<List<StoredReplay>>(json, readOptions) ?? new List<StoredReplay>();
-        }
-        finally
-        {
-            semaphore.Release();
-        }
+        string json = await File.ReadAllTextAsync(appSettings.StoredReplaysPath, ct);            
+        return JsonSerializer.Deserialize<List<StoredReplay>>(json, readOptions) ?? [];
     }
 }

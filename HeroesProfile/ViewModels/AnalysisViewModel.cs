@@ -6,7 +6,6 @@ using ReactiveUI;
 
 namespace HeroesProfile.UI.ViewModels;
 
-
 public class AnalysisViewModel(IMediator mediator) : ReactiveObject
 {
     public bool HasBattleLobby => Session?.BattleLobby != null;

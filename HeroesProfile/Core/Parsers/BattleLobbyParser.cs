@@ -10,7 +10,7 @@ public class BattleLobbyParser : IReplayParser
     public ParseType ParseType => ParseType.BattleLobby;
     public string FileExtension => ".battlelobby";
 
-    public Task<ReplayParseData> ParseAsync(FileInfo file, ParseOptions? options = null, CancellationToken token = default)
+    public Task<ReplayParseData> ParseAsync(FileInfo file, CancellationToken token = default)
     {
         var result = Heroes.StormReplayParser.StormReplayPregame.Parse(file.FullName);
 

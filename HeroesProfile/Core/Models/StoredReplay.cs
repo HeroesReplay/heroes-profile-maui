@@ -1,52 +1,59 @@
-﻿using Heroes.StormReplayParser;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
+using Heroes.StormReplayParser;
+using Heroes.StormReplayParser.Replay;
 
 namespace HeroesProfile.UI.Core.Models;
 
-public class StoredReplay : IEquatable<StoredReplay>
+public class StoredReplay : IEquatable<StoredReplay>, IEqualityComparer<StoredReplay>, IComparer<StoredReplay>
 {
-    /// <summary>
-    /// We need the full path to the replay
-    /// </summary>
+    [JsonPropertyName("Path")]
     public required string Path { get; init; }
 
-    /// <summary>
-    /// The calculated fingerprint, null if no replay was parsed
-    /// </summary>
-    public string? Fingerprint { get; init; }
-
-    /// <summary>
-    /// The time the file itself was created, regardless of the replay
-    /// This should be the replay metadata creation time if the replay file was parsed successfully.
-    /// </summary>
+    [JsonPropertyName("Created")]
     public required DateTime Created { get; init; }
 
-    /// <summary>
-    /// The time that the uploader did anything processing this specific file, uploading etc
-    /// </summary>
+    [JsonPropertyName("Updated")]
     public required DateTime Updated { get; set; }
-
-    /// <summary>
-    /// The status of the processing of the replay file
-    /// Once a file is created, it should default to Pending
-    /// Pending - The file has not been processed and decided what to do with it
-    /// </summary>
+    
+    [JsonPropertyName("ProcessStatus")]
     public required ProcessStatus ProcessStatus { get; set; } = ProcessStatus.Pending;
+    
+    [JsonPropertyName("GameMode")]
+    public required StormGameMode GameMode { get; set; } = StormGameMode.Unknown;
+    
+    [JsonPropertyName("ParseStatus")]
+    public required StormReplayParseStatus ParseStatus { get; set; } = StormReplayParseStatus.Unknonwn;
 
-    /// <summary>
-    /// The status of the parsing of the replay file
-    /// Unknown should be the default value until it has attempted to parse the file
-    /// </summary>
-    public required StormReplayParseStatus? ParseStatus { get; set; } = StormReplayParseStatus.Unknonwn;
-
-    /// <summary>
-    /// When a replay is uploaded, the id of the replay is stored here
-    /// </summary>
+    [JsonPropertyName("Fingerprint")]
+    public string? Fingerprint { get; set; }
+    
+    [JsonPropertyName("ReplayId")]
     public long? ReplayId { get; set; }
+    
+    
+    public bool Equals(StoredReplay? other) => other?.Path == Path;
 
-    public bool Equals(StoredReplay? other)
+    public static StoredReplay From(ReplayParseData data)
     {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return Path == other.Path && Created.Equals(other.Created);
+        return new StoredReplay()
+        {
+            Updated = DateTime.Now,
+            ProcessStatus = data.ProcessStatus,
+            ParseStatus = data.ParseStatus,
+            Created = data.Replay?.Timestamp ?? data.File.CreationTime,
+            GameMode = data.Replay?.GameMode ?? StormGameMode.Unknown,
+            Path = data.File.FullName,
+            Fingerprint = data.Fingerprint,
+        };
+    }
+
+    public bool Equals(StoredReplay? x, StoredReplay? y) => x?.Path == y?.Path;
+
+    public int GetHashCode([DisallowNull] StoredReplay obj) => obj.Path.GetHashCode();
+
+    public int Compare(StoredReplay? x, StoredReplay? y)
+    {
+        return x.Created.CompareTo(y.Created);
     }
 }

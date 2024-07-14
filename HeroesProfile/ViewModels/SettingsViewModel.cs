@@ -32,6 +32,9 @@ public class SettingsViewModel(IMediator mediator, INotificationService notifica
         {
             EnablePostMatch = response.UserSettings.EnablePostMatch,
             EnablePreMatch = response.UserSettings.EnablePreMatch,
+            EnableClearTrackedOnStart = response.UserSettings.EnableClearTrackedOnStart,
+            EnableFakeUpload = response.UserSettings.EnableFakeUpload,
+            EnableMinimizeToTray = response.UserSettings.EnableMinimizeToTray,
         };
     }
 
@@ -43,6 +46,9 @@ public class SettingsViewModel(IMediator mediator, INotificationService notifica
             {
                 EnablePostMatch = Form.EnablePostMatch,
                 EnablePreMatch = Form.EnablePreMatch,
+                EnableClearTrackedOnStart = Form.EnableClearTrackedOnStart,
+                EnableFakeUpload = Form.EnableFakeUpload,
+                EnableMinimizeToTray = Form.EnableMinimizeToTray,
             }));
 
             await notifications.Success("Settings saved.");
@@ -58,5 +64,8 @@ public class SettingsViewModel(IMediator mediator, INotificationService notifica
     {
         public bool EnablePostMatch { get; set; }
         public bool EnablePreMatch { get; set; }
+        public bool EnableClearTrackedOnStart { get; set; }
+        public bool EnableFakeUpload { get; set; }
+        public bool EnableMinimizeToTray { get; set; }
     }
 }

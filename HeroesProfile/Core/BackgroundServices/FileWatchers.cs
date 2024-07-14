@@ -19,7 +19,11 @@ public class FileWatchers(
     SessionFileSystemWatcher sessionFileSystemWatcher,
     UserSettingsRepository settingsRepository) : BackgroundService
 {
-    private readonly TimeSpan waitForUnlock = TimeSpan.FromSeconds(1);
+    private const string BattleLobbyExt = ".battlelobby";
+    private const string StormReplayExt = ".StormReplay";
+    private const string StormSaveExt = ".StormSave";
+
+    WatcherChangeTypes watcherChangeTypes = WatcherChangeTypes.Created | WatcherChangeTypes.Changed;
 
     private bool started;
 
@@ -30,7 +34,8 @@ public class FileWatchers(
 
         var watchTasks = watchers.Select(watcher => Task.Factory.StartNew(() => WaitAndCopy(watcher, stoppingToken), stoppingToken)).ToArray();
         var sessionTask = Task.Factory.StartNew(() => UpdateAndNotify(sessionFileSystemWatcher, stoppingToken), stoppingToken);
-        await Task.WhenAll(watchTasks.Concat(new[] { sessionTask }).ToArray());
+
+        await Task.WhenAll(watchTasks.Concat([sessionTask]).ToArray());
     }
 
     private async Task UpdateAndNotify(SessionFileSystemWatcher watcher, CancellationToken stoppingToken)
@@ -39,16 +44,12 @@ public class FileWatchers(
         {
             try
             {
-                WaitForChangedResult waitForChangedResult = watcher.WaitForChanged(WatcherChangeTypes.Created | WatcherChangeTypes.Changed, Timeout.Infinite);
+                WaitForChangedResult result = watcher.WaitForChanged(watcherChangeTypes, Timeout.Infinite);
+                if (string.IsNullOrWhiteSpace(result.Name)) continue;
 
-                await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
+                string fullName = Path.IsPathFullyQualified(result.Name) ? result.Name : Directory.GetFiles(watcher.Path, result.Name, SearchOption.AllDirectories).First();
 
-                string fullName = Path.IsPathFullyQualified(waitForChangedResult.Name)
-                    ? waitForChangedResult.Name
-                    : Directory.GetFiles(watcher.Path, waitForChangedResult.Name, SearchOption.AllDirectories).First();
-
-                GetParsedReplay.Response response =
-                    await mediator.Send(new GetParsedReplay.Query(new FileInfo(fullName), ParseOptions.DefaultParsing), stoppingToken);
+                GetParsedReplay.Response response = await mediator.Send(new GetParsedReplay.Query(new FileInfo(fullName)), stoppingToken);
 
                 if (response.Data.Replay != null)
                 {
@@ -73,60 +74,48 @@ public class FileWatchers(
         }
     }
 
-    private async Task WaitAndCopy(AbstractGameFileSystemWatcher watcher, CancellationToken stoppingToken)
+    private async Task WaitAndCopy(AbstractGameFileSystemWatcher watcher, CancellationToken ct)
     {
-        while (!stoppingToken.IsCancellationRequested)
+        while (!ct.IsCancellationRequested)
         {
-            WaitForChangedResult waitForChangedResult = watcher.WaitForChanged(WatcherChangeTypes.Created | WatcherChangeTypes.Changed, Timeout.Infinite);
+            WaitForChangedResult result = watcher.WaitForChanged(watcherChangeTypes, Timeout.Infinite);
+            if (string.IsNullOrWhiteSpace(result.Name)) continue;
 
-            await Task.Delay(waitForUnlock, stoppingToken);
-
-            if (!string.IsNullOrWhiteSpace(waitForChangedResult.Name))
+            try
             {
-                try
+                string fullName = Path.IsPathFullyQualified(result.Name) ? result.Name : Directory.GetFiles(watcher.Path, result.Name, SearchOption.AllDirectories).First();
+
+                if (fullName.EndsWith(BattleLobbyExt, StringComparison.OrdinalIgnoreCase))
                 {
-                    string fullName = Path.IsPathFullyQualified(waitForChangedResult.Name)
-                        ? waitForChangedResult.Name
-                        : Directory.GetFiles(watcher.Path, waitForChangedResult.Name, SearchOption.AllDirectories).First();
+                    await mediator.Send(new ClearSession.Command(), ct);
+                }
 
-                    if (fullName.EndsWith(".battlelobby", StringComparison.OrdinalIgnoreCase))
+                await mediator.Send(new CopyToSession.Command(fullName), ct);
+
+                if (result.Name.EndsWith(StormReplayExt))
+                {
+                    GetParsedReplay.Response response = await mediator.Send(new GetParsedReplay.Query(new FileInfo(fullName)), ct);
+
+                    if (response.Data.ParseStatus == StormReplayParseStatus.Success)
                     {
-                        await mediator.Send(new ClearSession.Command(), stoppingToken);
-                    }
+                        SaveReplay.Response saveResponse = await mediator.Send(new SaveReplay.Command(response.Data), ct);
+                        UploadAndUpdateReplay.Response uploadAndUpdateResponse = await mediator.Send(new UploadAndUpdateReplay.Command(saveResponse.StoredReplay), ct);
 
-                    await mediator.Send(new CopyToSession.Command(fullName), stoppingToken);
-
-                    if (waitForChangedResult.Name.EndsWith(".StormReplay"))
-                    {
-                        // PARSE
-                        var query = new GetParsedReplay.Query(new FileInfo(fullName), ParseOptions.MinimalParsing);
-                        GetParsedReplay.Response response = await mediator.Send(query, stoppingToken);
-
-                        if (response.Data.ParseStatus == StormReplayParseStatus.Success)
+                        if (uploadAndUpdateResponse.Success && uploadAndUpdateResponse.ReplayId.HasValue)
                         {
-                            SaveReplays.Response saveResponse = await mediator.Send(new SaveReplays.Command(response.Data), stoppingToken);
-                            StoredReplay storedReplay = saveResponse.StoredReplays.Single();
+                            UserSettings settings = await settingsRepository.LoadAsync(ct);
 
-                            // UPLOAD
-                            UploadAndUpdateReplay.Response uploadAndUpdateResponse =
-                                await mediator.Send(new UploadAndUpdateReplay.Command(storedReplay), stoppingToken);
-
-                            if (uploadAndUpdateResponse.Success && uploadAndUpdateResponse.ReplayId.HasValue)
+                            if (settings.EnablePostMatch)
                             {
-                                UserSettings settings = await settingsRepository.LoadAsync(stoppingToken);
-
-                                if (settings.EnablePostMatch)
-                                {
-                                    await mediator.Send(new UpdateSessionPostMatch.Command(uploadAndUpdateResponse.ReplayId.Value));
-                                }
+                                await mediator.Send(new UpdateSessionPostMatch.Command(uploadAndUpdateResponse.ReplayId.Value));
                             }
                         }
                     }
                 }
-                catch (Exception e)
-                {
-                    logger.LogError(e, "Error in watcher: {Name}", watcher.GetType().Name);
-                }
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error in watcher: {Name}", watcher.GetType().Name);
             }
         }
     }

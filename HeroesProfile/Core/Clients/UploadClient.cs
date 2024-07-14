@@ -1,6 +1,8 @@
 ﻿using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using HeroesProfile.UI.Core.Models;
 using Microsoft.Extensions.Logging;
 
@@ -12,9 +14,20 @@ public interface IUploadClient
     Task<UploadResponse> UploadToHeroesProfileAsync(StoredReplay replay, string fingerprint, CancellationToken cancellationToken);
 }
 
-public record UploadResponse(bool Success, UploadStatus Status, long? ReplayId = null);
+public class UploadResponse
+{
+    [JsonPropertyName("success")]
+    public bool Success { get; set; } = false;
 
-public class UploadClient(ILogger<UploadClient> logger, AppSettings appSettings, HttpClient httpClient) : IUploadClient
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [JsonPropertyName("status")]
+    public UploadStatus Status { get; set; } = UploadStatus.UploadError;
+
+    [JsonPropertyName("replayID")]
+    public long? ReplayId { get; set; }
+}
+
+public class UploadClient(ILogger<UploadClient> logger, HttpClient httpClient) : IUploadClient
 {
     public async Task<List<string>> CheckDuplicatesAsync(List<string> fingerprints, CancellationToken cancellationToken)
     {
@@ -50,24 +63,7 @@ public class UploadClient(ILogger<UploadClient> logger, AppSettings appSettings,
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var json = await response.Content.ReadAsStringAsync(cancellationToken);
-
-                    using (var document = JsonDocument.Parse(json))
-                    {
-                        long replayId = document.RootElement.GetProperty("replayID").GetInt64();
-                        bool success = false;
-
-                        if (document.RootElement.TryGetProperty("success", out var jsonElement))
-                        {
-                            success = jsonElement.GetBoolean();
-                        }
-
-                        string status = document.RootElement.GetProperty("status").GetString();
-
-                        return Enum.TryParse(status, ignoreCase: true, out UploadStatus uploadStatus)
-                            ? new UploadResponse(Success: success, Status: uploadStatus, ReplayId: replayId)
-                            : new UploadResponse(Success: success, Status: UploadStatus.UploadError, ReplayId: replayId);
-                    }
+                    return await response.Content.ReadFromJsonAsync<UploadResponse>(cancellationToken)!;
                 }
             }
         }
@@ -76,6 +72,12 @@ public class UploadClient(ILogger<UploadClient> logger, AppSettings appSettings,
             logger.LogError(e, "Failed to upload replay to HeroesProfile");
         }
 
-        return new UploadResponse(Success: false, Status: UploadStatus.UploadError, ReplayId: null);
+        
+        return new UploadResponse()
+        {
+            Success = false,
+            Status = UploadStatus.UploadError,
+            ReplayId = null
+        };
     }
 }

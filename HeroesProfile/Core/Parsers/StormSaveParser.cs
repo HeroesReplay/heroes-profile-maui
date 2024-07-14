@@ -10,7 +10,7 @@ public class StormSaveParser(ILogger<StormSaveParser> logger) : IReplayParser
 
     public string FileExtension => ".StormSave";
 
-    public async Task<ReplayParseData> ParseAsync(FileInfo file, ParseOptions? options = null, CancellationToken token = default)
+    public async Task<ReplayParseData> ParseAsync(FileInfo file, CancellationToken token = default)
     {
         try 
         {

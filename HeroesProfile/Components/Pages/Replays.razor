@@ -1,0 +1,139 @@
+﻿@page "/"
+@using Blazorise.DataGrid
+@inherits ReactiveInjectableComponentBase<ReplaysViewModel>
+
+@if (ViewModel.StoredReplays != null)
+{
+    <Row>
+        <Column>
+
+            <DataGrid 
+                TItem=@ReplaysViewModel.GridItem
+                Data=@ViewModel.StoredReplays 
+                Filterable=@true 
+                Responsive=@true
+                ShowPager=@true 
+                Narrow=@true 
+                PageSize=20 
+                Virtualize=@false
+                Editable=@false
+                FilterMode=@DataGridFilterMode.Menu
+                FilterMethod=@DataGridFilterMethod.Contains>
+
+                <!-- Name -->
+                <DataGridColumn 
+                    TItem=@ReplaysViewModel.GridItem
+                    Field=@nameof(ReplaysViewModel.GridItem.Path)
+                    Caption="Name"
+                    Sortable=@true />
+
+                <!-- Created -->
+                <DataGridDateColumn 
+                    TItem=@ReplaysViewModel.GridItem 
+                    Field=@nameof(ReplaysViewModel.GridItem.Created)
+                    Caption="Created"
+                    Sortable=@true 
+                    Displayable=@true />
+
+                <!-- Updated -->
+                <DataGridDateColumn 
+                    TItem=@ReplaysViewModel.GridItem
+                    Field=@nameof(ReplaysViewModel.GridItem.Updated)
+                    Caption="Updated" />
+
+                <!-- Upload Status -->
+                <DataGridNumericColumn 
+                    Filterable=@true 
+                    TItem=@ReplaysViewModel.GridItem
+                    Field=@nameof(ReplaysViewModel.GridItem.UploadStatus)
+                    Caption="Upload Status">
+
+                    <DisplayTemplate>
+                        <Badge Color=context.ProcessStatusColor>
+                            @context.UploadStatus
+                        </Badge>
+                    </DisplayTemplate>
+                    
+                </DataGridNumericColumn>
+
+                <!-- Parse Status -->
+                <DataGridNumericColumn 
+                    Filterable=@true 
+                    TItem=@ReplaysViewModel.GridItem
+                    Field="@nameof(ReplaysViewModel.GridItem.ParseStatus)" 
+                    Caption="Parse Result">
+                    <DisplayTemplate>
+                        <Badge Color=context.ParseStatusColor>
+                            @context.ParseStatus
+                        </Badge>
+                    </DisplayTemplate>
+                </DataGridNumericColumn>
+
+                <!-- Launch Heroes with the .StormReplay -->
+                <DataGridColumn 
+                    Filterable=@true 
+                    TItem=@ReplaysViewModel.GridItem
+                    Field=@nameof(ReplaysViewModel.GridItem.GameMode)
+                    Caption="Mode">
+                    
+                    <DisplayTemplate>
+                        @if (!string.IsNullOrWhiteSpace(context.GameMode))
+                        {                            
+                            <Badge Color=Color.Info>@context.GameMode</Badge>
+                        }
+                        else
+                        {
+                            <Badge Color=Color.Warning>Unknown</Badge>
+                        }
+                    </DisplayTemplate>
+                </DataGridColumn>
+
+                <!-- Launch Heroes with the .StormReplay -->
+                <DataGridColumn 
+                    Filterable=@false 
+                    TItem=@ReplaysViewModel.GridItem
+                    Field=@nameof(ReplaysViewModel.GridItem.Exists)
+                    Caption="Launch"
+                    Sortable=@false>
+
+                    <DisplayTemplate>
+                        @if (!context.Exists)
+                        {
+                            <Badge Color=Color.Warning>No Local file</Badge>
+                        }
+                        else
+                        {
+                            <Button Size=Size.Small Color=Color.Primary @onclick="@context.LaunchReplay">Launch Replay</Button>
+                        }
+                    </DisplayTemplate>
+                </DataGridColumn>
+
+                <!-- Heroes Profile Web Link -->
+                <DataGridColumn Filterable=false TItem="ReplaysViewModel.GridItem"
+                    Field="@nameof(ReplaysViewModel.GridItem.WebLink)" Caption="Web Link" Sortable=false>
+                    <DisplayTemplate>
+                        @if (context.WebLink != null)
+                        {
+                            <Button Size=Size.Small Color=Color.Primary @onclick="@context.OpenInBrowser">
+                                Open in Browser
+                            </Button>
+                        }
+                        else
+                        {
+                            <Badge Color=Color.Info>
+                                No ReplayID
+                            </Badge>
+                        }
+                    </DisplayTemplate>
+                </DataGridColumn>
+
+            </DataGrid>
+        </Column>
+    </Row>
+}
+
+<Button Color="Color.Primary" Clicked="@ViewModel.OpenDataFolder">Open Data</Button>
+
+@code {
+    protected override async Task OnInitializedAsync() => await ViewModel!.LoadAsync(CancellationToken.None);
+}

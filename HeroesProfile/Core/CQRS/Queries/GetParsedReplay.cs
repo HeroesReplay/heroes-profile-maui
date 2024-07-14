@@ -8,13 +8,13 @@ public static class GetParsedReplay
 {
     public record Response(ReplayParseData Data);
 
-    public record Query(FileInfo File, Heroes.StormReplayParser.ParseOptions Options) : IRequest<Response>;
+    public record Query(FileInfo File) : IRequest<Response>;
 
     public class Handler(AggregateReplayParser replayParser) : IRequestHandler<Query, Response>
     {
         public async Task<Response> Handle(Query request, CancellationToken cancellationToken)
         {
-            var parseData = await replayParser.ParseAsync(request.File, request.Options, cancellationToken);
+            ReplayParseData parseData = await replayParser.ParseAsync(request.File, cancellationToken);
             return new Response(parseData);
         }
     }

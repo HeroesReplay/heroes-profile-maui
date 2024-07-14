@@ -1,4 +1,5 @@
-﻿using HeroesProfile.UI.Core.CQRS.Notifications;
+﻿using Heroes.StormReplayParser.Replay;
+using HeroesProfile.UI.Core.CQRS.Notifications;
 using HeroesProfile.UI.Core.Models;
 using HeroesProfile.UI.Core.Repositories;
 using MediatR;
@@ -15,18 +16,8 @@ public static class SaveReplays
     {
         public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
         {
-            var storedReplays = request.ParseDatas.Select(data => new StoredReplay()
-            {
-                Updated = DateTime.UtcNow,
-                ProcessStatus = data.ProcessStatus,
-                ParseStatus = data.ParseStatus,
-                Created = data.Replay?.Timestamp ?? data.File.CreationTime,
-                Path = data.File.FullName,
-                Fingerprint = data.Fingerprint,
-            })
-            .ToList();
-
-            await replaysRepository.InsertAsync(storedReplays, cancellationToken);
+            var storedReplays = request.ParseDatas.Select(StoredReplay.From).ToList();
+            await replaysRepository.UpdateAsync(storedReplays, cancellationToken);
             await mediator.Publish(new StoredReplaysUpdated.Notification(storedReplays), cancellationToken);
             return new Response(storedReplays);
         }

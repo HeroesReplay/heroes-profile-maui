@@ -10,7 +10,6 @@ public class AppSettings
         get
         {
             // TODO: ~/Library/Caches/Blizzard/Heroes of the Storm
-            
             // ~/Users/User/AppData/Local/Temp/Heroes of the Storm
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Temp", "Heroes of the Storm");
         }
@@ -47,8 +46,4 @@ public class AppSettings
     
     public string ApplicationSessionDirectory => Path.Combine(ApplicationDataDirectory, "Session");
     public string StoredReplaysPath => Path.Combine(ApplicationDataDirectory, "replays.json");
-
-    public bool EnableFakeHttp { get; set; }
-    public bool DefaultUserSettingsOnStart { get; set; }
-    public bool ClearStoredReplaysOnStart { get; set; }
 }

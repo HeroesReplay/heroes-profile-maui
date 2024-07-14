@@ -16,8 +16,8 @@ public class StormReplayParser : IReplayParser
     {
         StormGameMode.QuickMatch,
         StormGameMode.UnrankedDraft,
-        StormGameMode.StormLeague,        
-        StormGameMode.ARAM        
+        StormGameMode.StormLeague,
+        StormGameMode.ARAM
     };
 
     private readonly StormReplayParseStatus[] NotSupportedStatus =
@@ -50,35 +50,11 @@ public class StormReplayParser : IReplayParser
         }
     }
 
-    public async Task<ReplayParseData> ParseAsync(FileInfo file, ParseOptions? options = null, CancellationToken token = default)
+    public async Task<ReplayParseData> ParseAsync(FileInfo file, CancellationToken token = default)
     {
         try
         {
-            var result = StormReplay.Parse(file.FullName, options ?? ParseOptions.MinimalParsing);
-
-            if (result.Exception != null)
-            {
-                return new ReplayParseData()
-                {
-                    File = file,
-                    Replay = result.Replay,
-                    ProcessStatus = ProcessStatus.NotSupported,
-                    ParseStatus = result.Status,
-                    ParseType = ParseType
-                };
-            }
-
-            if (NotSupportedStatus.Contains(result.Status))
-            {
-                return new ReplayParseData()
-                {
-                    File = file,
-                    Replay = result.Replay,
-                    ProcessStatus = ProcessStatus.NotSupported,
-                    ParseStatus = result.Status,
-                    ParseType = ParseType
-                };
-            }
+            StormReplayResult result = StormReplay.Parse(file.FullName, ParseOptions.MinimalParsing);
 
             if (result.Status == StormReplayParseStatus.Success && SupportedModes.Contains(result.Replay.GameMode))
             {
@@ -93,11 +69,38 @@ public class StormReplayParser : IReplayParser
                 };
             }
 
+            if (NotSupportedStatus.Contains(result.Status))
+            {
+                return new ReplayParseData()
+                {
+                    File = file,
+                    Replay = result.Replay,
+                    ProcessStatus = ProcessStatus.NotSupported,
+                    ParseStatus = result.Status,
+                    Fingerprint = GetFingerprint(result.Replay),
+                    ParseType = ParseType
+                };
+            }
+
+            if (result.Exception != null)
+            {
+                return new ReplayParseData()
+                {
+                    File = file,
+                    Replay = result.Replay,
+                    ProcessStatus = ProcessStatus.NotSupported,                    
+                    ParseStatus = result.Status,
+                    Fingerprint = GetFingerprint(result.Replay),
+                    ParseType = ParseType
+                };
+            }
+
             return new ReplayParseData()
             {
                 File = file,
                 Replay = result.Replay,
                 ProcessStatus = ProcessStatus.NotSupported,
+                Fingerprint = GetFingerprint(result.Replay),
                 ParseStatus = result.Status,
                 ParseType = ParseType
             };
@@ -108,6 +111,7 @@ public class StormReplayParser : IReplayParser
             {
                 File = file,
                 ProcessStatus = ProcessStatus.Error,
+                Fingerprint = null,
                 ParseStatus = StormReplayParseStatus.UnexpectedResult,
                 ParseType = ParseType
             };

@@ -8,5 +8,5 @@ public interface IReplayParser
 
     public string FileExtension { get; }
 
-    Task<ReplayParseData> ParseAsync(FileInfo file, Heroes.StormReplayParser.ParseOptions? options = null, CancellationToken token = default);
+    Task<ReplayParseData> ParseAsync(FileInfo file, CancellationToken token = default);
 }

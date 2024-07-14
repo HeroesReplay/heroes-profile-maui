@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Heroes.StormReplayParser;
+using Heroes.StormReplayParser.Replay;
 using HeroesProfile.UI.Core.CQRS.Queries;
 using HeroesProfile.UI.Core.Models;
 using MediatR;
@@ -21,6 +22,18 @@ public class ReplaysViewModel(IMediator mediator, AppSettings appSettings) : Rea
         StoredReplays = result.Replays.Select(r => new GridItem(r, matchUri)).ToList();
     }
 
+    public void OpenDataFolder()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            Process.Start("explorer.exe", appSettings.ApplicationDataDirectory);
+        }
+        else if (OperatingSystem.IsMacCatalyst())
+        {
+            Process.Start("open", appSettings.ApplicationDataDirectory);
+        }
+    }
+
     private List<GridItem> storedReplays;
 
     public List<GridItem> StoredReplays
@@ -33,9 +46,10 @@ public class ReplaysViewModel(IMediator mediator, AppSettings appSettings) : Rea
         }
     }
 
-    public GridItem SelectedRow { get; set; }
+    public GridItem SelectedRow { get; set; }    
 
-    public class GridItem
+    
+public class GridItem
     {
         public StoredReplay Item { get; }
 
@@ -49,41 +63,30 @@ public class ReplaysViewModel(IMediator mediator, AppSettings appSettings) : Rea
             }
         }
 
-        public Color ParseStatusColor
+        public Color ParseStatusColor => Item.ParseStatus switch
         {
-            get
-            {
-                return ParseStatus switch
-                {
-                    StormReplayParseStatus.Success => Color.Success,
-                    StormReplayParseStatus.PTRRegion => Color.Info,
-                    StormReplayParseStatus.PreAlphaWipe => Color.Info,
-                    StormReplayParseStatus.Incomplete => Color.Danger,
-                    StormReplayParseStatus.TryMeMode => Color.Danger,
-                    StormReplayParseStatus.Exception => Color.Danger,
-                    StormReplayParseStatus.FileNotFound => Color.Danger,
-                    StormReplayParseStatus.FileSizeTooLarge => Color.Danger,
-                    StormReplayParseStatus.UnexpectedResult => Color.Danger,
-                    StormReplayParseStatus.Unknonwn => Color.Danger
-                };
-            }
-        }
+            StormReplayParseStatus.Success => Color.Success,
+            StormReplayParseStatus.PTRRegion => Color.Info,
+            StormReplayParseStatus.PreAlphaWipe => Color.Info,
+            StormReplayParseStatus.Incomplete => Color.Danger,
+            StormReplayParseStatus.TryMeMode => Color.Danger,
+            StormReplayParseStatus.Exception => Color.Danger,
+            StormReplayParseStatus.FileNotFound => Color.Danger,
+            StormReplayParseStatus.FileSizeTooLarge => Color.Danger,
+            StormReplayParseStatus.UnexpectedResult => Color.Danger,
+            StormReplayParseStatus.Unknonwn => Color.Danger,
+            _ => Color.Danger
+        };
 
-        public Color ProcessStatusColor
+        public Color ProcessStatusColor => Item.ProcessStatus switch
         {
-            get
-            {
-                return ProcessStatus switch
-                {
-                    ProcessStatus.Pending => Color.Info,
-                    ProcessStatus.Success => Color.Success,
-                    ProcessStatus.Duplicate => Color.Warning,
-                    ProcessStatus.NotSupported => Color.Success,
-                    ProcessStatus.Error => Color.Danger,
-                    _ => Color.Warning,
-                };
-            }
-        }
+            ProcessStatus.Pending => Color.Info,
+            ProcessStatus.Success => Color.Success,
+            ProcessStatus.Duplicate => Color.Warning,
+            ProcessStatus.NotSupported => Color.Success,
+            ProcessStatus.Error => Color.Danger,
+            _ => Color.Warning,
+        };
 
 
         public void OpenInBrowser(MouseEventArgs e)
@@ -129,12 +132,51 @@ public class ReplaysViewModel(IMediator mediator, AppSettings appSettings) : Rea
         }
 
         public Uri? WebLink { get; set; }
+        
         public DateTime Created => Item.Created;
+        
         public DateTime Updated => Item.Updated;
+        
         public string Path => System.IO.Path.GetFileNameWithoutExtension(Item.Path);
+        
         public bool Exists => File.Exists(Item.Path);
+        
         public string? Fingerprint => Item.Fingerprint;
-        public ProcessStatus ProcessStatus => Item.ProcessStatus;
-        public StormReplayParseStatus ParseStatus => Item.ParseStatus ?? StormReplayParseStatus.Unknonwn;
+
+        public string UploadStatus => Item.ProcessStatus switch
+        {
+            ProcessStatus.Pending => "Pending",
+            ProcessStatus.Success => "Success",
+            ProcessStatus.Duplicate => "Duplicate",
+            ProcessStatus.NotSupported => "Not Supported",
+            ProcessStatus.Error => "Error",
+            _ => "Unknown"
+        };
+
+        public string ParseStatus => Item.ParseStatus switch
+        {
+            StormReplayParseStatus.Success => "Success",
+            StormReplayParseStatus.PTRRegion => "PTR Region",
+            StormReplayParseStatus.PreAlphaWipe => "Pre-Alpha Wipe",
+            StormReplayParseStatus.Incomplete => "Incomplete",
+            StormReplayParseStatus.TryMeMode => "Try Me Mode",
+            StormReplayParseStatus.Exception => "Exception",
+            StormReplayParseStatus.FileNotFound => "File Not Found",
+            StormReplayParseStatus.FileSizeTooLarge => "File Size Too Large",
+            StormReplayParseStatus.UnexpectedResult => "Unexpected Result",
+            StormReplayParseStatus.Unknonwn => "Unknown",
+            _ => "Unknown"
+        };
+
+        public string GameMode => Item.GameMode switch
+        {
+            StormGameMode.QuickMatch => "QM",
+            StormGameMode.UnrankedDraft => "UD",
+            StormGameMode.HeroLeague => "HL",
+            StormGameMode.TeamLeague => "TL",
+            StormGameMode.StormLeague => "SL",
+            StormGameMode.ARAM => "ARAM",
+            _ => "Unsupported"
+        };
     }
 }

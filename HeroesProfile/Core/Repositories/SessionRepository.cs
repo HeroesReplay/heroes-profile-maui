@@ -70,33 +70,25 @@ public class SessionRepository
 
     public async Task UpdateAsync(string sessionFile, CancellationToken cancellationToken)
     {
-        var options = new ParseOptions
-        {
-            AllowPTR = true,
-            ShouldParseGameEvents = false,
-            ShouldParseMessageEvents = false,
-            ShouldParseTrackerEvents = false
-        };
-
-        ReplayParseData parseData = await replayParser.ParseAsync(new FileInfo(sessionFile), options, cancellationToken);
+        ReplayParseData parseData = await replayParser.ParseAsync(new FileInfo(sessionFile), cancellationToken);
 
         switch (parseData.ParseType)
         {
             case ParseType.BattleLobby:
-                {
-                    SessionData.Files.BattleLobby = new SessionFile(parseData.Replay!, parseData.ParseType.Value, DateTime.Now);
-                    break;
-                }
+            {
+                SessionData.Files.BattleLobby = new SessionFile(parseData.Replay!, parseData.ParseType.Value, DateTime.Now);
+                break;
+            }
             case ParseType.StormReplay:
-                {
-                    SessionData.Files.StormReplay = new SessionFile(parseData.Replay!, parseData.ParseType.Value, DateTime.Now);
-                    break;
-                }
+            {
+                SessionData.Files.StormReplay = new SessionFile(parseData.Replay!, parseData.ParseType.Value, DateTime.Now);
+                break;
+            }
             case ParseType.StormSave:
-                {
-                    SessionData.Files.StormSave = new SessionFile(parseData.Replay!, parseData.ParseType.Value, DateTime.Now);
-                    break;
-                }
+            {
+                SessionData.Files.StormSave = new SessionFile(parseData.Replay!, parseData.ParseType.Value, DateTime.Now);
+                break;
+            }
         }
     }
 }

@@ -42,7 +42,7 @@ public class LoggingBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest,
         {
             try
             {
-                logger.LogInformation($"[PROPS] {requestNameWithGuid} {JsonSerializer.Serialize(request, options)}");
+                //logger.LogInformation($"[PROPS] {requestNameWithGuid} {JsonSerializer.Serialize(request, options)}");
             }
             catch (NotSupportedException)
             {
@@ -53,7 +53,7 @@ public class LoggingBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest,
 
             try
             {
-                logger.LogInformation($"[PROPS] [RESP] {requestNameWithGuid} {JsonSerializer.Serialize(response, options)}");
+                //logger.LogInformation($"[PROPS] [RESP] {requestNameWithGuid} {JsonSerializer.Serialize(response, options)}");
             }
             catch (NotSupportedException)
             {

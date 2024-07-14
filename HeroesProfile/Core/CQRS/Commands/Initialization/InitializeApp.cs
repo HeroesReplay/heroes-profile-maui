@@ -1,6 +1,6 @@
 ﻿using HeroesProfile.UI.Core.CQRS.Commands.Replays;
 using HeroesProfile.UI.Core.CQRS.Commands.Session;
-using HeroesProfile.UI.Core.CQRS.Commands.UserSettings;
+
 using HeroesProfile.UI.Core.Models;
 using MediatR;
 
@@ -10,18 +10,13 @@ public static class InitializeApp
 {
     public record Command : IRequest;
 
-    public class Handler(AppSettings appSettings, IMediator mediator) : IRequestHandler<Command>
+    public class Handler(Models.UserSettings userSettings, IMediator mediator) : IRequestHandler<Command>
     {
         public async Task Handle(Command request, CancellationToken cancellationToken)
         {
-            if (appSettings.ClearStoredReplaysOnStart)
+            if (userSettings.EnableClearTrackedOnStart)
             {
                 await mediator.Send(new ClearStoredReplays.Command(), cancellationToken);
-            }
-
-            if (appSettings.DefaultUserSettingsOnStart)
-            {
-                await mediator.Send(new InitializeDefaultUserSettings.Command(), cancellationToken);
             }
 
             await mediator.Send(new ClearSession.Command(), cancellationToken);

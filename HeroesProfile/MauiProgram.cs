@@ -77,11 +77,7 @@ public class MauiProgram
 
     public static MauiAppBuilder AddCore(MauiAppBuilder builder)
     {
-        AppSettings appSettings = new AppSettings()
-        {
-            EnableFakeHttp = false,
-            ClearStoredReplaysOnStart = true
-        };
+        AppSettings appSettings = new AppSettings();
 
         Directory.CreateDirectory(appSettings.GameTempDirectory);
         Directory.CreateDirectory(appSettings.GameDocumentsDirectory);
@@ -93,8 +89,11 @@ public class MauiProgram
             .AddSingleton(appSettings)
             .AddSingleton(new UserSettings()
             {
-                EnablePostMatch = false,
-                EnablePreMatch = false
+                EnablePostMatch = Preferences.Default.Get(nameof(UserSettings.EnablePostMatch), false),
+                EnablePreMatch = Preferences.Default.Get(nameof(UserSettings.EnableFakeUpload), false),
+                EnableClearTrackedOnStart = Preferences.Default.Get(nameof(UserSettings.EnableClearTrackedOnStart), false),
+                EnableFakeUpload = Preferences.Default.Get(nameof(UserSettings.EnableFakeUpload), false),
+                EnableMinimizeToTray = Preferences.Default.Get(nameof(UserSettings.EnableMinimizeToTray), true),
             });
 
         builder.Services
@@ -134,8 +133,9 @@ public class MauiProgram
             .ConfigureHttpClient(client => client.BaseAddress = appSettings.HeroesProfileApiUri)
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))
             .AddPolicyHandler((provider, ctx) => PollyPolicies.GetHeroesProfileRetryPolicy(provider.GetRequiredService<ILogger<UploadClient>>()));
+                
 
-        if (appSettings.EnableFakeHttp)
+        if (Preferences.Default.Get(nameof(UserSettings.EnableFakeUpload), false))
         {
             builder.Services.AddTransient<FakeHeroesProfileDelegatingHandler>();
             preMatchClientBuilder.ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<FakeHeroesProfileDelegatingHandler>());

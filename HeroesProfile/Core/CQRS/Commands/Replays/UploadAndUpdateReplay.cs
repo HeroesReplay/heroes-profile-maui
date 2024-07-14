@@ -1,4 +1,5 @@
 ﻿using Heroes.StormReplayParser;
+using Heroes.StormReplayParser.Replay;
 using HeroesProfile.UI.Core.Clients;
 using HeroesProfile.UI.Core.CQRS.Queries;
 using HeroesProfile.UI.Core.Models;
@@ -13,13 +14,7 @@ public static class UploadAndUpdateReplay
 
     public record Response(bool Success, long? ReplayId, ProcessStatus Status, StormReplayParseStatus ParseStatus);
 
-    public class Handler(
-        IUploadClient uploadUploadClient,
-        IMediator mediator,
-        SessionRepository sessionRepository,
-        AppSettings appSettings,
-        UserSettingsRepository userSettingsRepository)
-        : IRequestHandler<Command, Response>
+    public class Handler(IUploadClient uploadUploadClient, IMediator mediator) : IRequestHandler<Command, Response>
     {
         private static readonly UploadStatus[] Unsupported =
         [
@@ -32,7 +27,7 @@ public static class UploadAndUpdateReplay
 
         public async Task<Response> Handle(Command command, CancellationToken cancellationToken)
         {
-            var query = new GetParsedReplay.Query(new FileInfo(command.StoredReplay.Path), Options: ParseOptions.MinimalParsing);
+            var query = new GetParsedReplay.Query(new FileInfo(command.StoredReplay.Path));
             GetParsedReplay.Response response = await mediator.Send(query, cancellationToken);
 
             if (response.Data.ParseStatus != StormReplayParseStatus.Success)
@@ -71,6 +66,7 @@ public static class UploadAndUpdateReplay
 
             storedReplay.Updated = DateTime.Now;
             storedReplay.ReplayId = replayId;
+            storedReplay.GameMode = response.Data.Replay?.GameMode ?? StormGameMode.Unknown;
 
             await mediator.Send(new UpdateReplays.Command([storedReplay]), cancellationToken);
 

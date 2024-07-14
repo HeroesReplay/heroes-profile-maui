@@ -4,8 +4,6 @@ using MediatR;
 
 namespace HeroesProfile.UI.Core.CQRS.Queries;
 
-
-
 public static class GetSession
 {
     public record Response(SessionData Session);

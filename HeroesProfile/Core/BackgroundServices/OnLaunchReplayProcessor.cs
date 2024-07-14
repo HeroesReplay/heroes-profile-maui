@@ -2,13 +2,13 @@
 using HeroesProfile.UI.Core.CQRS.Commands.Replays;
 using HeroesProfile.UI.Core.CQRS.Queries;
 using HeroesProfile.UI.Core.Models;
-using HeroesProfile.UI.Core.Repositories;
 using MediatR;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace HeroesProfile.UI.Core.BackgroundServices;
 
-public class OnLaunchReplayProcessor(IMediator mediator, AppSettings appSettings, UserSettingsRepository userSettingsRepository) : BackgroundService
+public class OnLaunchReplayProcessor(ILogger<OnLaunchReplayProcessor> logger, IMediator mediator) : BackgroundService
 {
     private bool started;
 
@@ -21,31 +21,37 @@ public class OnLaunchReplayProcessor(IMediator mediator, AppSettings appSettings
         {
             while (true)
             {
-                // Find the OLDEST 100 replays and process those first
-                ParseOldestUnknownReplays.Response response = await mediator.Send(new ParseOldestUnknownReplays.Command(Take: 100), stoppingToken);
+                ParseOldestReplays.Response response = await mediator.Send(new ParseOldestReplays.Command(Take: 100), stoppingToken);
 
                 if (response.Processed.Any())
                 {
                     var oldestFirst = response.Processed
                         .Where(x => x.ParseData.ProcessStatus == ProcessStatus.Pending)
-                        .OrderBy(x => x.StoredReplay.Created)
+                        .OrderByDescending(x => x.StoredReplay.Created)
+                        .Reverse()
                         .ToList();
 
-                    foreach (ParseOldestUnknownReplays.Item item in oldestFirst)
+                    foreach (ParseOldestReplays.Item item in oldestFirst)
                     {
                         await mediator.Send(new UploadAndUpdateReplay.Command(item.StoredReplay), stoppingToken);
                     }
                 }
                 else
                 {
+                    logger.LogInformation("No oldest replays to process.");
                     break;
                 }
             }
 
             List<GetReplays.Filter> filters =
             [
+                // Process replays that are pending with an unknown parse  (not yet uploaded)
                 new(ProcessStatus.Pending, StormReplayParseStatus.Unknonwn),
+
+                // Process replays that are pending with a successful parse (not yet uploaded)
                 new(ProcessStatus.Pending, StormReplayParseStatus.Success),
+
+                // Process replays that are errored with a successful parse (upload issues?) 
                 new(ProcessStatus.Error, StormReplayParseStatus.Success)
             ];
 
@@ -55,11 +61,18 @@ public class OnLaunchReplayProcessor(IMediator mediator, AppSettings appSettings
             {
                 foreach (StoredReplay storedReplay in replaysResponse.Replays.OrderByDescending(replay => replay.Created).Reverse())
                 {
+                    logger.LogInformation("Processing replay {Path} with Status {Status}", storedReplay.Path, storedReplay.ProcessStatus);
+
                     await mediator.Send(new UploadAndUpdateReplay.Command(storedReplay), stoppingToken);
                 }
             }
+            else
+            {
+                logger.LogInformation("No replays to process.");
+                break;
+            }
 
-            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
         }
     }
 }

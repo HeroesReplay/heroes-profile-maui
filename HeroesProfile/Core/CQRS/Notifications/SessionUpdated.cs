@@ -11,7 +11,7 @@ public static class SessionUpdated
     {
         public async Task Handle(Notification notification, CancellationToken cancellationToken)
         {
-
+            await Task.CompletedTask;
         }
     }
 }

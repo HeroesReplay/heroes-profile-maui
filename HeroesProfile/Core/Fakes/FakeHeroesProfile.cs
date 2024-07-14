@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
+using System.Text.Json;
 using HeroesProfile.UI.Core.Clients;
 using HeroesProfile.UI.Core.Models;
 using Microsoft.Extensions.Logging;
@@ -10,7 +11,7 @@ public class FakeHeroesProfileDelegatingHandler(AppSettings appSettings, ILogger
 {
     private readonly Dictionary<Uri, HttpResponseMessage> fakeResponses = new();
 
-    private HashSet<long> Uploaded { get; } = new();
+    private static HashSet<long> Uploaded { get; } = new();
 
     public void AddFakeResponse(Uri uri, HttpResponseMessage responseMessage)
     {
@@ -20,6 +21,8 @@ public class FakeHeroesProfileDelegatingHandler(AppSettings appSettings, ILogger
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         await Task.Delay(TimeSpan.FromSeconds(Random.Shared.Next(0, 1)), cancellationToken);
+
+        logger.LogInformation("Fake handler: {0}", request.RequestUri);
 
         if (Random.Shared.Next(1, 8) == 1)
         {
@@ -44,7 +47,7 @@ public class FakeHeroesProfileDelegatingHandler(AppSettings appSettings, ILogger
         }
 
         // Fake file uploads
-        if (request.RequestUri!.LocalPath.Equals("/upload"))
+        if (request.RequestUri!.LocalPath.Equals("/api/upload/heroesprofile/desktop"))
         {
             long replayId = Random.Shared.NextInt64(1, 1000);
 
@@ -72,8 +75,7 @@ public class FakeHeroesProfileDelegatingHandler(AppSettings appSettings, ILogger
             return new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(
-                    $@"{{""replayID"": {replayId}, ""success"": {(status == UploadStatus.Success).ToString().ToLower()}, ""status"": ""{status}"" }}")
+                Content = new StringContent(JsonSerializer.Serialize(new UploadResponse{ ReplayId = replayId, Status = status, Success = status == UploadStatus.Success })),
             };
         }
 
