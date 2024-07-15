@@ -103,7 +103,7 @@ public class FileWatchers(
 
                         if (uploadAndUpdateResponse.Success && uploadAndUpdateResponse.ReplayId.HasValue)
                         {
-                            UserSettings settings = await settingsRepository.LoadAsync(ct);
+                            UserSettings settings = settingsRepository.Load();
 
                             if (settings.EnablePostMatch)
                             {

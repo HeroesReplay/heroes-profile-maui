@@ -15,7 +15,7 @@ public static class GetUserSettings
     {
         public async Task<Response> Handle(Query request, CancellationToken cancellationToken)
         {
-            return new(await repository.LoadAsync(cancellationToken));
+            return new Response(repository.Load());
         }
     }
 }

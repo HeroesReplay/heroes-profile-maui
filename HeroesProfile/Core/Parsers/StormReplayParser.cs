@@ -54,7 +54,7 @@ public class StormReplayParser : IReplayParser
     {
         try
         {
-            StormReplayResult result = StormReplay.Parse(file.FullName, ParseOptions.MinimalParsing);
+            StormReplayResult result = StormReplay.Parse(file.FullName, ParseOptions.DefaultParsing);
 
             if (result.Status == StormReplayParseStatus.Success && SupportedModes.Contains(result.Replay.GameMode))
             {

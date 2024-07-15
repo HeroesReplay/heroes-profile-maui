@@ -13,7 +13,7 @@ public static class BattleLobbyCreated
     {
         public async Task Handle(Notification notification, CancellationToken cancellationToken)
         {
-            var settings = await userSettingsRepository.LoadAsync(cancellationToken);
+            var settings = userSettingsRepository.Load();
 
             if (settings.EnablePreMatch)
             {

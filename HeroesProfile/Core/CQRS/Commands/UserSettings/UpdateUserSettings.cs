@@ -9,18 +9,11 @@ public static class UpdateUserSettings
 
     public record Response(Models.UserSettings Settings);
 
-    public class Handler : IRequestHandler<Command, Response>
+    public class Handler(UserSettingsRepository repository) : IRequestHandler<Command, Response>
     {
-        private readonly UserSettingsRepository repository;
-
-        public Handler(UserSettingsRepository repository)
-        {
-            this.repository = repository;
-        }
-
         public async Task<Response> Handle(Command request, CancellationToken cancellationToken)
         {
-            await repository.SaveAsync(request.Settings, cancellationToken);
+            repository.Save(request.Settings);
             return new Response(request.Settings);
         }
     }
